@@ -189,8 +189,8 @@
     "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
     "directory": "packages/vscode"
   },
-  "homepage": "https://github.com/skyt-a/liminalia/blob/main/docs/vscode.md",
+  "homepage": "https://liminalia.skyta.dev/vscode/",
   "bugs": {
-    "url": "https://github.com/skyt-a/liminalia/issues"
+    "url": "https://github.com/skyt-a/liminalia-sdk/issues"
   }
 }

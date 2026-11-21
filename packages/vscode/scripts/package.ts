@@ -23,7 +23,7 @@ try {
   // liminalia.json、cast.json、訳のファイル（lang/*.json）の補完と説明（jsonValidation。packages/project/scripts/config-schema.ts が型から作る）
   cpSync(join(root, "schemas"), join(stage, "schemas"), { recursive: true });
   cpSync(join(root, "language-configuration.json"), join(stage, "language-configuration.json"));
-  cpSync(join(repo, "docs/vscode.md"), join(stage, "README.md"));
+  cpSync(join(root, "README.md"), join(stage, "README.md"));
   // 利用条件（package.json の license は "SEE LICENSE IN LICENSE"。npm で配る形と同じ）
   cpSync(join(repo, "LICENSE"), join(stage, "LICENSE"));
   // 画面の言葉（英語が既定、日本語は .ja）とアイコン（Marketplace と Open VSX の一覧に出る）
