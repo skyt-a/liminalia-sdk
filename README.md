@@ -1,19 +1,21 @@
 # Liminalia SDK
 
-[Liminalia](https://liminalia.skyta.dev/) は、AI と一緒に作ることを前提にした、ノベルゲームのエンジンと制作ツールです。
-このリポジトリは、そのうちプラグインを書くための部品と、VS Code の拡張機能のソースを公開したものです。
-制作アプリ（Liminalia Studio）、ブラウザの描画、lim コマンドは含みません。
+**日本語** | [English](README.en.md)
 
-| 場所 | パッケージ | 中身 |
+[Liminalia](https://liminalia.skyta.dev/) は、AI との連携も前提にした、ノベルゲームのエンジンと制作ツールです。
+このリポジトリは、そのうちプラグイン開発向けのパッケージと VS Code 拡張機能のソースコードを公開したものです。
+制作アプリ（Liminalia Studio）、ブラウザ向けの描画部分、`lim` コマンドは含みません。
+
+| パス | パッケージ | 概要 |
 |---|---|---|
-| `packages/sdk` | `@liminalia/sdk` | プラグインを書くための部品（コマンドの表、状態、データの宣言）。MIT ライセンス |
-| `packages/lang` | `@liminalia/lang` | .lim の構文解析、式、コマンドの表、検査 |
-| `packages/runtime` | `@liminalia/runtime` | 実行器（描画、音、入力は Host として差し込む。画面なしの HeadlessHost つき） |
-| `packages/project` | `@liminalia/project` | liminalia.json の読み込みと、プラグインの解決 |
-| `packages/std` | `@liminalia/std` | 標準のコマンドの仕様（描画の部分は含まない） |
-| `packages/screens` | `@liminalia/screens` | 標準のシステム画面のテンプレート、決まり、文言 |
-| `packages/editor` | `@liminalia/editor` | 制作画面と VS Code の拡張機能が共有する、画面を持たない部品 |
-| `packages/vscode` | `Liminalia（VS Code の拡張機能）` | 補完、検査、名前の付け替え、ここからテストプレイ |
+| `packages/sdk` | `@liminalia/sdk` | プラグインを書くための SDK（コマンド定義、状態、データの宣言）。MIT ライセンス |
+| `packages/lang` | `@liminalia/lang` | `.lim` の構文解析、式、コマンドレジストリ、静的検査 |
+| `packages/runtime` | `@liminalia/runtime` | シナリオ実行エンジン（描画・音声・入力は `Host` として差し込み。画面なしの `HeadlessHost` 付き） |
+| `packages/project` | `@liminalia/project` | `liminalia.json` の読み込みとプラグインの解決 |
+| `packages/std` | `@liminalia/std` | 標準コマンドの仕様（描画部分は含まない） |
+| `packages/screens` | `@liminalia/screens` | 標準システム画面のテンプレート、ルール、既定の文言 |
+| `packages/editor` | `@liminalia/editor` | Liminalia Studio と VS Code 拡張機能が共有する、UI を持たない共通部品 |
+| `packages/vscode` | Liminalia（VS Code 拡張機能） | シンタックスハイライト、補完、構文チェック、名前の変更、ここからテストプレイなど |
 
 ## プラグインを書く
 
@@ -25,11 +27,10 @@ npm install --save-dev @liminalia/sdk
 import { defineCommandPlugin, t } from "@liminalia/sdk";
 ```
 
-手順は [プラグインでコマンドを足す](https://liminalia.skyta.dev/howto/plugin-command/)、
-決まりは [プラグイン](https://liminalia.skyta.dev/docs/plugins/) にあります。
-プラグインが動くときは、Studio と lim が持っている部品が使われます。npm の部品は、エディターの補完と型の確認、テストのために入れます。
+手順は [はじめてのコマンドを作る](https://liminalia.skyta.dev/howto/plugin-command/)、詳しい仕様は [プラグインの書き方](https://liminalia.skyta.dev/docs/plugins/) を参照してください。
+プラグインの実行時には Liminalia Studio や `lim` に同梱されたパッケージが使われるため、npm パッケージはエディターの補完・型チェック・テスト用に `devDependencies` へ入れます。
 
-## このリポジトリで確かめる
+## このリポジトリでの動作確認
 
 ```sh
 npm install
@@ -39,15 +40,13 @@ npm test
 
 ## ライセンス
 
-- `packages/sdk` は MIT ライセンスです（`packages/sdk/LICENSE`）。
-- ほかは「Liminalia のライセンスと利用条件」に従います（`LICENSE`、全文は https://liminalia.skyta.dev/license/ ）。
-  ソースは読めますが、オープンソースではありません。プラグインや拡張機能を作るために使えます。
+- `packages/sdk` は MIT ライセンスです（[packages/sdk/LICENSE](packages/sdk/LICENSE)）。
+- それ以外のファイルは [Liminalia のライセンスと利用条件](https://liminalia.skyta.dev/license/) に従います（要点は [LICENSE](LICENSE)）。ソースコードは閲覧できますが、オープンソースではありません。Liminalia のプラグインや拡張機能、関連ツールの開発のために利用できます。
 
 ## 不具合の報告と修正の提案
 
-Issues とプルリクエストを受け付けます。このリポジトリは非公開のリポジトリから写したもので、
-受け取った修正は正本に取り込んでから、次の写しで反映します。
+Issue やプルリクエストを受け付けています。このリポジトリは非公開リポジトリからの公開ミラーのため、いただいた修正は正本に取り込んだうえで、次回の同期時に反映します。
 
 ---
 
-版 0.8.1（正本 4abf284d）。このリポジトリのファイルは `scripts/public-mirror.mjs` が作ります。
+バージョン 0.8.1（正本 `ebe7df49`）。このリポジトリの内容は正本リポジトリの `scripts/public-mirror.mjs` により生成されています。
