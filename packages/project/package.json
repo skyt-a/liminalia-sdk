@@ -1,0 +1,34 @@
+{
+  "name": "@liminalia/project",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "プロジェクト設定（liminalia.json）の読み込みとプラグインの解決（Node 用）",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    ".": "./src/index.ts",
+    "./scenario-files": "./src/scenario-files.ts",
+    "./file-names": "./src/file-names.ts",
+    "./project-id": "./src/project-id.ts",
+    "./new-config": "./src/new-config.ts",
+    "./build-lines-en": "./src/build-lines-en.ts",
+    "./psd": "./src/psd.ts",
+    "./contained-path": "./src/contained-path.ts",
+    "./asset-copy": "./src/asset-copy.ts",
+    "./trust": "./src/trust.ts",
+    "./screen-templates": "./src/screen-templates.ts",
+    "./screen-copy": "./src/screen-copy.ts",
+    "./asset-uses": "./src/asset-uses.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.8.1",
+    "@liminalia/sdk": "0.8.1",
+    "@liminalia/std": "0.8.1",
+    "ag-psd": "31.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/project"
+  }
+}

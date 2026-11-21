@@ -1,0 +1,25 @@
+// 夜明け。どの選び方でも最後はここに来る。終わるとタイトル画面に戻る。
+
+# dawn
+@chara-hide-all time=500ms
+@mask time=1s
+@bg hill_morning.webp
+@wait 800ms
+@mask-off time=1500ms
+@window show time=300ms
+　気がつくと、空の端が白みはじめていた。
+　あれほどあった星はひとつずつ薄くなって、丘には朝の{r 靄|もや}がかかっている。
+@chara アカリ normal at=center time=400ms
+アカリ「……夜って、ほんとうに明けるんですね」
+@chara アカリ normal at=left time=300ms
+@chara ソウ smile at=right time=400ms
+ソウ「明けるよ。毎晩ちゃんと。{br}だから、待つのも悪くない」
+@chara アカリ smile at=left
+アカリ「また来ます。今度は、もっと早い時間に」
+@se chime.wav
+　坂を下りはじめたわたしの背中で、扉の鈴が、もう一度だけ鳴った。
+@chara-hide-all time=1s
+　――星を待つ丘　おわり
+@window hide time=300ms
+@mask time=2s
+@wait 1s

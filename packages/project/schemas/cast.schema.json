@@ -1,0 +1,257 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "cast.json（Liminalia の話者とキャラクター）",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "この Schema の場所（エディタの補完と説明に使う）"
+    },
+    "speakers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "台詞の話者として認める名前（名前欄に出す名前）。行頭がこの名前で、すぐ後に括弧か引用符が来る行が台詞になる"
+    },
+    "cast": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "defaultAppearance": {
+            "description": "appearance を書かなかったときの立ち絵セット。",
+            "type": "string"
+          },
+          "speaker": {
+            "description": "本文の行の話者名（キャスト名と違うとき）。口パクで、話しているのがこのキャストかを見るのに使う。",
+            "type": "string"
+          },
+          "color": {
+            "description": "名前の欄の文字の色（CSS の色。\"#e05a7a\" など）。省略でシステム画面の既定の色。",
+            "type": "string"
+          },
+          "text": {
+            "description": "この人物の台詞の本文の文字の見た目（メッセージ枠、NVL、吹き出し）。color は文字の色、font は書体（CSS の font-family）、italic は斜体。\n省いた項目は作品の既定（ui.text）。本文の中の {c …} などの飾りが先。",
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "font": {
+                "type": "string"
+              },
+              "italic": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "nameImage": {
+            "description": "この人物が話すときの名前の欄の画像（image からのパス）。名前の欄の地に敷く（文字はそのまま）。省くと ui.name.image。",
+            "type": "string"
+          },
+          "windowImage": {
+            "description": "この人物が話すあいだのメッセージ枠の画像（image からのパス）。@window-image が先。省くと ui.message.image。",
+            "type": "string"
+          },
+          "appearances": {
+            "description": "立ち絵セット。立ち絵の無い人物（名前の色だけを決める話者など）は空でよい。",
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "description": "表示用の名前。",
+                  "type": "string"
+                },
+                "layers": {
+                  "description": "パーツ合成の層。差分の parts で層ごとの絵を選ぶ。@chara の差分に「smile+blush」と書くと、smile の差分に blush の絵を足す。",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "options": {
+                        "description": "選べる絵の名前 → fgimage からのパス。",
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "default": {
+                        "description": "差分が書かなかったときに使う絵の名前（省くと、その層は出さない）。",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "options"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "defaultVariant": {
+                  "description": "差分を書かずに出したときの差分（基準の差分）。省くと normal → default の順にあるもの。",
+                  "type": "string"
+                },
+                "face": {
+                  "description": "顔ウィンドウに使う、立ち絵（パーツ合成なら重ねた後）の中の範囲（px）。差分の face が無いときに使う。",
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "width": {
+                      "type": "number"
+                    },
+                    "height": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y",
+                    "width",
+                    "height"
+                  ],
+                  "additionalProperties": false
+                },
+                "variants": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "image": {
+                        "description": "画像（fgimage からのパス）。パーツ合成の差分（parts）では、一覧や大きさの目安に使う絵（空でもよい。空なら一番下の層）。",
+                        "type": "string"
+                      },
+                      "parts": {
+                        "description": "パーツ合成の差分: 立ち絵セットの層（layers）の名前 → その層で使う絵の名前（\"\" はその層を出さない）。\n書かなかった層は、その層の default（無ければ出さない）。層の絵を下から重ねた一枚を立ち絵にする。",
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      },
+                      "cacheKey": {
+                        "description": "画像を差し替えたときにブラウザのキャッシュを避けるための文字列（URL に付ける）。",
+                        "type": "string"
+                      },
+                      "frame": {
+                        "description": "枠。省略すると画像の実寸で出し、名前の立ち位置は画面下の中央。",
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number"
+                          },
+                          "height": {
+                            "type": "number"
+                          },
+                          "positions": {
+                            "description": "立ち位置の名前 → 左上の座標。",
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "object",
+                              "properties": {
+                                "left": {
+                                  "type": "number"
+                                },
+                                "top": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "left",
+                                "top"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "flipAxis": {
+                            "description": "左右反転（@chara の flip）して出すときに裏返す軸。画像の左端からの X（画像の px）。省くと画像の中央で裏返す。\n制作画面の「頭の大きさを揃える」が、反転しても差分ごとに顎が横へずれないように書く。",
+                            "type": "number"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "lip": {
+                        "description": "口パクの重ね画像（fgimage からのパス。image と同じ大きさで、口の部分だけを描いたもの）。\n少し開いた口 → 大きく開いた口 の順。話しているあいだ image の上に重ねて切り替える。",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "blink": {
+                        "description": "まばたきの重ね画像（半目 → 閉じた目 の順）。ときどき image の上に重ねる。",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "face": {
+                        "description": "顔ウィンドウの絵（fgimage からのパス）。省くと、立ち絵セットの face の範囲を立ち絵から切り出す。",
+                        "type": "string"
+                      },
+                      "model": {
+                        "description": "画像の代わりにプラグインが描く立ち絵（Live2D・Spine など）。type でプラグインの描き方（WebPlugin の\nextensions.spriteParts）を選び、ほかの項目はそのプラグインが読む。image は位置と大きさを決める静止画として使う。\n人物の model と同じ type なら、人物の model に重ねる（Live2D のモデルは人物に書き、差分には表情だけを書く、など）。",
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": {}
+                      }
+                    },
+                    "required": [
+                      "image"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "variants"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "model": {
+            "description": "この人物のすべての差分に使う立ち絵の部品（差分の model と同じ書き方。差分に別の type の model があればそちらを使い、\n同じ type なら差分の項目を重ねる）。{ \"type\": \"sway\" } で、一枚絵の立ち絵を呼吸・首の傾き・髪の揺れで動かす。\n公式のプラグインを入れると { \"type\": \"live2d\", \"src\": \"…\" }（Live2D）と { \"type\": \"spine\", \"src\": \"…\" }（Spine）も使える。",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": {}
+          },
+          "side": {
+            "description": "登場順の自動配置での定位置。left なら並びの左に、right なら右に寄せる（同じ側の人物どうしは登場順）。\n位置を明示して出したときには効かない。",
+            "enum": [
+              "left",
+              "right"
+            ]
+          }
+        },
+        "required": [
+          "appearances"
+        ],
+        "additionalProperties": false
+      },
+      "description": "キャラクター（立ち絵の持ち主）。名前 → 立ち絵セット・差分・立ち位置など"
+    }
+  },
+  "additionalProperties": false
+}

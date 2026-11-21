@@ -1,0 +1,19 @@
+{
+  "id": "hoshi_wo_matsu_oka",
+  "title": "星を待つ丘",
+  "version": "1.0.0",
+  "entry": "start",
+  "titleScreen": true,
+  "screen": {
+    "width": 1280,
+    "height": 720
+  },
+  "build": {
+    "icon": "icon.png"
+  },
+  "commandDefaults": {
+    "scene-change": {
+      "time": "1200ms"
+    }
+  }
+}

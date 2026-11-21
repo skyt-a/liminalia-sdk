@@ -1,0 +1,19 @@
+{
+  "name": "@liminalia/runtime",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": ".lim を実行する。状態は JSON にできる素のデータだけで持ち、描画・音・入力は外から差し込む",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/runtime"
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "name": "@liminalia/vscode",
+  "displayName": "Liminalia",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "publisher": "liminalia",
+  "description": "%description%",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Linters"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "workspaceContains:**/*.limtest"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%untrusted%",
+      "restrictedConfigurations": [
+        "liminalia.lim",
+        "liminalia.node",
+        "liminalia.studioApp"
+      ]
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "liminalia",
+        "aliases": [
+          "Liminalia",
+          "lim"
+        ],
+        "extensions": [
+          ".lim"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "liminalia-test",
+        "aliases": [
+          "Liminalia Test",
+          "limtest"
+        ],
+        "extensions": [
+          ".limtest"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "liminalia.json",
+        "url": "./schemas/liminalia.schema.json"
+      },
+      {
+        "fileMatch": "cast.json",
+        "url": "./schemas/cast.schema.json"
+      },
+      {
+        "fileMatch": "lang/*.json",
+        "url": "./schemas/lang-file.schema.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "liminalia",
+        "scopeName": "source.liminalia",
+        "path": "./syntaxes/lim.tmLanguage.json"
+      },
+      {
+        "language": "liminalia-test",
+        "scopeName": "source.liminalia-test",
+        "path": "./syntaxes/limtest.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[liminalia]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": true
+        },
+        "editor.defaultFormatter": "liminalia.liminalia"
+      }
+    },
+    "configuration": {
+      "title": "Liminalia",
+      "properties": {
+        "liminalia.node": {
+          "type": "string",
+          "default": "",
+          "description": "%config.node%"
+        },
+        "liminalia.lim": {
+          "type": "string",
+          "default": "",
+          "description": "%config.lim%"
+        },
+        "liminalia.studioApp": {
+          "type": "string",
+          "default": "",
+          "description": "%config.studioApp%"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "liminalia.restartServer",
+        "title": "%command.restartServer%",
+        "category": "Liminalia"
+      },
+      {
+        "command": "liminalia.playFromHere",
+        "title": "%command.playFromHere%",
+        "category": "Liminalia"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "liminalia.playFromHere",
+          "when": "editorLangId == liminalia",
+          "group": "navigation@90"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "liminalia.playFromHere",
+          "when": "editorLangId == liminalia"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "liminalia.playFromHere",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "editorTextFocus && editorLangId == liminalia"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "package": "tsx scripts/build.ts && tsx scripts/package.ts"
+  },
+  "dependencies": {
+    "@liminalia/editor": "0.8.1",
+    "@liminalia/lang": "0.8.1",
+    "@liminalia/project": "0.8.1",
+    "@liminalia/runtime": "0.8.1",
+    "@liminalia/screens": "0.8.1",
+    "@liminalia/sdk": "0.8.1",
+    "@liminalia/std": "0.8.1",
+    "vscode-languageclient": "10.1.2",
+    "vscode-languageserver": "10.1.2",
+    "vscode-languageserver-textdocument": "1.0.15",
+    "vscode-uri": "3.1.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "1.146.0",
+    "@vscode/vsce": "4.1.1",
+    "esbuild": "0.28.2",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.3.2"
+  },
+  "keywords": [
+    "visual novel",
+    "novel game",
+    "ノベルゲーム",
+    "liminalia",
+    "lim"
+  ],
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#1f1d2b",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/vscode"
+  },
+  "homepage": "https://github.com/skyt-a/liminalia/blob/main/docs/vscode.md",
+  "bugs": {
+    "url": "https://github.com/skyt-a/liminalia/issues"
+  }
+}

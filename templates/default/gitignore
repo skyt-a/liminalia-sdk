@@ -1,0 +1,5 @@
+.liminalia/*
+!.liminalia/shared.json
+exports/
+dist/
+node_modules/

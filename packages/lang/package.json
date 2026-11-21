@@ -1,0 +1,20 @@
+{
+  "name": "@liminalia/lang",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "新形式シナリオ（.lim）の構文解析・式・命令レジストリ・検査",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    ".": "./src/index.ts",
+    "./diagnostics-en": "./src/diagnostics-en.ts",
+    "./media": "./src/media.ts",
+    "./message-catalog": "./src/message-catalog.ts",
+    "./line-syntax": "./src/line-syntax.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/lang"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@liminalia/editor",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "制作画面（Liminalia Studio）と VS Code の拡張機能が共有する、画面を持たない部品。名前の付け替えとその追従、ここからテストプレイ、開発サーバーとのやり取りの形、動いている制作画面の見つけ方",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    "./protocol": "./src/protocol.ts",
+    "./protocol-sweep": "./src/protocol/sweep.ts",
+    "./scene-markers": "./src/scene-markers.ts",
+    "./stage-positions": "./src/stage-positions.ts",
+    "./sweep": "./src/sweep.ts",
+    "./running": "./src/running.ts",
+    "./asset-rename": "./src/asset-rename.ts",
+    "./label-follow": "./src/label-follow.ts",
+    "./label-rename": "./src/label-rename.ts",
+    "./lines": "./src/lines.ts",
+    "./name-rename": "./src/name-rename.ts",
+    "./play-from": "./src/play-from.ts",
+    "./rewrite": "./src/rewrite.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.8.1",
+    "@liminalia/project": "0.8.1",
+    "@liminalia/runtime": "0.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/editor"
+  }
+}

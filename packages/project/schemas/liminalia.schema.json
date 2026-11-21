@@ -1,0 +1,4603 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "liminalia.json（Liminalia の作品の設定）",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "format": {
+      "description": "台本（.lim）の書式の版（@liminalia/lang の SCRIPT_FORMAT）。lim new と lim migrate が書く。省くと版を書く前の台本として扱う。\nエンジンの書式より新しければ、lim check が知らせる（新しいエンジンで書いた台本）。",
+      "type": "number"
+    },
+    "engines": {
+      "description": "合うエンジンの宣言。liminalia はエンジンの口の版（@liminalia/sdk の PLUGIN_API_VERSION）の範囲（\">=2\"、\"^2\"、\"2 - 3\" など。\nプラグインの package.json、テーマの theme.json と同じ書き方）。合わなければ lim check が知らせ、ひな形なら lim new --template も知らせる。",
+      "type": "object",
+      "properties": {
+        "liminalia": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "author": {
+      "type": "string"
+    },
+    "description": {
+      "description": "作品の短い説明（ブラウザ版のページの説明 <meta name=\"description\"> と、Linux 版の .desktop の Comment）。",
+      "type": "string"
+    },
+    "screen": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "string"
+    },
+    "titleScreen": {
+      "type": "boolean"
+    },
+    "paths": {
+      "type": "object",
+      "properties": {
+        "scenario": {},
+        "assets": {},
+        "data": {},
+        "cast": {},
+        "lang": {},
+        "voiceLock": {},
+        "out": {}
+      },
+      "additionalProperties": false
+    },
+    "languages": {
+      "description": "遊べる言語。先頭が原文の言語で、ほかの言語の訳は paths.lang の <言語>.json に置く。原文の言語だけでもよい（[\"en\"] ならシステム画面を英語で出す）。\n省略は日本語の原文だけ。",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "variables": {
+      "description": "変数の初期値（\"game.名前\" か \"system.名前\" → 値）。game の変数は「はじめから」のたびにこの値で始まり、\nsystem の変数はまだ値が無いときにこの値になる（ロードしたセーブに無い game の変数も、この値で補う）。",
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {},
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {},
+                      {}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {},
+                      {}
+                    ]
+                  }
+                },
+                {}
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "ui": {
+      "description": "ゲームの見た目と操作の設定（@liminalia/lang の UiConfig）。",
+      "type": "object",
+      "properties": {
+        "fonts": {
+          "description": "読み込む書体（others からのパス）。本文・名前・選択肢・システム画面の font から family の名前で使う。",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "family": {
+                "description": "CSS の font-family で呼ぶ名前。",
+                "type": "string"
+              },
+              "file": {
+                "description": "書体のファイル（others からのパス）。",
+                "type": "string"
+              },
+              "weight": {
+                "description": "太さ（CSS の font-weight）。",
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "family",
+              "file"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "text": {
+          "type": "object",
+          "properties": {
+            "font": {
+              "description": "本文の書体（CSS の font-family）。",
+              "type": "string"
+            },
+            "fontFile": {
+              "description": "書体のファイル（others からのパス。.woff2・.woff・.ttf・.otf）。読み込んで font より先に使う。",
+              "type": "string"
+            },
+            "size": {
+              "description": "文字の大きさ（px。既定 26）。",
+              "type": "number"
+            },
+            "color": {
+              "type": "string"
+            },
+            "lineHeight": {
+              "description": "行の高さ（文字の大きさの倍率。既定 1.75）。",
+              "type": "number"
+            },
+            "decoration": {
+              "description": "文字の飾り。shadow は影、edge は縁取り。",
+              "enum": [
+                "none",
+                "shadow",
+                "edge"
+              ]
+            },
+            "decorationColor": {
+              "type": "string"
+            },
+            "shadow": {
+              "description": "文字の影（CSS の text-shadow。decoration より優先する）。",
+              "type": "string"
+            },
+            "stroke": {
+              "description": "文字の縁（CSS の -webkit-text-stroke。\"0.5px #000\" など）。",
+              "type": "string"
+            },
+            "letterSpacing": {
+              "description": "字間（CSS の letter-spacing。\"1.6px\"・\"0.04em\" など）。",
+              "type": "string"
+            },
+            "weight": {
+              "description": "太さ（CSS の font-weight）。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "topGap": {
+              "description": "本文の上に空ける長さ（px）。",
+              "type": "number"
+            },
+            "readColor": {
+              "description": "既読のページの本文の色（省略で変えない）。",
+              "type": "string"
+            },
+            "align": {
+              "description": "本文の揃え（既定 left）。中央にしても、文字を出す途中で行が動かない（ルビも同じ）。",
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ]
+            },
+            "rubySize": {
+              "description": "ルビの文字の大きさ（親文字に対する倍率。既定 0.45）。縦書きのルビの位置もこれから決まる。",
+              "type": "number"
+            },
+            "paragraphGap": {
+              "description": "NVL の段落と段落のあいだ（文字の大きさの倍率。既定 0.5。0 なら段落の終わりでちょうど一行分だけ進む）。縦書きでも同じ。",
+              "type": "number"
+            },
+            "rubyGap": {
+              "description": "ルビと親文字のあいだ（親文字の大きさの倍率。既定 0）。縦書きでは親文字の右との間。ルビの大きさを変えても位置はずれない。",
+              "type": "number"
+            },
+            "lineChars": {
+              "description": "一行の字数（全角で数える。書かなければ枠の幅いっぱい）。縦書きなら一列の字数。",
+              "type": "number"
+            },
+            "lineBreak": {
+              "description": "禁則の強さ（CSS の line-break）。strict は行頭に小さい「ッ」「ゃ」や「ー」も置かない、normal は標準、loose は緩め、anywhere はどこでも折る、\nauto はブラウザに任せる。書かなければ、遊んでいる言語（<html lang>）が日本語か中国語なら strict、ほかは auto\n（前の版の既定は言語によらず auto。前と同じにするなら auto と書く）。\n行頭禁則の文字の一覧は指定できない（ブラウザの禁則処理に任せる）。",
+              "enum": [
+                "auto",
+                "strict",
+                "normal",
+                "loose",
+                "anywhere"
+              ]
+            },
+            "hangingPunctuation": {
+              "description": "行末の句読点（、。）をぶら下げる（CSS の hanging-punctuation。Safari・iOS だけが対応。ほかでは何もしない）。",
+              "type": "boolean"
+            },
+            "emphasis": {
+              "description": "傍点（{dot …}）の形（CSS の text-emphasis-style。既定 \"filled sesame\"。\"filled dot\"、\"open circle\" など）。",
+              "type": "string"
+            },
+            "quotes": {
+              "description": "台詞の外側の括弧と引用符。keep（既定）は書いたまま出す。strip は台詞の本文の外側の一組（「…」『…』“…”\"…\"）を外して中身だけを出す\n（始まりの印が本文の最初の字で、対になる閉じが最後の字のときだけ。（…）は心の声として残す）。\nメッセージ枠・NVL・バックログ・吹き出し（@balloon と、チャットの画面のふだんの台詞）に効く。言語ごとに替えられる（ui.languages）。\nチャットの画面は、keep でも「…」『…』を外す（吹き出しが括弧の代わりなので）。",
+              "enum": [
+                "keep",
+                "strip"
+              ]
+            },
+            "reveal": {
+              "description": "本文の一文字の出し方。fade（既定）は浮き出る、none はフェードせずに一文字ずつ出す、rise は少し下から浮かび上がる。\nrevealTime は一文字が出きるまでの長さ（ミリ秒。既定 120。none では使わない）。文字送りの速さ（一文字ずつの間隔）は設定画面と",
+              "enum": [
+                "none",
+                "fade",
+                "rise"
+              ]
+            },
+            "revealTime": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "description": "枠の位置と大きさ（px）。省略した項目は既定（画面の下に、左右 60px あけて置く）。",
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            },
+            "padding": {
+              "description": "枠の内側の余白（px か CSS の padding。\"48px 148px 18px 122px\" など）。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "background": {
+              "type": "string"
+            },
+            "image": {
+              "description": "枠の画像（image からのパス）。枠いっぱいに引き伸ばす。imageSlice があれば角を伸ばさない。",
+              "type": "string"
+            },
+            "imageSlice": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              ]
+            },
+            "borderColor": {
+              "description": "枠の線の色。\"none\" で線を消す。",
+              "type": "string"
+            },
+            "backdrop": {
+              "description": "枠の下から敷く地（CSS の background。グラデーションなど）。本文の下に、枠とは別に置く。",
+              "type": "string"
+            },
+            "backdropHeight": {
+              "description": "敷く地の高さ（px。既定は枠の高さ）。",
+              "type": "number"
+            },
+            "radius": {
+              "description": "角の丸み（px）。",
+              "type": "number"
+            },
+            "scroll": {
+              "description": "枠に収まらない本文を、改ページせずに枠の中でスクロールさせる（文字を出すのに合わせて下へ送る。ホイールで読み返せる）。\n枠の高さは height（省略は既定の高さ）で決まったままにする。",
+              "type": "boolean"
+            },
+            "vertical": {
+              "description": "本文を縦書きにする（行は右から左へ進む。ルビは文字の右）。シナリオの",
+              "type": "boolean"
+            },
+            "keepText": {
+              "description": "true なら、ページをクリックで送ったあとも、次の本文を出すまで前のページの名前と本文を枠に残す（0.4.1 より前の動き）。\n既定（false）は TyranoScript の [p] と同じく、送ったあとの最初の命令（背景、立ち絵、待つなど）で消し、枠だけを残す。\n一行だけ残すなら",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "description": "名前の欄の位置（メッセージ枠の左上からの px）。",
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "size": {
+              "type": "number"
+            },
+            "color": {
+              "type": "string"
+            },
+            "background": {
+              "type": "string"
+            },
+            "image": {
+              "description": "名前の欄の画像（image からのパス）。imageSlice があれば角を伸ばさない。",
+              "type": "string"
+            },
+            "imageSlice": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              ]
+            },
+            "borderColor": {
+              "description": "欄の線の色。\"none\" で線を消す。",
+              "type": "string"
+            },
+            "font": {
+              "description": "書体（CSS の font-family）。",
+              "type": "string"
+            },
+            "weight": {
+              "description": "太さ（CSS の font-weight）。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "letterSpacing": {
+              "type": "string"
+            },
+            "shadow": {
+              "description": "文字の影（CSS の text-shadow）。",
+              "type": "string"
+            },
+            "padding": {
+              "description": "欄の内側の余白（CSS の padding）。",
+              "type": "string"
+            },
+            "lineHeight": {
+              "description": "行の高さ（文字の大きさの倍率。既定 1.4）。",
+              "type": "number"
+            },
+            "rule": {
+              "description": "名前の左に引く縦の罫の色。",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "glyph": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "description": "クリック待ちの印の文字（既定 ▼）。",
+              "type": "string"
+            },
+            "image": {
+              "description": "印の画像（image からのパス。text より先に使う）。",
+              "type": "string"
+            },
+            "color": {
+              "type": "string"
+            },
+            "shape": {
+              "description": "文字や画像の代わりに描く形（image より先に使う）。",
+              "enum": [
+                "diamond",
+                "triangle",
+                "dot",
+                "bar"
+              ]
+            },
+            "motion": {
+              "description": "印の動き。breathe はゆっくり大きさと濃さを変える。",
+              "enum": [
+                "none",
+                "bounce",
+                "blink",
+                "breathe"
+              ]
+            },
+            "size": {
+              "description": "印の大きさ（本文の文字の大きさの倍率。既定 0.7）。",
+              "type": "number"
+            },
+            "gap": {
+              "description": "本文の終わりと印のあいだ（印の文字の大きさの倍率。既定 0.3）。縦書きでは上下の間。",
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "choice": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "description": "ボタンの幅（px。既定 560）と文字の大きさ。",
+              "type": "number"
+            },
+            "size": {
+              "type": "number"
+            },
+            "gap": {
+              "description": "ボタンどうしの間（px）。",
+              "type": "number"
+            },
+            "color": {
+              "type": "string"
+            },
+            "background": {
+              "type": "string"
+            },
+            "hoverBackground": {
+              "type": "string"
+            },
+            "borderColor": {
+              "type": "string"
+            },
+            "image": {
+              "description": "ボタンの画像と、重ねたときの画像（image からのパス）。imageSlice があれば角を伸ばさない。",
+              "type": "string"
+            },
+            "hoverImage": {
+              "type": "string"
+            },
+            "imageSlice": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              ]
+            },
+            "font": {
+              "description": "書体（CSS の font-family）。",
+              "type": "string"
+            },
+            "weight": {
+              "description": "太さ（CSS の font-weight）。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "letterSpacing": {
+              "type": "string"
+            },
+            "lineHeight": {
+              "description": "行の高さ（文字の大きさの倍率）。",
+              "type": "number"
+            },
+            "align": {
+              "description": "文字の揃え（既定 center）。",
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ]
+            },
+            "padding": {
+              "description": "ボタンの内側の余白（CSS の padding）。",
+              "type": "string"
+            },
+            "margin": {
+              "description": "ボタンの外側の余白（CSS の margin）。",
+              "type": "string"
+            },
+            "minHeight": {
+              "description": "ボタンの高さの下限（px）。",
+              "type": "number"
+            },
+            "fixedWidth": {
+              "description": "幅を width に決め、長い文は折り返す（既定は width を下限に文の長さまで広がる）。",
+              "type": "boolean"
+            },
+            "radius": {
+              "description": "角の丸み（px）。",
+              "type": "number"
+            },
+            "blur": {
+              "description": "ボタンの後ろをぼかす大きさ（px か CSS の backdrop-filter）。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "shadow": {
+              "description": "文字の影（CSS の text-shadow）。",
+              "type": "string"
+            },
+            "hoverColor": {
+              "description": "重ねたときの文字の色・線の色・影（CSS の box-shadow）。",
+              "type": "string"
+            },
+            "hoverBorderColor": {
+              "type": "string"
+            },
+            "hoverShadow": {
+              "type": "string"
+            },
+            "ornament": {
+              "description": "ボタンの飾り。brackets は左右の括弧、underline は下線。",
+              "enum": [
+                "none",
+                "brackets",
+                "underline"
+              ]
+            },
+            "ornamentColor": {
+              "description": "飾りの色（既定は線の色）。",
+              "type": "string"
+            },
+            "hideMessage": {
+              "description": "選択肢を出している間、メッセージ枠を隠す。",
+              "type": "boolean"
+            },
+            "height": {
+              "description": "ボタンの高さ（px）。",
+              "type": "number"
+            },
+            "y": {
+              "description": "最初のボタンの上端（px）。省略は画面の縦の中央にまとめる（position で変えられる）。",
+              "type": "number"
+            },
+            "position": {
+              "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。",
+              "enum": [
+                "center",
+                "top",
+                "bottom",
+                "avoid-faces"
+              ]
+            },
+            "backdrop": {
+              "description": "選択肢を出している間、画面いっぱいに敷く画像（image からのパス）。",
+              "type": "string"
+            },
+            "readColor": {
+              "description": "先を読んだことのある選択肢の文字の色（書かなければ少し薄くする）。",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "chat": {
+          "description": "チャットの画面（@chat-open と、dialogue なら ふだんの台詞）の配色と形。書かなければ",
+          "type": "object",
+          "properties": {
+            "dialogue": {
+              "description": "ふだんの台詞・地の文・選択肢をチャットの画面に出す。",
+              "type": "boolean"
+            },
+            "me": {
+              "description": "自分の話者名（この話者の吹き出しを右に出す。@chat-open me= が優先）。テーマを替えても残す。",
+              "type": "string"
+            },
+            "title": {
+              "description": "画面の上の名前（dialogue で",
+              "type": "string"
+            },
+            "size": {
+              "description": "文字の大きさ（px。既定は",
+              "type": "number"
+            },
+            "font": {
+              "type": "string"
+            },
+            "color": {
+              "description": "文字の色（地の文の一行と",
+              "type": "string"
+            },
+            "background": {
+              "description": "画面の地（CSS の background。色かグラデーション）と、その上に敷く絵（image からのパス。繰り返す）。",
+              "type": "string"
+            },
+            "image": {
+              "type": "string"
+            },
+            "headBackground": {
+              "description": "上の帯の地と文字の色。",
+              "type": "string"
+            },
+            "headColor": {
+              "type": "string"
+            },
+            "otherBackground": {
+              "description": "相手の吹き出しの地と文字の色。",
+              "type": "string"
+            },
+            "otherColor": {
+              "type": "string"
+            },
+            "meBackground": {
+              "description": "自分の吹き出しの地と文字の色。",
+              "type": "string"
+            },
+            "meColor": {
+              "type": "string"
+            },
+            "radius": {
+              "description": "吹き出しの角の丸さ（px。既定 16）と、話している側の角（px。既定 4）。",
+              "type": "number"
+            },
+            "tailRadius": {
+              "type": "number"
+            },
+            "nameColor": {
+              "description": "名前の色と、地の文の一行の色。",
+              "type": "string"
+            },
+            "noteColor": {
+              "type": "string"
+            },
+            "showName": {
+              "description": "相手の名前の出し方。always は毎回（既定）、first は話者が替わったときだけ、none は出さない。",
+              "enum": [
+                "none",
+                "always",
+                "first"
+              ]
+            },
+            "showFace": {
+              "description": "相手の吹き出しの横に顔を丸く出す（キャストの顔。無ければ名前の一文字目）。faceSize は直径（px。既定 56）。",
+              "type": "boolean"
+            },
+            "faceSize": {
+              "type": "number"
+            },
+            "choiceBackground": {
+              "description": "選択肢の後ろに敷く帯の地（dialogue のとき。ボタンの見た目は ui.choice）。",
+              "type": "string"
+            },
+            "typing": {
+              "description": "相手の吹き出しの前に「…」を出す長さ（ミリ秒。既定 0 で出さない）。スキップと既読のページでは出さない。",
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "system": {
+          "type": "object",
+          "properties": {
+            "preset": {
+              "description": "選んだテーマの名前（制作画面の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
+              "type": "string"
+            },
+            "theme": {
+              "description": "システム画面（メニュー・セーブ・設定・履歴など）の配色。",
+              "enum": [
+                "dark",
+                "light"
+              ]
+            },
+            "accent": {
+              "description": "選んでいるものの色。",
+              "type": "string"
+            },
+            "font": {
+              "description": "システム画面の書体。",
+              "type": "string"
+            },
+            "fg": {
+              "description": "文字の色（薄い文字は、この色を薄めて作る）。",
+              "type": "string"
+            },
+            "screenBg": {
+              "description": "画面の地の色（セーブ・設定・履歴などの全面の画面と、メニュー・確認の枠）。",
+              "type": "string"
+            },
+            "controlBg": {
+              "description": "ボタン・タブの地の色（触れたとき・選んでいるときの色は、これに選んでいるものの色を混ぜて作る）。",
+              "type": "string"
+            },
+            "border": {
+              "description": "線の色（細い線は、この色を薄めて作る）。",
+              "type": "string"
+            },
+            "radius": {
+              "description": "ボタンと枠の角の丸み（px。既定 4）。",
+              "type": "number"
+            },
+            "titleBg": {
+              "description": "タイトル画面の地（CSS の background。色かグラデーション。ui.title.background の画像があればそちらが上）。",
+              "type": "string"
+            },
+            "titleButtonBg": {
+              "description": "タイトルのボタンの地の色（絵の上でも読めるように。省略はボタンの地の色）。",
+              "type": "string"
+            },
+            "titleShadow": {
+              "description": "タイトルの題名の文字の影（CSS の text-shadow）。",
+              "type": "string"
+            },
+            "images": {
+              "description": "システム画面の画像。",
+              "type": "object",
+              "properties": {
+                "screen": {
+                  "type": "string"
+                },
+                "button": {
+                  "type": "string"
+                },
+                "buttonHover": {
+                  "type": "string"
+                },
+                "frame": {
+                  "type": "string"
+                },
+                "buttonSlice": {
+                  "description": "ボタンと枠の画像の切り分け。書くと角を伸ばさない。",
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  ]
+                },
+                "frameSlice": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  ]
+                },
+                "sliderThumb": {
+                  "description": "つまみの丸の画像（image からのパス）。",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "ending": {
+          "description": "結末の名前の画面（@title-screen ending=）の見た目。書かなければ、システム画面の値（system の titleBg・fg・accent）と本文の書体で描く。",
+          "type": "object",
+          "properties": {
+            "background": {
+              "description": "地（CSS の background。色かグラデーション）。",
+              "type": "string"
+            },
+            "image": {
+              "description": "地に敷く絵（bgimage からのパス。画面いっぱいに切り抜く）。",
+              "type": "string"
+            },
+            "font": {
+              "description": "書体（CSS の font-family）。",
+              "type": "string"
+            },
+            "color": {
+              "description": "名前の文字の色と大きさ（px。既定 48）。",
+              "type": "string"
+            },
+            "size": {
+              "type": "number"
+            },
+            "letterSpacing": {
+              "description": "名前の字間（CSS の letter-spacing。既定 0.16em）。",
+              "type": "string"
+            },
+            "kindColor": {
+              "description": "種類の文言（title= があるときに名前の上に添える BAD END など）の色。",
+              "type": "string"
+            },
+            "rule": {
+              "description": "名前と終わりの表記のあいだの罫の色。\"none\" で引かない。",
+              "type": "string"
+            },
+            "markColor": {
+              "description": "終わりの表記の色と大きさ（px。既定 26）。",
+              "type": "string"
+            },
+            "markSize": {
+              "type": "number"
+            },
+            "mark": {
+              "description": "終わりの表記の出し方。below は名前の下（既定）、above は名前の上、none は出さない（罫も引かない）。",
+              "enum": [
+                "none",
+                "below",
+                "above"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "chapter": {
+          "description": "章の扉と章末（@chapter-card、@chapter-end）の見た目。書かなければ、システム画面の値（system の titleBg・fg・accent）と本文の書体で描く。",
+          "type": "object",
+          "properties": {
+            "background": {
+              "description": "地（CSS の background。色かグラデーション）。",
+              "type": "string"
+            },
+            "image": {
+              "description": "地に敷く絵（bgimage からのパス。画面いっぱいに切り抜く）。",
+              "type": "string"
+            },
+            "font": {
+              "description": "書体（CSS の font-family）。",
+              "type": "string"
+            },
+            "color": {
+              "description": "文字の色。",
+              "type": "string"
+            },
+            "size": {
+              "description": "題の大きさ（px。既定 52。章末の題はその 8/13、縦長の作品の扉の題は 10/13）。",
+              "type": "number"
+            },
+            "letterSpacing": {
+              "description": "題の字間（CSS の letter-spacing。既定 0.12em）。",
+              "type": "string"
+            },
+            "accent": {
+              "description": "章の番号（第一章 など）と罫の色。",
+              "type": "string"
+            },
+            "numberSize": {
+              "description": "章の番号の大きさ（px。既定 22）。",
+              "type": "number"
+            },
+            "subtitleColor": {
+              "description": "副題の色と大きさ（px。既定 18）。",
+              "type": "string"
+            },
+            "subtitleSize": {
+              "type": "number"
+            },
+            "rule": {
+              "description": "題と副題のあいだの罫の色。\"none\" で引かない。",
+              "type": "string"
+            },
+            "endColor": {
+              "description": "章末の終わりの表記（完）の色と大きさ（px。既定 44）。",
+              "type": "string"
+            },
+            "endSize": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "nvl": {
+          "description": "NVL（@nvl on）の見た目。書かなければ、暗い地に本文の書体と大きさで下から積む。",
+          "type": "object",
+          "properties": {
+            "background": {
+              "description": "地（CSS の background。色かグラデーション。既定は暗い半透明）。",
+              "type": "string"
+            },
+            "image": {
+              "description": "地に敷く絵（image からのパス。画面いっぱいに切り抜く。地の色の上に重なる）。",
+              "type": "string"
+            },
+            "padding": {
+              "description": "文章の周りの余白（px。一つなら四辺とも、四つなら上・右・下・左。既定 72・150・96・150）。",
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              ]
+            },
+            "align": {
+              "description": "行の揃え（left、center、right）。",
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ]
+            },
+            "valign": {
+              "description": "段落を積む位置（既定 bottom）。",
+              "enum": [
+                "center",
+                "top",
+                "bottom"
+              ]
+            },
+            "font": {
+              "description": "書体（CSS の font-family。遊ぶ人がコンフィグで選んだ書体が先）。",
+              "type": "string"
+            },
+            "color": {
+              "description": "文字の色。",
+              "type": "string"
+            },
+            "size": {
+              "description": "文字の大きさ（px。遊ぶ人の文字サイズを掛ける）。",
+              "type": "number"
+            },
+            "lineHeight": {
+              "description": "行の高さ（文字の大きさに対する倍率）。",
+              "type": "number"
+            },
+            "fade": {
+              "description": "段落を出すときのフェードの時間（ミリ秒。0 か省くとフェードしない）。",
+              "type": "number"
+            },
+            "names": {
+              "description": "段落の頭に話者の名前を出すか（既定 true）。",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "nvlStyles": {
+          "description": "名前を付けた NVL の見た目（名前 → 見た目）。`@nvl on style=letter` で選び、書いた項目だけ nvl の上に重ねる\n（手紙、文書、端末の画面のような「別の紙に本文を書く」場面を、本文のまま書く）。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "background": {
+                "description": "地（CSS の background。色かグラデーション。既定は暗い半透明）。",
+                "type": "string"
+              },
+              "image": {
+                "description": "地に敷く絵（image からのパス。画面いっぱいに切り抜く。地の色の上に重なる）。",
+                "type": "string"
+              },
+              "padding": {
+                "description": "文章の周りの余白（px。一つなら四辺とも、四つなら上・右・下・左。既定 72・150・96・150）。",
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                ]
+              },
+              "align": {
+                "description": "行の揃え（left、center、right）。",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              "valign": {
+                "description": "段落を積む位置（既定 bottom）。",
+                "enum": [
+                  "center",
+                  "top",
+                  "bottom"
+                ]
+              },
+              "font": {
+                "description": "書体（CSS の font-family。遊ぶ人がコンフィグで選んだ書体が先）。",
+                "type": "string"
+              },
+              "color": {
+                "description": "文字の色。",
+                "type": "string"
+              },
+              "size": {
+                "description": "文字の大きさ（px。遊ぶ人の文字サイズを掛ける）。",
+                "type": "number"
+              },
+              "lineHeight": {
+                "description": "行の高さ（文字の大きさに対する倍率）。",
+                "type": "number"
+              },
+              "fade": {
+                "description": "段落を出すときのフェードの時間（ミリ秒。0 か省くとフェードしない）。",
+                "type": "number"
+              },
+              "names": {
+                "description": "段落の頭に話者の名前を出すか（既定 true）。",
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "background": {
+              "description": "タイトル画面の背景（bgimage からのパス）。",
+              "type": "string"
+            },
+            "bgm": {
+              "description": "タイトル画面の BGM（bgm からのパス）。",
+              "type": "string"
+            },
+            "bgmVolume": {
+              "description": "タイトル画面の BGM の音量（0〜100。既定 100）。",
+              "type": "number"
+            },
+            "resume": {
+              "description": "「つづきから」で、ロード画面を開かずにいちばん新しいセーブ（番号つき・クイック・オートセーブのうち）から再開する。",
+              "type": "boolean"
+            },
+            "logo": {
+              "description": "題名の代わりに出す画像（image からのパス）。",
+              "type": "string"
+            },
+            "showName": {
+              "description": "題名の文字を出すか（既定 true。logo があれば出さない）。",
+              "type": "boolean"
+            },
+            "menu": {
+              "description": "タイトルのボタンの並べ方。",
+              "type": "object",
+              "properties": {
+                "align": {
+                  "description": "題名とボタンのまとまりを置く場所（既定 center）。",
+                  "enum": [
+                    "left",
+                    "center",
+                    "right"
+                  ]
+                },
+                "direction": {
+                  "description": "ボタンの並ぶ向き（既定 column）。",
+                  "enum": [
+                    "column",
+                    "row"
+                  ]
+                },
+                "gap": {
+                  "description": "ボタンどうしの間（px。既定 14）。",
+                  "type": "number"
+                },
+                "width": {
+                  "description": "ボタンの幅の下限（px。既定 280）。",
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            },
+            "variants": {
+              "description": "クリアの状況などで変わるタイトル。if（全セーブ共通の変数 system.… の式）が真の最初のものが、書いた項目だけ上の値を置き換える。\n例: [{ \"if\": \"(system.cleared_true)\", \"background\": \"title_after.png\", \"bgm\": \"title2.ogg\" }]",
+              "type": "array",
+              "items": {}
+            }
+          },
+          "additionalProperties": false
+        },
+        "menuBar": {
+          "description": "ゲーム中の操作の帯（メッセージ枠の下のボタンの並び）。",
+          "type": "object",
+          "properties": {
+            "items": {
+              "description": "置くボタンと並び（書いたものだけをこの順に置く）。",
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "auto"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "quick-save"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "quick-load"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "save"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "load"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "skip"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "rollback"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "rollforward"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "prev-choice"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "next-choice"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "next-unread"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "backlog"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "replay-voice"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "items"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "config"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "help"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "screenshot"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "hide"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "title"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "fullscreen"
+                    ]
+                  },
+                  {}
+                ]
+              }
+            },
+            "position": {
+              "description": "帯の位置（hidden は出さない。右クリック・Esc のメニューからは使える）。既定 bottom-right。",
+              "enum": [
+                "bottom-right",
+                "bottom-left",
+                "bottom-center",
+                "top-right",
+                "top-left",
+                "hidden"
+              ]
+            },
+            "x": {
+              "description": "帯の左端（px。文字と枠の座標）。書くと position の左右の置き方より優先する（書かなければ position の置き方のまま）。\nposition が hidden なら出さない。",
+              "type": "number"
+            },
+            "y": {
+              "description": "帯の上端（px。文字と枠の座標）。書くと position の上下の置き方より優先する。",
+              "type": "number"
+            },
+            "touchButton": {
+              "description": "指で触れる端末に出すメニューのボタン（帯を隠しても、指でメニューを開けるように出す）。false で出さない\n（指では長押しでメニューを開く。作品が自分のボタンからメニューを開くとき）。",
+              "type": "boolean"
+            },
+            "images": {
+              "description": "ボタンごとの絵（操作の名前 → image からのパス）。書いたボタンは文字の代わりに絵を出す。",
+              "type": "object",
+              "properties": {
+                "auto": {},
+                "quick-save": {},
+                "quick-load": {},
+                "save": {},
+                "load": {},
+                "skip": {},
+                "rollback": {},
+                "rollforward": {},
+                "prev-choice": {},
+                "next-choice": {},
+                "next-unread": {},
+                "backlog": {},
+                "replay-voice": {},
+                "items": {},
+                "config": {},
+                "help": {},
+                "screenshot": {},
+                "hide": {},
+                "title": {},
+                "fullscreen": {}
+              },
+              "additionalProperties": false
+            },
+            "activeImages": {
+              "description": "オート・スキップが動いている間の絵。",
+              "type": "object",
+              "properties": {
+                "auto": {},
+                "quick-save": {},
+                "quick-load": {},
+                "save": {},
+                "load": {},
+                "skip": {},
+                "rollback": {},
+                "rollforward": {},
+                "prev-choice": {},
+                "next-choice": {},
+                "next-unread": {},
+                "backlog": {},
+                "replay-voice": {},
+                "items": {},
+                "config": {},
+                "help": {},
+                "screenshot": {},
+                "hide": {},
+                "title": {},
+                "fullscreen": {}
+              },
+              "additionalProperties": false
+            },
+            "labels": {
+              "description": "ボタンの文字を置き換える（操作の名前 → 文字）。",
+              "type": "object",
+              "properties": {
+                "auto": {},
+                "quick-save": {},
+                "quick-load": {},
+                "save": {},
+                "load": {},
+                "skip": {},
+                "rollback": {},
+                "rollforward": {},
+                "prev-choice": {},
+                "next-choice": {},
+                "next-unread": {},
+                "backlog": {},
+                "replay-voice": {},
+                "items": {},
+                "config": {},
+                "help": {},
+                "screenshot": {},
+                "hide": {},
+                "title": {},
+                "fullscreen": {}
+              },
+              "additionalProperties": false
+            },
+            "color": {
+              "description": "ボタンの文字の色（既定は薄い白）。",
+              "type": "string"
+            },
+            "shadow": {
+              "description": "帯の文字の影（CSS の text-shadow）。",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "indicator": {
+          "description": "オート中・スキップ中の表示の位置（hidden は出さない）。既定は top-left。作品が操作の帯を差し替えているとき（screens.menuBar）は、\n表示も差し替えて（screens.indicator）いなければ hidden。",
+          "enum": [
+            "bottom-right",
+            "bottom-left",
+            "top-right",
+            "top-left",
+            "hidden"
+          ]
+        },
+        "cursor": {
+          "description": "マウスのカーソルの画像（image からのパス）と、押す点（画像の左上からの px）。animated なら画像を舞台の上に描いてマウスに\n付いて動かす（GIF・APNG の動きが出る。OS のカーソルは動く画像を動かさないため）。",
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "animated": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "image"
+          ],
+          "additionalProperties": false
+        },
+        "tap": {
+          "description": "押した（触れた）ところに出す演出。画像（image からのパス）を出して消し、効果音（sound からのパス）を鳴らす。",
+          "type": "object",
+          "properties": {
+            "image": {
+              "description": "出す画像（image からのパス）。",
+              "type": "string"
+            },
+            "se": {
+              "description": "鳴らす効果音（sound からのパス）。",
+              "type": "string"
+            },
+            "size": {
+              "description": "画像の幅（px。既定は画像の大きさ）。",
+              "type": "number"
+            },
+            "time": {
+              "description": "出してから消えるまで（ミリ秒。既定 400）。",
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "backgroundFocus": {
+          "description": "背景を舞台に合わせて切り抜くときの焦点。背景のファイルの名前（bgimage からのパス）→ 残す位置（CSS の object-position。\"30% 50%\" など）。\n\"*\" はそれ以外のすべての背景。書いていなければ真ん中。縦長の作品で横長の背景を使うときなど、画面と縦横比が違う背景に効く。タイトルの背景にも効く。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "templates": {
+          "description": "作品の画面のテンプレート（画面の名前 → テンプレートの HTML のファイル。作品のフォルダ（liminalia.json のあるところ）からのパスで、ui/screens/confirm/confirm.html など）。\n標準の画面を写して HTML と CSS で直したもの。部品（<template data-part>）ごとに標準のテンプレートに重なるので、部品一つだけを書いてもよい。\n同じ画面をプラグインの screens.* が差し替えていれば、そちらが先。書ける画面は confirm（確認）、menu（メニュー）、help（操作の説明）、ending（エンディング）、\nchoice（選択肢）、saveload（セーブとロード）、backlog（履歴）、title（タイトル）、config（コンフィグ）。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "screen": {
+          "description": "画面。fullscreen を false にすると全画面にさせない（設定画面の「画面」を出さず、Alt+Enter・F11 も効かない）。\npauseScenario は、標準の画面（設定・セーブ・ロード・履歴など）を開いている間、シナリオの次の命令を止めるか\n（@wait の残りや時間で進む演出が、画面の裏で先へ進まない。既定は止める。false で前の版と同じく止めない）。\ntextScale はコンフィグの「文字サイズ」を効かせる範囲で、all（本文・選択肢・名前欄・バックログ・システム画面。既定）か\nmessage（本文と選択肢だけ。作品が名前欄やシステム画面を決まった大きさで組んでいるとき）。\npauseInBackground を false にすると、タブを裏へ回したとき（ほかのタブ・ウィンドウを最小化など）も音・動画・オート・\n選択肢の制限時間を止めない（既定は止め、戻ったら続ける）。",
+          "type": "object",
+          "properties": {
+            "fullscreen": {
+              "type": "boolean"
+            },
+            "pauseScenario": {
+              "type": "boolean"
+            },
+            "textScale": {
+              "enum": [
+                "all",
+                "message"
+              ]
+            },
+            "pauseInBackground": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "saveSlots": {
+          "description": "セーブの枠の数（8 の倍数に切り上げる。8〜200。既定 48）。",
+          "type": "number"
+        },
+        "autosave": {
+          "description": "オートセーブ。slots は枠の数（0〜10。既定 3。新しいもので古いものを置き換えて回す。0 なら持たず、@autosave も何もしない）。\nleave は、終了するときと裏へ回ったとき（タブを切り替える・スマホでホームへ戻るなど）にもオートセーブするか\n（既定は true。ロード画面を作品が差し替えているときは false）。\non はほかに保存する時機。choice は選択肢を出したとき（既定 true）、chapter は章の頭（liminalia.json の chapters の\nファイルが替わった最初のページと、おまけの章の始まり。既定 false）、pages はこのページ数を読むごと（0 か書かなければしない）。",
+          "type": "object",
+          "properties": {
+            "slots": {
+              "type": "number"
+            },
+            "leave": {
+              "type": "boolean"
+            },
+            "on": {
+              "type": "object",
+              "properties": {
+                "choice": {
+                  "description": "選択肢を出したとき（既定 true）。",
+                  "type": "boolean"
+                },
+                "chapter": {
+                  "description": "章の頭（既定 false）。",
+                  "type": "boolean"
+                },
+                "pages": {
+                  "description": "このページ数を読むごと（0 か書かなければしない）。",
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "quickSave": {
+          "description": "クイックセーブ。slots は枠の数（1〜10。既定 3）。クイックセーブは空いている枠か、いちばん古い枠に書き、\nクイックロードはいちばん新しい枠から読む。1 なら一つの枠を上書きし続ける。",
+          "type": "object",
+          "properties": {
+            "slots": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "chapterNames": {
+          "description": "セーブの一覧に出す章の名前。\"ファイル#ラベル\" か \"ファイル\" → 名前（今いるラベル、ファイルの順に探す）。\n書いていなければ、おまけの章（extra.chapters）に着いていればその題、そうでなければファイルの名前。プラグインの slotChapter が先。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "backlog": {
+          "description": "履歴に残すページの数（10〜2000。既定 300）。",
+          "type": "number"
+        },
+        "backlogChoices": {
+          "description": "選んだ選択肢を履歴に残すか（既定 true。@choice の選択肢を選んだとき。時間切れで default を選んだときも）。",
+          "type": "boolean"
+        },
+        "defaults": {
+          "description": "はじめて遊ぶ人の設定画面の値。",
+          "type": "object",
+          "properties": {
+            "textSpeed": {
+              "description": "一文字あたりのミリ秒（0〜80）。",
+              "type": "number"
+            },
+            "autoWait": {
+              "description": "オートの待ち（ミリ秒。500〜5000）。",
+              "type": "number"
+            },
+            "master": {
+              "description": "全体の音量（0〜100）。",
+              "type": "number"
+            },
+            "bgm": {
+              "type": "number"
+            },
+            "se": {
+              "type": "number"
+            },
+            "voice": {
+              "type": "number"
+            },
+            "skipUnread": {
+              "description": "スキップで未読も飛ばすか。",
+              "type": "boolean"
+            },
+            "autoAfterChoice": {
+              "description": "選択肢を選んだあともオート・スキップを続けるか（既定 false）。",
+              "type": "boolean"
+            },
+            "skipAfterChoice": {
+              "type": "boolean"
+            },
+            "fullscreen": {
+              "description": "全画面で始めるか（デスクトップ版）。",
+              "type": "boolean"
+            },
+            "windowOpacity": {
+              "description": "メッセージ枠の濃さ（0〜100。枠の色の不透明度に掛ける）。",
+              "type": "number"
+            },
+            "textScale": {
+              "description": "文字の大きさ（80〜200 %）。",
+              "type": "number"
+            },
+            "duckBgm": {
+              "description": "ボイスの間 BGM を下げるか（既定 true）。",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "keys": {
+          "description": "キーの割り当て（KeyboardEvent.key の名前。\"Enter\"・\" \"・\"Escape\"・\"s\" など）。書いた操作だけ既定を置き換える。",
+          "type": "object",
+          "properties": {
+            "auto": {},
+            "menu": {},
+            "save": {},
+            "load": {},
+            "skip": {},
+            "rollback": {},
+            "rollforward": {},
+            "backlog": {},
+            "config": {},
+            "screenshot": {},
+            "hide": {},
+            "advance": {},
+            "quickSave": {},
+            "quickLoad": {},
+            "prevChoice": {},
+            "nextChoice": {},
+            "nextUnread": {},
+            "mute": {},
+            "replayVoice": {},
+            "copyText": {}
+          },
+          "additionalProperties": false
+        },
+        "input": {
+          "description": "マウスの割り当て。rightClick はゲーム中の右クリックで、menu（メニューを開く。既定）か hide（文字の枠を隠す・戻す）。\nwheelUp はホイールを上へ回したときで、backlog（履歴を開く。既定）か rollback（一ページ戻る）。\n下へ回すと、戻ったところからは進め直し、そうでなければ読み進める。\nswipeSide は指で横になぞったときで、rollback（右へなぞると一ページ戻り、左へなぞると進め直す。既定）か none（何もしない）。\nskipEffects を false にすると、クリック・決定キー・タップで演出（背景や立ち絵の切り替え、カメラ、揺れ、暗転、@wait など）を\n終わりまで飛ばさない（既定は飛ばす。命令ごとに止めるなら、その命令の skip=false）。\nmiddleClick はホイールを押したときで、hide（ウィンドウを消す・戻す。既定）か none（何もしない）。\nnumberKeys を false にすると、数字のキー（1〜9）で選択肢を選ばない（既定は選ぶ）。",
+          "type": "object",
+          "properties": {
+            "rightClick": {
+              "enum": [
+                "menu",
+                "hide"
+              ]
+            },
+            "wheelUp": {
+              "enum": [
+                "rollback",
+                "backlog"
+              ]
+            },
+            "swipeSide": {
+              "enum": [
+                "none",
+                "rollback"
+              ]
+            },
+            "skipEffects": {
+              "type": "boolean"
+            },
+            "middleClick": {
+              "enum": [
+                "none",
+                "hide"
+              ]
+            },
+            "numberKeys": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "rollback": {
+          "description": "巻き戻し（一ページずつ戻る・進め直す）。",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "fixChoices": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "tones": {
+          "description": "立ち絵の色調（@tone）の名前 → 中身。組み込み（sepia・mono・night・evening・dark）と同じ名前なら置き換える。\ncolor（掛け合わせる色）と amount（その強さ 0〜1。既定 1）、saturation（彩度。1 でそのまま、0 で白黒）、\nbrightness（明るさ。1 でそのまま）、contrast（1 でそのまま）。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "saturation": {
+                "type": "number"
+              },
+              "brightness": {
+                "type": "number"
+              },
+              "contrast": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "backgroundTones": {
+          "description": "背景の色調。背景のファイルの名前（bgimage からのパス）→ 色調の名前（tones か組み込み）。その背景が出ている間は、@tone を書いていない\n立ち絵にこの色調を掛ける（暗い部屋や夕方の背景で立ち絵だけが明るく浮かないように）。@bg の tone= が先。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "nextChoice": {
+          "description": "次の選択肢へ。readOnly が true なら、次の選択肢まで既読のときだけ飛ぶ（未読があれば知らせるだけ）。\n既定（false）はスキップの設定に従い、「既読のみ」なら選択肢の手前の未読のページで止まる。",
+          "type": "object",
+          "properties": {
+            "readOnly": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "face": {
+          "description": "顔ウィンドウ。話している人物の顔をメッセージ枠の中（side の側。既定は左）に出し、本文をその分ずらす。\n顔の絵はキャストの差分の face か、立ち絵セットの face（立ち絵から切り出す範囲）。どちらも無い人物は出さない。\nshow が offstage なら、その人物の立ち絵を表示していないときだけ出す（既定 always）。width・height は枠の大きさ（px。既定 180）。\n縦書き・NVL・吹き出しのあいだは出さない。",
+          "type": "object",
+          "properties": {
+            "show": {
+              "description": "always: 話者の顔を常に。offstage: 立ち絵がないときだけ。explicit: 話者によらず",
+              "enum": [
+                "always",
+                "offstage",
+                "explicit"
+              ]
+            },
+            "side": {
+              "enum": [
+                "left",
+                "right"
+              ]
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            },
+            "x": {
+              "description": "置く位置（メッセージウィンドウの左上から px。負でもよい）。書くと side より優先し、本文をずらさない。",
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "chara": {
+          "description": "立ち絵の見せ方（シナリオで書いたもの（@chara-config）が優先する）。focus は話者強調で、話していないキャラクターの立ち絵を沈める\n（名前欄の話者とキャラクター ID か cast.json の speaker が同じキャラクターを、話している人とみなす。地の文と、話者の立ち絵が出ていないときは誰も変えない）。",
+          "type": "object",
+          "properties": {
+            "focus": {
+              "description": "話していないキャラクターの見せ方。none: 変えない（既定）、dim: 暗く、lower: 少し下げる、dim-lower: 暗くして下げる、blur: ぼかす、dim-blur: 暗くしてぼかす。",
+              "enum": [
+                "none",
+                "dim",
+                "blur",
+                "dim-blur",
+                "lower",
+                "dim-lower"
+              ]
+            },
+            "dim": {
+              "description": "暗くするときの明るさ（0〜1。既定 0.6）。",
+              "type": "number"
+            },
+            "lower": {
+              "description": "下げる量（px。既定 12）。",
+              "type": "number"
+            },
+            "jump": {
+              "description": "話し始めたキャラクターを小さく跳ねさせる。",
+              "type": "boolean"
+            },
+            "keepText": {
+              "description": "true なら、まだ出ていないキャラクターが出るのを待つ間（@chara の wait=true）も、前のページの話者の名前と本文を残す（前の版の動き）。\n既定（false）は、前の話者がそのキャラクターでなければ名前欄と本文を消してから出す。",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "captions": {
+          "description": "効果音と BGM の字幕（コンフィグで「効果音の字幕」をオンにした人に、画面の右上に少しのあいだ出す）。\nsounds は効果音のファイル（sound からのパス）→ 字幕（@se の caption= が優先）。music が true なら、BGM が替わったときに\nおまけの音楽の一覧（extra.music）の題名を出す。",
+          "type": "object",
+          "properties": {
+            "sounds": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "music": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "help": {
+          "description": "操作説明の画面（メニューの「操作説明」と",
+          "type": "object",
+          "properties": {
+            "pages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "絵（image からのパス）。",
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "title": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "systemVoice": {
+          "description": "システムボイス（voice フォルダの音）。title はタイトル画面を出したとき（タイトルコール）、actions は操作したとき\n（\"start\"・\"continue\"・\"extra\" と、メニューの操作 \"save\"・\"load\"・\"auto\" など）、confirm は確認のダイアログを出したとき。\n候補が複数あれば、if（全セーブ共通の変数の式。クリア後だけ、など）が真のものから一つを選ぶ。character を書くと、\n遊ぶ人がコンフィグで担当のキャラクターを選べる。volume は 0〜100（既定 100）。",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string"
+                      },
+                      "if": {
+                        "type": "string"
+                      },
+                      "character": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "actions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "file": {
+                          "type": "string"
+                        },
+                        "if": {
+                          "type": "string"
+                        },
+                        "character": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "file"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "confirm": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string"
+                      },
+                      "if": {
+                        "type": "string"
+                      },
+                      "character": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "volume": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "contentFilter": {
+          "description": "表現を控えめにする設定（設定画面に出す）。台本は system.content_filter で分け、assets（\"種類/パス\" → 控えめのときに使う同じ種類のパス）で素材を差し替える。\nlabel は設定画面の項目の名前、default ははじめの値。",
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "default": {
+              "type": "boolean"
+            },
+            "assets": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "contentWarning": {
+          "description": "起動したときにタイトルの前に出す注意書き（年齢・表現・光の点滅など）。文を変えたら、同意した人にも出し直す。always ならいつも出す。",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "button": {
+              "type": "string"
+            },
+            "always": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        "splash": {
+          "description": "起動の演出（「クリックで開始」のあと、タイトルの前に一度だけ流す）。ロゴを順に出し、注意書きを出す。プラグインの splash があればそちらを使う。\n押す（クリック・Enter・Space）と次へ進む（skip が false なら進まない）。",
+          "type": "object",
+          "properties": {
+            "logos": {
+              "description": "順に出すロゴ。image は image フォルダの画像、background は地の色、time は出しておく時間（ミリ秒。既定 2500）。",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string"
+                  },
+                  "background": {
+                    "type": "string"
+                  },
+                  "time": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "image"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "notice": {
+              "description": "注意書き。blocks は見出し（label）と文（text。改行で行を分ける）の並び。time は自動で進むまでの時間（ミリ秒。既定 6000）、auto が false なら押すまで待つ。",
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "background": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number"
+                },
+                "auto": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            },
+            "skip": {
+              "description": "押して次へ進めるか（既定 true）。",
+              "type": "boolean"
+            },
+            "fade": {
+              "description": "最後に地の色を残して消える時間（ミリ秒。既定 600）。",
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "settings": {
+          "description": "設定の幅（設定画面のつまみの幅と、保存した値を収める幅）。",
+          "type": "object",
+          "properties": {
+            "samples": {
+              "description": "音量の欄の試聴（コンフィグの音量を動かし終えたら、その音量で鳴らす）。bgm は bgm、se は sound、voice は voice からのパス。\nBGM は鳴っていないとき（タイトルなど）だけ鳴らし、コンフィグを閉じたら止める。",
+              "type": "object",
+              "properties": {
+                "bgm": {
+                  "type": "string"
+                },
+                "se": {
+                  "type": "string"
+                },
+                "voice": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "textSpeedMin": {
+              "type": "number"
+            },
+            "textSpeedMax": {
+              "type": "number"
+            },
+            "textSpeedStep": {
+              "type": "number"
+            },
+            "autoWaitMin": {
+              "type": "number"
+            },
+            "autoWaitMax": {
+              "type": "number"
+            },
+            "autoWaitStep": {
+              "type": "number"
+            },
+            "autoPerChar": {
+              "type": "number"
+            },
+            "voiceSpeakers": {
+              "description": "コンフィグの話者ごとの声の音量に並べる人物。heard（既定）は声を聞いた人物だけ、all は cast.json の話者をはじめから並べ、\nmasked は並べたうえで、まだ声を聞いていない人物の名前を「？？？」で伏せる。",
+              "enum": [
+                "all",
+                "heard",
+                "masked"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "sound": {
+          "description": "音。movie は動画の音に掛ける系統。streamBgm を false にすると、長い BGM（1MB より大きいもの）も展開して鳴らす\n（既定は流し読み。ループのつなぎ目は展開したものの方が正確）。\nui はシステム画面の効果音（sound からのパス。効果音の音量で鳴らす）。hover はボタンにマウスが乗ったときとキー・パッドで選んだとき、\nselect は押したとき、cancel は閉じるボタン・Esc・右クリック・B で戻ったとき、open と close は画面を開いた・閉じたとき、\npage はタブを替えたとき、choice は選択肢を選んだとき。既定の画面とプラグインの部品（ui.button など）の両方で鳴る。",
+          "type": "object",
+          "properties": {
+            "movie": {
+              "enum": [
+                "none",
+                "bgm",
+                "se",
+                "voice"
+              ]
+            },
+            "streamBgm": {
+              "type": "boolean"
+            },
+            "ui": {
+              "type": "object",
+              "properties": {
+                "hover": {},
+                "select": {},
+                "cancel": {},
+                "open": {},
+                "close": {},
+                "page": {},
+                "choice": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "languages": {
+          "description": "言語ごとの見た目（言語 → 書き換える項目）。遊んでいる言語のものを、上の設定に重ねる（項目ごとに、書いたものだけ置き換える。\nfonts は足す）。書けるのは UI_LANGUAGE_GROUPS（書体、本文、メッセージ枠、名前の欄、クリック待ち、選択肢、チャット、システム画面、結末の画面、章の扉）。\n原文の言語にも書ける。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "description": "枠の位置と大きさ（px）。省略した項目は既定（画面の下に、左右 60px あけて置く）。",
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "width": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number"
+                  },
+                  "padding": {
+                    "description": "枠の内側の余白（px か CSS の padding。\"48px 148px 18px 122px\" など）。",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "background": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "枠の画像（image からのパス）。枠いっぱいに引き伸ばす。imageSlice があれば角を伸ばさない。",
+                    "type": "string"
+                  },
+                  "imageSlice": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  },
+                  "borderColor": {
+                    "description": "枠の線の色。\"none\" で線を消す。",
+                    "type": "string"
+                  },
+                  "backdrop": {
+                    "description": "枠の下から敷く地（CSS の background。グラデーションなど）。本文の下に、枠とは別に置く。",
+                    "type": "string"
+                  },
+                  "backdropHeight": {
+                    "description": "敷く地の高さ（px。既定は枠の高さ）。",
+                    "type": "number"
+                  },
+                  "radius": {
+                    "description": "角の丸み（px）。",
+                    "type": "number"
+                  },
+                  "scroll": {
+                    "description": "枠に収まらない本文を、改ページせずに枠の中でスクロールさせる（文字を出すのに合わせて下へ送る。ホイールで読み返せる）。\n枠の高さは height（省略は既定の高さ）で決まったままにする。",
+                    "type": "boolean"
+                  },
+                  "vertical": {
+                    "description": "本文を縦書きにする（行は右から左へ進む。ルビは文字の右）。シナリオの",
+                    "type": "boolean"
+                  },
+                  "keepText": {
+                    "description": "true なら、ページをクリックで送ったあとも、次の本文を出すまで前のページの名前と本文を枠に残す（0.4.1 より前の動き）。\n既定（false）は TyranoScript の [p] と同じく、送ったあとの最初の命令（背景、立ち絵、待つなど）で消し、枠だけを残す。\n一行だけ残すなら",
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "choice": {
+                "type": "object",
+                "properties": {
+                  "width": {
+                    "description": "ボタンの幅（px。既定 560）と文字の大きさ。",
+                    "type": "number"
+                  },
+                  "size": {
+                    "type": "number"
+                  },
+                  "gap": {
+                    "description": "ボタンどうしの間（px）。",
+                    "type": "number"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "background": {
+                    "type": "string"
+                  },
+                  "hoverBackground": {
+                    "type": "string"
+                  },
+                  "borderColor": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "ボタンの画像と、重ねたときの画像（image からのパス）。imageSlice があれば角を伸ばさない。",
+                    "type": "string"
+                  },
+                  "hoverImage": {
+                    "type": "string"
+                  },
+                  "imageSlice": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  },
+                  "font": {
+                    "description": "書体（CSS の font-family）。",
+                    "type": "string"
+                  },
+                  "weight": {
+                    "description": "太さ（CSS の font-weight）。",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "letterSpacing": {
+                    "type": "string"
+                  },
+                  "lineHeight": {
+                    "description": "行の高さ（文字の大きさの倍率）。",
+                    "type": "number"
+                  },
+                  "align": {
+                    "description": "文字の揃え（既定 center）。",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "padding": {
+                    "description": "ボタンの内側の余白（CSS の padding）。",
+                    "type": "string"
+                  },
+                  "margin": {
+                    "description": "ボタンの外側の余白（CSS の margin）。",
+                    "type": "string"
+                  },
+                  "minHeight": {
+                    "description": "ボタンの高さの下限（px）。",
+                    "type": "number"
+                  },
+                  "fixedWidth": {
+                    "description": "幅を width に決め、長い文は折り返す（既定は width を下限に文の長さまで広がる）。",
+                    "type": "boolean"
+                  },
+                  "radius": {
+                    "description": "角の丸み（px）。",
+                    "type": "number"
+                  },
+                  "blur": {
+                    "description": "ボタンの後ろをぼかす大きさ（px か CSS の backdrop-filter）。",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "shadow": {
+                    "description": "文字の影（CSS の text-shadow）。",
+                    "type": "string"
+                  },
+                  "hoverColor": {
+                    "description": "重ねたときの文字の色・線の色・影（CSS の box-shadow）。",
+                    "type": "string"
+                  },
+                  "hoverBorderColor": {
+                    "type": "string"
+                  },
+                  "hoverShadow": {
+                    "type": "string"
+                  },
+                  "ornament": {
+                    "description": "ボタンの飾り。brackets は左右の括弧、underline は下線。",
+                    "enum": [
+                      "none",
+                      "brackets",
+                      "underline"
+                    ]
+                  },
+                  "ornamentColor": {
+                    "description": "飾りの色（既定は線の色）。",
+                    "type": "string"
+                  },
+                  "hideMessage": {
+                    "description": "選択肢を出している間、メッセージ枠を隠す。",
+                    "type": "boolean"
+                  },
+                  "height": {
+                    "description": "ボタンの高さ（px）。",
+                    "type": "number"
+                  },
+                  "y": {
+                    "description": "最初のボタンの上端（px）。省略は画面の縦の中央にまとめる（position で変えられる）。",
+                    "type": "number"
+                  },
+                  "position": {
+                    "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。",
+                    "enum": [
+                      "center",
+                      "top",
+                      "bottom",
+                      "avoid-faces"
+                    ]
+                  },
+                  "backdrop": {
+                    "description": "選択肢を出している間、画面いっぱいに敷く画像（image からのパス）。",
+                    "type": "string"
+                  },
+                  "readColor": {
+                    "description": "先を読んだことのある選択肢の文字の色（書かなければ少し薄くする）。",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "fonts": {
+                "description": "読み込む書体（others からのパス）。本文・名前・選択肢・システム画面の font から family の名前で使う。",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "family": {
+                      "description": "CSS の font-family で呼ぶ名前。",
+                      "type": "string"
+                    },
+                    "file": {
+                      "description": "書体のファイル（others からのパス）。",
+                      "type": "string"
+                    },
+                    "weight": {
+                      "description": "太さ（CSS の font-weight）。",
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "family",
+                    "file"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "text": {
+                "type": "object",
+                "properties": {
+                  "font": {
+                    "description": "本文の書体（CSS の font-family）。",
+                    "type": "string"
+                  },
+                  "fontFile": {
+                    "description": "書体のファイル（others からのパス。.woff2・.woff・.ttf・.otf）。読み込んで font より先に使う。",
+                    "type": "string"
+                  },
+                  "size": {
+                    "description": "文字の大きさ（px。既定 26）。",
+                    "type": "number"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "lineHeight": {
+                    "description": "行の高さ（文字の大きさの倍率。既定 1.75）。",
+                    "type": "number"
+                  },
+                  "decoration": {
+                    "description": "文字の飾り。shadow は影、edge は縁取り。",
+                    "enum": [
+                      "none",
+                      "shadow",
+                      "edge"
+                    ]
+                  },
+                  "decorationColor": {
+                    "type": "string"
+                  },
+                  "shadow": {
+                    "description": "文字の影（CSS の text-shadow。decoration より優先する）。",
+                    "type": "string"
+                  },
+                  "stroke": {
+                    "description": "文字の縁（CSS の -webkit-text-stroke。\"0.5px #000\" など）。",
+                    "type": "string"
+                  },
+                  "letterSpacing": {
+                    "description": "字間（CSS の letter-spacing。\"1.6px\"・\"0.04em\" など）。",
+                    "type": "string"
+                  },
+                  "weight": {
+                    "description": "太さ（CSS の font-weight）。",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "topGap": {
+                    "description": "本文の上に空ける長さ（px）。",
+                    "type": "number"
+                  },
+                  "readColor": {
+                    "description": "既読のページの本文の色（省略で変えない）。",
+                    "type": "string"
+                  },
+                  "align": {
+                    "description": "本文の揃え（既定 left）。中央にしても、文字を出す途中で行が動かない（ルビも同じ）。",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "rubySize": {
+                    "description": "ルビの文字の大きさ（親文字に対する倍率。既定 0.45）。縦書きのルビの位置もこれから決まる。",
+                    "type": "number"
+                  },
+                  "paragraphGap": {
+                    "description": "NVL の段落と段落のあいだ（文字の大きさの倍率。既定 0.5。0 なら段落の終わりでちょうど一行分だけ進む）。縦書きでも同じ。",
+                    "type": "number"
+                  },
+                  "rubyGap": {
+                    "description": "ルビと親文字のあいだ（親文字の大きさの倍率。既定 0）。縦書きでは親文字の右との間。ルビの大きさを変えても位置はずれない。",
+                    "type": "number"
+                  },
+                  "lineChars": {
+                    "description": "一行の字数（全角で数える。書かなければ枠の幅いっぱい）。縦書きなら一列の字数。",
+                    "type": "number"
+                  },
+                  "lineBreak": {
+                    "description": "禁則の強さ（CSS の line-break）。strict は行頭に小さい「ッ」「ゃ」や「ー」も置かない、normal は標準、loose は緩め、anywhere はどこでも折る、\nauto はブラウザに任せる。書かなければ、遊んでいる言語（<html lang>）が日本語か中国語なら strict、ほかは auto\n（前の版の既定は言語によらず auto。前と同じにするなら auto と書く）。\n行頭禁則の文字の一覧は指定できない（ブラウザの禁則処理に任せる）。",
+                    "enum": [
+                      "auto",
+                      "strict",
+                      "normal",
+                      "loose",
+                      "anywhere"
+                    ]
+                  },
+                  "hangingPunctuation": {
+                    "description": "行末の句読点（、。）をぶら下げる（CSS の hanging-punctuation。Safari・iOS だけが対応。ほかでは何もしない）。",
+                    "type": "boolean"
+                  },
+                  "emphasis": {
+                    "description": "傍点（{dot …}）の形（CSS の text-emphasis-style。既定 \"filled sesame\"。\"filled dot\"、\"open circle\" など）。",
+                    "type": "string"
+                  },
+                  "quotes": {
+                    "description": "台詞の外側の括弧と引用符。keep（既定）は書いたまま出す。strip は台詞の本文の外側の一組（「…」『…』“…”\"…\"）を外して中身だけを出す\n（始まりの印が本文の最初の字で、対になる閉じが最後の字のときだけ。（…）は心の声として残す）。\nメッセージ枠・NVL・バックログ・吹き出し（@balloon と、チャットの画面のふだんの台詞）に効く。言語ごとに替えられる（ui.languages）。\nチャットの画面は、keep でも「…」『…』を外す（吹き出しが括弧の代わりなので）。",
+                    "enum": [
+                      "keep",
+                      "strip"
+                    ]
+                  },
+                  "reveal": {
+                    "description": "本文の一文字の出し方。fade（既定）は浮き出る、none はフェードせずに一文字ずつ出す、rise は少し下から浮かび上がる。\nrevealTime は一文字が出きるまでの長さ（ミリ秒。既定 120。none では使わない）。文字送りの速さ（一文字ずつの間隔）は設定画面と",
+                    "enum": [
+                      "none",
+                      "fade",
+                      "rise"
+                    ]
+                  },
+                  "revealTime": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "description": "名前の欄の位置（メッセージ枠の左上からの px）。",
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "size": {
+                    "type": "number"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "background": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "名前の欄の画像（image からのパス）。imageSlice があれば角を伸ばさない。",
+                    "type": "string"
+                  },
+                  "imageSlice": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      }
+                    ]
+                  },
+                  "borderColor": {
+                    "description": "欄の線の色。\"none\" で線を消す。",
+                    "type": "string"
+                  },
+                  "font": {
+                    "description": "書体（CSS の font-family）。",
+                    "type": "string"
+                  },
+                  "weight": {
+                    "description": "太さ（CSS の font-weight）。",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "letterSpacing": {
+                    "type": "string"
+                  },
+                  "shadow": {
+                    "description": "文字の影（CSS の text-shadow）。",
+                    "type": "string"
+                  },
+                  "padding": {
+                    "description": "欄の内側の余白（CSS の padding）。",
+                    "type": "string"
+                  },
+                  "lineHeight": {
+                    "description": "行の高さ（文字の大きさの倍率。既定 1.4）。",
+                    "type": "number"
+                  },
+                  "rule": {
+                    "description": "名前の左に引く縦の罫の色。",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "glyph": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "description": "クリック待ちの印の文字（既定 ▼）。",
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "印の画像（image からのパス。text より先に使う）。",
+                    "type": "string"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "shape": {
+                    "description": "文字や画像の代わりに描く形（image より先に使う）。",
+                    "enum": [
+                      "diamond",
+                      "triangle",
+                      "dot",
+                      "bar"
+                    ]
+                  },
+                  "motion": {
+                    "description": "印の動き。breathe はゆっくり大きさと濃さを変える。",
+                    "enum": [
+                      "none",
+                      "bounce",
+                      "blink",
+                      "breathe"
+                    ]
+                  },
+                  "size": {
+                    "description": "印の大きさ（本文の文字の大きさの倍率。既定 0.7）。",
+                    "type": "number"
+                  },
+                  "gap": {
+                    "description": "本文の終わりと印のあいだ（印の文字の大きさの倍率。既定 0.3）。縦書きでは上下の間。",
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "chat": {
+                "description": "チャットの画面（@chat-open と、dialogue なら ふだんの台詞）の配色と形。書かなければ",
+                "type": "object",
+                "properties": {
+                  "dialogue": {
+                    "description": "ふだんの台詞・地の文・選択肢をチャットの画面に出す。",
+                    "type": "boolean"
+                  },
+                  "me": {
+                    "description": "自分の話者名（この話者の吹き出しを右に出す。@chat-open me= が優先）。テーマを替えても残す。",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "画面の上の名前（dialogue で",
+                    "type": "string"
+                  },
+                  "size": {
+                    "description": "文字の大きさ（px。既定は",
+                    "type": "number"
+                  },
+                  "font": {
+                    "type": "string"
+                  },
+                  "color": {
+                    "description": "文字の色（地の文の一行と",
+                    "type": "string"
+                  },
+                  "background": {
+                    "description": "画面の地（CSS の background。色かグラデーション）と、その上に敷く絵（image からのパス。繰り返す）。",
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string"
+                  },
+                  "headBackground": {
+                    "description": "上の帯の地と文字の色。",
+                    "type": "string"
+                  },
+                  "headColor": {
+                    "type": "string"
+                  },
+                  "otherBackground": {
+                    "description": "相手の吹き出しの地と文字の色。",
+                    "type": "string"
+                  },
+                  "otherColor": {
+                    "type": "string"
+                  },
+                  "meBackground": {
+                    "description": "自分の吹き出しの地と文字の色。",
+                    "type": "string"
+                  },
+                  "meColor": {
+                    "type": "string"
+                  },
+                  "radius": {
+                    "description": "吹き出しの角の丸さ（px。既定 16）と、話している側の角（px。既定 4）。",
+                    "type": "number"
+                  },
+                  "tailRadius": {
+                    "type": "number"
+                  },
+                  "nameColor": {
+                    "description": "名前の色と、地の文の一行の色。",
+                    "type": "string"
+                  },
+                  "noteColor": {
+                    "type": "string"
+                  },
+                  "showName": {
+                    "description": "相手の名前の出し方。always は毎回（既定）、first は話者が替わったときだけ、none は出さない。",
+                    "enum": [
+                      "none",
+                      "always",
+                      "first"
+                    ]
+                  },
+                  "showFace": {
+                    "description": "相手の吹き出しの横に顔を丸く出す（キャストの顔。無ければ名前の一文字目）。faceSize は直径（px。既定 56）。",
+                    "type": "boolean"
+                  },
+                  "faceSize": {
+                    "type": "number"
+                  },
+                  "choiceBackground": {
+                    "description": "選択肢の後ろに敷く帯の地（dialogue のとき。ボタンの見た目は ui.choice）。",
+                    "type": "string"
+                  },
+                  "typing": {
+                    "description": "相手の吹き出しの前に「…」を出す長さ（ミリ秒。既定 0 で出さない）。スキップと既読のページでは出さない。",
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "system": {
+                "type": "object",
+                "properties": {
+                  "preset": {
+                    "description": "選んだテーマの名前（制作画面の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
+                    "type": "string"
+                  },
+                  "theme": {
+                    "description": "システム画面（メニュー・セーブ・設定・履歴など）の配色。",
+                    "enum": [
+                      "dark",
+                      "light"
+                    ]
+                  },
+                  "accent": {
+                    "description": "選んでいるものの色。",
+                    "type": "string"
+                  },
+                  "font": {
+                    "description": "システム画面の書体。",
+                    "type": "string"
+                  },
+                  "fg": {
+                    "description": "文字の色（薄い文字は、この色を薄めて作る）。",
+                    "type": "string"
+                  },
+                  "screenBg": {
+                    "description": "画面の地の色（セーブ・設定・履歴などの全面の画面と、メニュー・確認の枠）。",
+                    "type": "string"
+                  },
+                  "controlBg": {
+                    "description": "ボタン・タブの地の色（触れたとき・選んでいるときの色は、これに選んでいるものの色を混ぜて作る）。",
+                    "type": "string"
+                  },
+                  "border": {
+                    "description": "線の色（細い線は、この色を薄めて作る）。",
+                    "type": "string"
+                  },
+                  "radius": {
+                    "description": "ボタンと枠の角の丸み（px。既定 4）。",
+                    "type": "number"
+                  },
+                  "titleBg": {
+                    "description": "タイトル画面の地（CSS の background。色かグラデーション。ui.title.background の画像があればそちらが上）。",
+                    "type": "string"
+                  },
+                  "titleButtonBg": {
+                    "description": "タイトルのボタンの地の色（絵の上でも読めるように。省略はボタンの地の色）。",
+                    "type": "string"
+                  },
+                  "titleShadow": {
+                    "description": "タイトルの題名の文字の影（CSS の text-shadow）。",
+                    "type": "string"
+                  },
+                  "images": {
+                    "description": "システム画面の画像。",
+                    "type": "object",
+                    "properties": {
+                      "screen": {
+                        "type": "string"
+                      },
+                      "button": {
+                        "type": "string"
+                      },
+                      "buttonHover": {
+                        "type": "string"
+                      },
+                      "frame": {
+                        "type": "string"
+                      },
+                      "buttonSlice": {
+                        "description": "ボタンと枠の画像の切り分け。書くと角を伸ばさない。",
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "frameSlice": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "sliderThumb": {
+                        "description": "つまみの丸の画像（image からのパス）。",
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "ending": {
+                "description": "結末の名前の画面（@title-screen ending=）の見た目。書かなければ、システム画面の値（system の titleBg・fg・accent）と本文の書体で描く。",
+                "type": "object",
+                "properties": {
+                  "background": {
+                    "description": "地（CSS の background。色かグラデーション）。",
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "地に敷く絵（bgimage からのパス。画面いっぱいに切り抜く）。",
+                    "type": "string"
+                  },
+                  "font": {
+                    "description": "書体（CSS の font-family）。",
+                    "type": "string"
+                  },
+                  "color": {
+                    "description": "名前の文字の色と大きさ（px。既定 48）。",
+                    "type": "string"
+                  },
+                  "size": {
+                    "type": "number"
+                  },
+                  "letterSpacing": {
+                    "description": "名前の字間（CSS の letter-spacing。既定 0.16em）。",
+                    "type": "string"
+                  },
+                  "kindColor": {
+                    "description": "種類の文言（title= があるときに名前の上に添える BAD END など）の色。",
+                    "type": "string"
+                  },
+                  "rule": {
+                    "description": "名前と終わりの表記のあいだの罫の色。\"none\" で引かない。",
+                    "type": "string"
+                  },
+                  "markColor": {
+                    "description": "終わりの表記の色と大きさ（px。既定 26）。",
+                    "type": "string"
+                  },
+                  "markSize": {
+                    "type": "number"
+                  },
+                  "mark": {
+                    "description": "終わりの表記の出し方。below は名前の下（既定）、above は名前の上、none は出さない（罫も引かない）。",
+                    "enum": [
+                      "none",
+                      "below",
+                      "above"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "chapter": {
+                "description": "章の扉と章末（@chapter-card、@chapter-end）の見た目。書かなければ、システム画面の値（system の titleBg・fg・accent）と本文の書体で描く。",
+                "type": "object",
+                "properties": {
+                  "background": {
+                    "description": "地（CSS の background。色かグラデーション）。",
+                    "type": "string"
+                  },
+                  "image": {
+                    "description": "地に敷く絵（bgimage からのパス。画面いっぱいに切り抜く）。",
+                    "type": "string"
+                  },
+                  "font": {
+                    "description": "書体（CSS の font-family）。",
+                    "type": "string"
+                  },
+                  "color": {
+                    "description": "文字の色。",
+                    "type": "string"
+                  },
+                  "size": {
+                    "description": "題の大きさ（px。既定 52。章末の題はその 8/13、縦長の作品の扉の題は 10/13）。",
+                    "type": "number"
+                  },
+                  "letterSpacing": {
+                    "description": "題の字間（CSS の letter-spacing。既定 0.12em）。",
+                    "type": "string"
+                  },
+                  "accent": {
+                    "description": "章の番号（第一章 など）と罫の色。",
+                    "type": "string"
+                  },
+                  "numberSize": {
+                    "description": "章の番号の大きさ（px。既定 22）。",
+                    "type": "number"
+                  },
+                  "subtitleColor": {
+                    "description": "副題の色と大きさ（px。既定 18）。",
+                    "type": "string"
+                  },
+                  "subtitleSize": {
+                    "type": "number"
+                  },
+                  "rule": {
+                    "description": "題と副題のあいだの罫の色。\"none\" で引かない。",
+                    "type": "string"
+                  },
+                  "endColor": {
+                    "description": "章末の終わりの表記（完）の色と大きさ（px。既定 44）。",
+                    "type": "string"
+                  },
+                  "endSize": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "css": {
+          "description": "作品の CSS（作品のフォルダからの CSS のファイルのパスの並び。\"ui/screens.css\" など）。テーマとプラグインの CSS のあとに、この順で読む\n（後のものが勝つ。エンジンの CSS はカスケードレイヤーの中なので、詳細度を競わずに勝つ）。中の url() と",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "extra": {
+      "description": "おまけ（CG・回想・音楽・実績）の一覧（@liminalia/lang の ExtraConfig）。",
+      "type": "object",
+      "properties": {
+        "cg": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "group": {
+                "description": "一覧で見出しにするまとまり（章など）。同じ group のものを続けて並べる。",
+                "type": "string"
+              },
+              "chapter": {
+                "description": "章（liminalia.json の chapters の id）。group を書かなければ、その章の見出し（番号か題）を group にする。",
+                "type": "string"
+              },
+              "description": {
+                "description": "説明（場面の一言など）。",
+                "type": "string"
+              },
+              "folder": {
+                "description": "images を探すフォルダ（既定 bgimage）。",
+                "enum": [
+                  "bgimage",
+                  "fgimage"
+                ]
+              },
+              "images": {
+                "description": "画像（folder からのパス）。一枚目を一覧の縮小画像にする（thumb があればそれ）。",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "thumb": {
+                "description": "一覧に出す画像（bgimage からのパス）。",
+                "type": "string"
+              },
+              "auto": {
+                "description": "cgAuto で足したもの（expandExtra が付ける。liminalia.json には書かない）。",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "images"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "cgAuto": {
+          "type": "object",
+          "properties": {
+            "folder": {
+              "description": "bgimage の中のフォルダ。シナリオが",
+              "type": "string"
+            },
+            "groups": {
+              "description": "folder の直下のフォルダの名前 → 一覧の見出し（group）。書いていなければフォルダの名前のまま。",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "folder"
+          ],
+          "additionalProperties": false
+        },
+        "replay": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "target": {
+                "description": "再生を始める位置（`ファイル`・`ファイル#ラベル`）。",
+                "type": "string"
+              },
+              "thumb": {
+                "description": "一覧に出す画像（bgimage からのパス）。",
+                "type": "string"
+              },
+              "variables": {
+                "description": "再生を始める前に入れる変数（\"game.x\"・\"temp.x\" → 値）。本編で決まる値（選んだルート、主人公の名前など）を回想に渡す。\n回想の中かどうかは式の replaying() で分かる。",
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "id",
+              "target"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "music": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "description": "BGM のファイル（bgm からのパス）。",
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "artist": {
+                "description": "アーティスト（作曲者、歌手など）。",
+                "type": "string"
+              },
+              "description": {
+                "description": "曲の説明（音楽室で選んだ曲の下に出す）。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "file"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "achievements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "hidden": {
+                "description": "解放するまで名前と説明を伏せる。",
+                "type": "boolean"
+              },
+              "icon": {
+                "description": "一覧に出す画像（image からのパス）。",
+                "type": "string"
+              },
+              "goal": {
+                "description": "数を数える実績の目標（1 以上の整数）。@achieve-progress で数を進め、この数に届いたら解放する。おまけの一覧に「今の数 / goal」を出す。",
+                "type": "number"
+              },
+              "endings": {
+                "description": "見たエンディングの数で進める実績（エンディングの種類。\"*\" はどの種類も）。プレイを終える命令（@title-screen ending=）を動かすたびに、\nその種類のエンディングを見た数（式の endings() と同じ数え方）を今の数にし、goal に届いたら解放する（@achieve-progress を書かなくてよい）。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "flowchart": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "titles": {
+                  "description": "場面の id（\"ファイル#ラベル\"）→ フローチャートに出す題（書かなければ場面の最初の本文）。",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "glossary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "term": {
+                "description": "語（本文に出たら解放し、印を付ける）。",
+                "type": "string"
+              },
+              "reading": {
+                "description": "読み（一覧の並びと見出しのルビ）。",
+                "type": "string"
+              },
+              "aliases": {
+                "description": "同じものを指す別の書き方（これが本文に出ても解放し、印を付ける）。",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              },
+              "group": {
+                "description": "一覧で見出しにするまとまり。",
+                "type": "string"
+              },
+              "link": {
+                "description": "本文の中で印を付けるか（既定 true。false なら解放だけ）。",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "term",
+              "description"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "章選択の名前。liminalia.json の chapters に同じ id があれば、title を省くとその題になる。",
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "target": {
+                "description": "章の始まり（`ファイル` か `ファイル#ラベル`）。",
+                "type": "string"
+              },
+              "synopsis": {
+                "description": "あらすじ。",
+                "type": "string"
+              },
+              "thumb": {
+                "description": "一覧に出す画像（bgimage からのパス）。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "target"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "characters": {
+          "description": "立ち絵の鑑賞（キャラクターの並び）。見た差分だけを見せる。",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "who": {
+                "description": "キャスト名（cast.json の cast）。",
+                "type": "string"
+              },
+              "name": {
+                "description": "一覧に出す名前（省くとキャスト名）。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "who"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "movies": {
+          "description": "ムービーの鑑賞（@movie で再生したものを解放する）。",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "description": "動画（video からのパス。@movie のファイル）。",
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "thumb": {
+                "description": "一覧の絵（image からのパス）。",
+                "type": "string"
+              },
+              "subtitles": {
+                "description": "字幕（video からのパス。WebVTT）。",
+                "type": "string"
+              }
+            },
+            "required": [
+              "file"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "endings": {
+          "description": "エンディングの一覧をおまけのタブに出す（シナリオから作ったフローチャートのエンディング。着いたものだけ名前を出す）。",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "chapters": {
+      "description": "章の情報（番号・題・英題と、その章のシナリオファイル。@liminalia/lang の ChapterInfo）。",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "名前（式の chapter() が返す値。extra.cg の chapter・extra.chapters の id で指す）。",
+            "type": "string"
+          },
+          "title": {
+            "description": "題。",
+            "type": "string"
+          },
+          "number": {
+            "description": "番号の表記（第一章、EPISODE 01 など）。",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "副題や英題。",
+            "type": "string"
+          },
+          "files": {
+            "description": "この章のシナリオファイル（拡張子なし。* は任意の文字の並び。chapter1_* など）。",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "additionalProperties": {}
+      }
+    },
+    "commandDefaults": {
+      "description": "作品ごとのコマンドの既定値（コマンド名 → パラメータ名 → .lim の書き方の値。@liminalia/lang の CommandDefaults）。\nシナリオで省いたパラメータに使う（\"chara\": { \"time\": \"400ms\" } なら、time を書かない",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      }
+    },
+    "import": {
+      "description": "インポートの設定。tyrano は TyranoScript（lim import）。ink と yarn の commands は Ink のタグ、Yarn Spinner のコマンドの名前 →\n.lim の行の型（lim import-ink / lim import-yarn。組み込みの対応表に重ねる。null はそのタグ、コマンドを書き出さない）。",
+      "type": "object",
+      "properties": {
+        "tyrano": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "profile": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "ink": {
+          "type": "object",
+          "properties": {
+            "commands": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "yarn": {
+          "type": "object",
+          "properties": {
+            "commands": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "saves": {
+      "description": "セーブの扱い。location はデスクトップ版の保存先（\"user\": OS の標準の場所 / \"portable\": 実行ファイルの横の\nsavedata フォルダ。書けなければ標準の場所。省くと Windows と Linux は \"portable\"、Mac は \"user\"）。protect はセーブ・設定を読めない形で書き、書き換えたものを読まない。\ncarryFrom は引き継げる作品（体験版など）の id → デスクトップ版の題名。はじめて起動したときにその作品のセーブを見つけたら、\n引き継ぐかを尋ねる（設定画面の「セーブを読み込む」でも、その作品の書き出したものを読める）。",
+      "type": "object",
+      "properties": {
+        "location": {
+          "enum": [
+            "user",
+            "portable"
+          ]
+        },
+        "protect": {
+          "type": "boolean"
+        },
+        "carryFrom": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "afterLoad": {
+      "description": "ロードの直後に呼び出す位置（`ファイル#ラベル`）。セーブに入らない temp の計算し直しなどに使い、@return でロードしたページへ戻る。",
+      "type": "string"
+    },
+    "items": {
+      "description": "持ち物（名前 → 表示名・絵・説明）。@item-add で足し、式の item(\"名前\") で数を読む。",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "voiceScript": {
+      "description": "収録用の台本（lim voice-script と制作画面のボイスの画面）。notes は演技のメモにする行（既定は台詞のすぐ上の //! の行だけ。\n\"comments\" なら前のとおり、すぐ上のすべての // の行）。",
+      "type": "object",
+      "properties": {
+        "notes": {
+          "enum": [
+            "marked",
+            "comments"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "allowScript": {
+      "type": "boolean"
+    },
+    "stats": {
+      "description": "文字数と表記ゆれの集計（lim stats と Studio のチェックの画面）。variants は表記ゆれの辞書（@liminalia/lang の VariantDictionary。\nadd で組を足し、ignore で組を外し、off で種類を外す）。作者の手元だけの辞書は .liminalia/variants.json に同じ形で書ける。",
+      "type": "object",
+      "properties": {
+        "variants": {
+          "type": "object",
+          "properties": {
+            "add": {
+              "description": "足す組（それぞれ、同じ語の別の書き方を並べる。[\"出来る\", \"できる\"]）。",
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "ignore": {
+              "description": "出さない組（組の id か、組に入っている書き方のどれか）。",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "off": {
+              "description": "出さない種類（kana・okurigana・symbol・width・name・glossary）。",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "check": {
+      "description": "構文チェックの設定。punctuation は約物の検査（@liminalia/lang の punctuation.ts。括弧の閉じ忘れ・句読点の重なり・！？の後の空白・\n三点リーダーとダッシュの数）。false ですべて外し、{ \"off\": [\"single-ellipsis\"] } で書いたものだけ外す。\nrules は作品の演出の決まり（@liminalia/lang の ProjectRule。docs/design/format.md の「演出の決まり」）。",
+      "type": "object",
+      "properties": {
+        "punctuation": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "off": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "items": {}
+        },
+        "severity": {
+          "description": "診断の code ごとの重さ（\"error\"、\"warning\"、\"info\"、\"off\"。off は出さない）。替えられるのは警告と情報だけ（@liminalia/lang の suppress.ts）。\n一行だけ外すなら、その行の前に // lim-ignore 診断のコード を書く。",
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "error",
+              "warning",
+              "info",
+              "off"
+            ]
+          }
+        },
+        "variables": {
+          "description": "変数の検査。\"declared\" なら variables に書いた変数だけを認め、書いていない game. と system. の変数を読む・書く所を警告する\n（undeclared-variable）。省くと、読むだけで値の入らない変数のうち、値の入る変数に綴りの近いものを警告する（unset-variable）。",
+          "enum": [
+            "declared"
+          ]
+        },
+        "sound": {
+          "description": "音の抜けの検査（@liminalia/lang の SoundCheckConfig。docs/design/format.md の「音の抜け」）。silence は無音の区間を知らせる本文の行数\n（既定 30）、quiet はわざと無音にした場面、carry はファイルをまたいで鳴らしてよいループの効果音、off は外す診断。false ですべて外す。",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "silence": {
+                  "description": "BGM も環境音も鳴らない本文がこの行数（1 以上）続いたら知らせる。既定 30。",
+                  "type": "number"
+                },
+                "quiet": {
+                  "description": "わざと無音にした場面（`ファイル` か `ファイル#ラベル`）。その中の本文は無音の区間に数えない。",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "carry": {
+                  "description": "ファイルをまたいで鳴らしてよいループの効果音（sound からのパス）。",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "off": {
+                  "description": "知らせない診断（long-silence、redundant-stop、loop-across-files）。",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "unusedSpeakers": {
+          "description": "使われなくても知らせない話者（cast.json の speakers の名前。先の話で使う人物など）。どの台詞にも使われない話者の情報（unused-speaker）を、\nこの話者だけ出さない。",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scenes": {
+      "description": "場面（`ファイル` か `ファイル#ラベル`）ごとの情報（視点の人物 pov・作中の日付 date・場所 place・作品の項目）。演出の決まりが読む。",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {}
+      }
+    },
+    "playtest": {
+      "description": "自動確認（lim playtest）と録画の選択肢の選び方。avoidChoices はこの文を含む選択肢を、avoidEndings はこの種類（プレイを終えるコマンドの ending=。\nbad など。種類でない文字なら、エンディングの名前（title=）にその文字を含むもの）のエンディングにしか到達しない選択肢を、ほかに選べるものがあれば選ばない。\nlim playtest の --avoid-choice・--avoid-ending に足して使う。",
+      "type": "object",
+      "properties": {
+        "avoidChoices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoidEndings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "endingKinds": {
+      "description": "作品が足すエンディングの種類（種類の名前 → 画面の文言。`{ \"secret\": \"SECRET END\" }`）。組み込みの種類（bad、normal、good、true、other）を書けば、\nその作品の文言にする。文言は作品の設定の文字として訳す（@liminalia/lang の endings.ts）。",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "autoLayout": {
+      "description": "立ち絵の登場順の自動配置（commandDefaults.chara の auto-layout）の並べ方。positions は人数ごとの立ち位置（人数 → 左からの位置。\n立ち絵の枠の立ち位置の名前か、画面の幅に対する割合 \"30%\"。書かない人数は前からの並べ方）。enter は新しく来た人物を入れる場所\n（end は右の端、start は左の端、middle は真ん中。既定 end）。exit は誰かが退場したとき（reflow は残った人物を並べ直す、keep は動かさずに空けておき、\n次に来た人物をそこへ入れる。既定 reflow）。人物ごとの定位置は cast.json の side に書く。byCount は位置を名前で明示した立ち絵の読み替え\n（人数 → 書いた立ち位置の名前 → 置く立ち位置の名前。表示中の立ち絵がちょうどその人数のときだけ。x= を書いた立ち絵と自動配置の人物は読み替えない）。",
+      "type": "object",
+      "properties": {
+        "positions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "enter": {
+          "enum": [
+            "end",
+            "start",
+            "middle"
+          ]
+        },
+        "exit": {
+          "enum": [
+            "keep",
+            "reflow"
+          ]
+        },
+        "byCount": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "fmt": {
+      "description": "整形（lim fmt と制作画面の「整える」）の設定（書式の版の format とは別）。indent は行頭の字下げ（ブロックの深さ一つにつき空白の数か \"tab\"。省くと字下げは変えない）。\nexpressions が false なら式の演算子の前後の空白を整えない（前の lim fmt の動き）。",
+      "type": "object",
+      "properties": {
+        "indent": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "tab"
+              ]
+            }
+          ]
+        },
+        "expressions": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "bundleId": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "iconBackground": {
+          "description": "スマホ版のアイコンの地の色（\"#rrggbb\"）。iOS は正方形に収めたときの余白と透明な所を、Android は適応アイコンの地を、この色で埋める。\n省くとアイコンの縁の色（縁が透明なら白）。",
+          "type": "string"
+        },
+        "winIcon": {
+          "type": "string"
+        },
+        "executableName": {
+          "description": "書き出すファイルの名前（拡張子なし）: Windows 版の実行ファイル、Mac 版のアプリ、書き出し先のフォルダと zip など。\n省くとタイトル（Linux 版の実行ファイルだけはプロジェクト ID）。書き出し先の OS で使えない文字があれば書き出しを止める（file-names.ts）。",
+          "type": "string"
+        },
+        "verifyWait": {
+          "description": "書き出したあとの確かめで、タイトル画面が出てから写真を撮るまで待つミリ秒（既定 2500）。作品が host.holdShot() で\n撮影を止めていれば、離すまで待ってから数える（白からのフェードで始まるタイトルなど）。",
+          "type": "number"
+        },
+        "asar": {
+          "type": "boolean"
+        },
+        "variants": {
+          "description": "書き出しの版（lim build --variant 名前。全年齢版など）。forbid・exclude はこの版で足す、入っていたら止める素材・入れない素材。\ncontentFilter なら表現を控えめにしたまま変えさせない（ui.contentFilter）。台本からは system.variant で版の名前を見る。",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "forbid": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "exclude": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "contentFilter": {
+                "type": "boolean"
+              },
+              "feedback": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "crashReport": {
+          "description": "止まったときの記録を、遊ぶ人に尋ねてから送る先（POST で JSON を受ける URL）。書かなければ送らない（デスクトップ版は logs/ に残す）。",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        "sourcemap": {
+          "description": "ソースマップ（書き出したエンジンとプラグインの束の、元のプログラムの位置）。書かなければ作らない。\"separate\" は配るファイルに入れず、\n書き出し先の sourcemaps/<ID>-<書き出した日時>/ に残す（止まったときの記録のプログラムの位置を元に戻すのに使う）。\"include\" は書き出しに入れる\n（遊ぶ人の開発者ツールで元のプログラムが見える）。",
+          "enum": [
+            "separate",
+            "include"
+          ]
+        },
+        "analytics": {
+          "description": "遊ばれ方の統計（任意。選んだ選択肢と、遊ぶのをやめた場面）を送る先（POST で JSON を受ける URL）。書かなければ送らない。\n書いても、書き出したゲームがはじめて起動したときに遊ぶ人に尋ね、送ると答えたときだけ送る（コンフィグで変えられる）。docs/distribution.md",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        "feedback": {
+          "description": "テスト版の指摘（テスターや依頼主が、遊びながらその場面に指摘を残す）。テスト版（lim build --feedback、\n制作アプリの書き出しの「テスト版」、build.variants の feedback: true のエディション）にだけ入れ、製品の書き出しには入れない。\nurl があれば指摘を POST の JSON で送り、無ければ遊ぶ人がファイルに保存して渡す。Studio のコメントの画面で取り込む。",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "csp": {
+          "description": "ブラウザ版とデスクトップ版の index.html に入れる Content Security Policy（@liminalia/cli の csp.ts）。既定はゲームと同じ場所からだけ読む。\n指示ごとに許すものを足す（{ \"connect-src\": [\"https://api.example.com\"], \"frame-src\": [\"https://www.youtube.com\"] }）か、false でその指示を外す。\nfalse なら入れない（前の書き出しと同じ）。",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "encrypt": {
+          "description": "デスクトップ版の素材とシナリオを暗号にして入れる（読むときにアプリが戻す。素材を取り出されにくくする）。\nlim pack と lim update-manifest のパックも同じ鍵で暗号にする。ブラウザ版は build.browser.encrypt。",
+          "type": "boolean"
+        },
+        "subsetFonts": {
+          "description": "書体を作品で使う字だけに縮める（書き出しの大きさを減らす）。files は素材のフォルダからのパス（\"others/fonts/a.otf\"）、\ntext は残す字を足す（作品のプラグインの外から文字を出すときなど）。",
+          "type": "object",
+          "properties": {
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "files"
+          ],
+          "additionalProperties": false
+        },
+        "resizable": {
+          "type": "boolean"
+        },
+        "exclude": {
+          "description": "書き出しに入れない素材（素材のフォルダからのパスにこの文字列を含むもの）。",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onlyUsed": {
+          "description": "使っている素材だけを書き出しに入れる（lim build --only-used と同じ。既定 false）。外すのは lim unused が出す素材\n（名前が台本、データ、設定、プラグイン、作品の CSS と画面のテンプレート、パック、訳のどこにも出てこないもの）。声（voice/）とテーマの素材は外さない。\n素材の引数を式で書いた命令（(\"bg_\" + n) など）があるフォルダは外さない。プラグインのコードの中で名前を組み立てる素材は追えない。",
+          "type": "boolean"
+        },
+        "forbid": {
+          "description": "書き出しに入っていてはいけない素材。見つかったら書き出しを止める（公開前の素材の混入を防ぐ）。",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "keep": {
+          "description": "日時付きで溜まる書き出し（<out>/mac/<名前>_<日時>/ など）を、書き出しのたびに名前ごとに新しいものからこの数だけ残して消す\n（0 以上の整数。環境変数 LIMINALIA_KEEP が優先）。省くと 3 件残す。0 なら消さない。lim clean で手で片付けるときの既定の数にもなる。",
+          "type": "number"
+        },
+        "keepSourcemaps": {
+          "description": "ソースマップの控え（sourcemap が \"separate\" のときの <out>/sourcemaps/<名前>-<日時>/）を、書き出しのたびに名前ごとに新しいものから\nこの数だけ残して消す（0 以上の整数）。省くと keep（と LIMINALIA_KEEP）と同じ数。0 なら消さない。配った版の止まったときの記録を読むために多めに残すときに書く。",
+          "type": "number"
+        },
+        "buildNumber": {
+          "description": "スマホ版の版の番号（1 以上の整数。ストアに出すたびに上げる。環境変数 LIMINALIA_BUILD_NUMBER が優先）。省略すると version から作る\n（1.2.3 → 10203。二つ目か三つ目が 100 以上の版は、ほかの版と重なるので書き出しを止める）。",
+          "type": "number"
+        },
+        "androidAab": {
+          "description": "Android 版を Google Play 向けの Android App Bundle（.aab）にもする（APK の隣に作る。bundletool が要る）。\nlim build android --aab でもよい（環境変数 LIMINALIA_AAB が優先）。",
+          "type": "boolean"
+        },
+        "android": {
+          "description": "Android 版。keystore・alias・storePasswordEnv は署名（省略すると開発用の鍵）。パスワードは環境変数の名前で書く。AAB も同じ鍵（Play のアップロード鍵）で署名する。\ntargetSdk は targetSdkVersion（既定は Google Play が今求める下限。組み立てにはその版の SDK Platform が要る。下限より小さいと --aab は止める）。",
+          "type": "object",
+          "properties": {
+            "keystore": {
+              "type": "string"
+            },
+            "alias": {
+              "type": "string"
+            },
+            "storePasswordEnv": {
+              "type": "string"
+            },
+            "keyPasswordEnv": {
+              "type": "string"
+            },
+            "targetSdk": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ios": {
+          "description": "iOS 版。team は署名に使う Apple の開発チームの ID。audioSession は音の扱い（\"ambient\"（既定）: 消音スイッチに従い、ほかのアプリの音と重ねる。\n\"playback\": 消音スイッチを入れていても鳴らし、ほかのアプリの音を止める）。",
+          "type": "object",
+          "properties": {
+            "team": {
+              "type": "string"
+            },
+            "audioSession": {
+              "enum": [
+                "ambient",
+                "playback"
+              ]
+            },
+            "privacyManifest": {
+              "description": "iOS のプライバシーマニフェスト（PrivacyInfo.xcprivacy。プロジェクトからのパス）。省くと書き出しが作る（集める情報は build.crashReport、\nbuild.analytics、テスト版の build.feedback から決め、追跡はしない）。作品のプラグインが別に情報を送るときは自分のものを書く。docs/distribution.md",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "mobile": {
+          "description": "スマホ版（android・ios）だけ素材を縮める（劣化を伴うので、書かなければ縮めない）。音は ffmpeg で AAC（format: \"m4a\"。既定）か\nOpus（\"opus\"。.ogg）に bitrate（既定 \"64k\"・Opus は \"48k\"）で、画像は cwebp で WebP に quality（既定 80）で。\nfolders で縮めるフォルダを選ぶ（既定は音が bgm・sound・voice、画像が bgimage・fgimage・image）。\nOGG に埋め込んだループの位置は、縮める前の音から読んで書き出しの project/audio-loops.json に入れる（形式が変わっても保つ）。",
+          "type": "object",
+          "properties": {
+            "audio": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "enum": [
+                    "m4a",
+                    "opus"
+                  ]
+                },
+                "bitrate": {
+                  "type": "string"
+                },
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "images": {
+              "description": "scale は画像の解像度の倍率（0 より大きく 1 より小さい数。0.5 なら縦横を半分に）。scaleFolders（既定は bgimage と fgimage）の画像を\n縮め、遊ぶ側は元の大きさで出す（表示の大きさと位置は変わらない）。部品の画像（image）は枠の角の大きさを画素で書くので既定では縮めない。",
+              "type": "object",
+              "properties": {
+                "format": {
+                  "enum": [
+                    "webp"
+                  ]
+                },
+                "quality": {
+                  "type": "number"
+                },
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "scale": {
+                  "type": "number"
+                },
+                "scaleFolders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "steam": {
+          "description": "Steam（デスクトップ版）。appId を書くと Steam につなぎ、@achieve を Steam の実績にする。\nachievements は",
+          "type": "object",
+          "properties": {
+            "appId": {
+              "type": "number"
+            },
+            "achievements": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "stats": {
+              "description": "数を数える実績（extra.achievements の goal）の",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "depots": {
+              "description": "lim publish steam が上げる先のデポ（OS → デポ ID。Steamworks の「SteamPipe → デポ」で作る）。版ごとの App ID へ上げるときは\nlim publish steam --app-id と --depot で選ぶ。",
+              "type": "object",
+              "properties": {
+                "windows": {},
+                "mac": {},
+                "linux": {}
+              },
+              "additionalProperties": false
+            },
+            "variants": {
+              "description": "版ごとの App ID（\"demo\" → 体験版の ID など）。`lim build --steam 名前` で選ぶ。",
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "workshop": {
+              "description": "Steam ワークショップで購読したアイテム（pack.json のあるもの）をパックとして読み込む。",
+              "type": "boolean"
+            },
+            "input": {
+              "description": "Steam Input。actionSet（既定 \"InGameControls\"）の、actions（Steam のデジタルのアクションの名前 → ゲームの操作）を結ぶ。\nゲームの操作はゲームパッドのボタン（a、b、x、y、lb、rb、lt、rt、select、start、up、down、left、right。advance は a、back は b）か、\nシステム画面の操作（auto、skip、quick-save、backlog など）。",
+              "type": "object",
+              "properties": {
+                "actionSet": {
+                  "type": "string"
+                },
+                "actions": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "actions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "appId"
+          ],
+          "additionalProperties": false
+        },
+        "gameCenter": {
+          "description": "iOS 版の実績（Game Center）。書くと",
+          "type": "object",
+          "properties": {
+            "achievements": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "playGames": {
+          "description": "Android 版の実績（Google Play Games Services v2）。appId は Play Console の Play Games サービスのプロジェクトの ID、\nachievements はゲームの実績の名前 → Play Console の実績の ID（書いた実績だけ送る）、libraries は play-services-games-v2 の AAR と、\nその依存の AAR・JAR（プロジェクトからのパス。build.store.android.libraries と同じく自分で用意する）。",
+          "type": "object",
+          "properties": {
+            "appId": {
+              "type": "string"
+            },
+            "achievements": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "libraries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "appId",
+            "achievements",
+            "libraries"
+          ],
+          "additionalProperties": false
+        },
+        "gpu": {
+          "description": "デスクトップ版で使う GPU（\"high-performance\": 性能の高い方。既定 / \"default\": OS に任せる）。",
+          "enum": [
+            "high-performance",
+            "default"
+          ]
+        },
+        "mac": {
+          "description": "Mac 版の配布用の署名と公証。署名の名前（環境変数 LIMINALIA_MAC_SIGN_IDENTITY が優先）があれば、hardened runtime と\nentitlements を付けて署名し、公証の資格（notaryProfile か環境変数。docs/distribution.md）があれば公証して staple する。\n無ければ今までどおりアドホック署名。",
+          "type": "object",
+          "properties": {
+            "signIdentity": {
+              "description": "署名の名前（\"Developer ID Application: 名前 (チーム ID)\"）。",
+              "type": "string"
+            },
+            "entitlements": {
+              "description": "entitlements の plist（プロジェクトからのパス）。省くと Electron に要るものを書き出しが作る。",
+              "type": "string"
+            },
+            "notaryProfile": {
+              "description": "notarytool のキーチェーンのプロファイル名（xcrun notarytool store-credentials で作ったもの）。",
+              "type": "string"
+            },
+            "notarize": {
+              "description": "false なら資格があっても公証しない（署名だけ）。",
+              "type": "boolean"
+            },
+            "zip": {
+              "description": "アプリを zip にもする（ditto で作る。シンボリックリンク・実行の許可・署名を保つ）。環境変数 LIMINALIA_ZIP が優先。",
+              "type": "boolean"
+            },
+            "dmg": {
+              "description": "アプリを dmg にもする（hdiutil。アプリと「Applications」へのリンクを入れる）。環境変数 LIMINALIA_DMG が優先。",
+              "type": "boolean"
+            },
+            "arch": {
+              "description": "Mac の CPU（\"universal\": Apple Silicon と Intel の両方で動く一つのアプリ。既定 / \"arm64\": Apple Silicon だけ / \"x64\": Intel だけ）。\n一つに絞ると Electron が片方の分になり、半分ほどの大きさになる。環境変数 LIMINALIA_MAC_ARCH、LIMINALIA_ARCH の順に優先。",
+              "enum": [
+                "universal",
+                "arm64",
+                "x64"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "browser": {
+          "description": "ブラウザ版。zip は書き出したフォルダの中身を zip にもする（index.html が zip の一番上。itch.io などにそのまま上げられる）。\ncompress は素材を縮める（形は build.mobile と同じ。環境変数 LIMINALIA_COMPRESS=0 なら縮めない）。\nencrypt は素材とシナリオを暗号にし、Service Worker で戻す（https のページでだけ遊べる。鍵はページから読めるので、取り出されにくくするだけ）。\noffline は一度開いたあとオフラインでも遊べるように、Service Worker でエンジン・台本・データを控え、素材は使ったときに控える（既定 true。\n\"all\" なら素材も入れたときに全部控える。false なら Service Worker を入れない。暗号化と同じ lm-sw.js）。",
+          "type": "object",
+          "properties": {
+            "zip": {
+              "type": "boolean"
+            },
+            "compress": {
+              "type": "object",
+              "properties": {
+                "audio": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "m4a",
+                        "opus"
+                      ]
+                    },
+                    "bitrate": {
+                      "type": "string"
+                    },
+                    "folders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "images": {
+                  "description": "scale は画像の解像度の倍率（0 より大きく 1 より小さい数。0.5 なら縦横を半分に）。scaleFolders（既定は bgimage と fgimage）の画像を\n縮め、遊ぶ側は元の大きさで出す（表示の大きさと位置は変わらない）。部品の画像（image）は枠の角の大きさを画素で書くので既定では縮めない。",
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "webp"
+                      ]
+                    },
+                    "quality": {
+                      "type": "number"
+                    },
+                    "folders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "scale": {
+                      "type": "number"
+                    },
+                    "scaleFolders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "encrypt": {
+              "type": "boolean"
+            },
+            "offline": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "enum": [
+                    "all"
+                  ]
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "desktop": {
+          "description": "デスクトップ版（Mac・Windows・Linux）。compress は素材を縮める（形は build.mobile と同じ）。\nfuses は Electron の Fuses（既定では RunAsNode、EnableNodeOptionsEnvironmentVariable、EnableNodeCliInspectArguments を切り、\napp.asar に入れるなら OnlyLoadAppFromAsar と、Mac と Windows では EnableEmbeddedAsarIntegrityValidation を入れる）。\n名前 → true か false で一つずつ替え、false なら Fuses に手を付けない（前の書き出しと同じ）。\nlocales は Electron の言語のファイルに、作品の言語（languages）と英語のほかに残す言語（\"fr\" など）。\"all\" ならすべて残す（前の書き出しと同じ）。",
+          "type": "object",
+          "properties": {
+            "compress": {
+              "type": "object",
+              "properties": {
+                "audio": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "m4a",
+                        "opus"
+                      ]
+                    },
+                    "bitrate": {
+                      "type": "string"
+                    },
+                    "folders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "images": {
+                  "description": "scale は画像の解像度の倍率（0 より大きく 1 より小さい数。0.5 なら縦横を半分に）。scaleFolders（既定は bgimage と fgimage）の画像を\n縮め、遊ぶ側は元の大きさで出す（表示の大きさと位置は変わらない）。部品の画像（image）は枠の角の大きさを画素で書くので既定では縮めない。",
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "webp"
+                      ]
+                    },
+                    "quality": {
+                      "type": "number"
+                    },
+                    "folders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "scale": {
+                      "type": "number"
+                    },
+                    "scaleFolders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "locales": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "enum": [
+                    "all"
+                  ]
+                }
+              ]
+            },
+            "fuses": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "RunAsNode": {},
+                    "EnableNodeOptionsEnvironmentVariable": {},
+                    "EnableNodeCliInspectArguments": {},
+                    "EnableEmbeddedAsarIntegrityValidation": {},
+                    "OnlyLoadAppFromAsar": {}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "update": {
+          "description": "アップデートの確認（デスクトップ版。Steam 以外で売るとき）。url のマニフェスト（lim update-manifest が作る）を、起動したときと\nメニューの「アップデートを確認」で取り寄せ、新しいパックがあれば取り寄せて入れ、本体が新しければインストーラーかダウンロードのページへ案内する。\n環境変数 LIMINALIA_UPDATE_URL が優先（\"off\" なら入れない）。",
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "マニフェストの URL（https）。",
+              "type": "string"
+            },
+            "checkOnStartup": {
+              "description": "起動したときに確かめる（既定 true）。false ならメニューから確かめたときだけ。",
+              "type": "boolean"
+            },
+            "steam": {
+              "description": "Steam につなぐ版でも確かめる（既定 false。Steam が更新を配るため）。",
+              "type": "boolean"
+            },
+            "publicKey": {
+              "description": "マニフェストの署名を確かめる公開鍵（Ed25519 の 32 バイトの base64。lim update-key が作る）。書くと、署名の通ったマニフェストだけを使う。\n鍵を替えるときは、前の鍵と新しい鍵を配列で並べた版を先に配る。",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        "store": {
+          "description": "店とアプリ内課金。products は買える商品（ゲームの中の名前 → 店ごとの商品 ID）で、買ったものは system.purchases.<名前> が true になる\n（シナリオは",
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "ios": {
+                    "type": "string"
+                  },
+                  "android": {
+                    "type": "string"
+                  },
+                  "steam": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              }
+            },
+            "desktop": {
+              "type": "object",
+              "properties": {
+                "module": {
+                  "type": "string"
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "module"
+              ],
+              "additionalProperties": false
+            },
+            "android": {
+              "description": "Play Billing Library の AAR と、その依存の AAR・JAR（プロジェクトからのパス）。無ければ Android 版はアプリ内課金なしで書き出す。",
+              "type": "object",
+              "properties": {
+                "libraries": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "libraries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "itch": {
+          "description": "itch.io へ上げる先（lim publish itch）。target は \"人の名前/ゲームの名前\"（itch.io のゲームのページの URL の形）、channels は\n書き出しの種類 → チャンネルの名前（既定 browser: html5、windows: windows、mac: mac、linux: linux）。",
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string"
+            },
+            "channels": {
+              "type": "object",
+              "properties": {
+                "windows": {},
+                "mac": {},
+                "linux": {},
+                "browser": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "windows": {
+          "description": "Windows 版の Authenticode 署名（sign）と、インストーラー（installer。true か設定）。",
+          "type": "object",
+          "properties": {
+            "sign": {
+              "type": "object",
+              "properties": {
+                "pfx": {
+                  "description": "証明書（PFX）のパス（プロジェクトからの相対）。",
+                  "type": "string"
+                },
+                "passwordEnv": {
+                  "description": "PFX のパスワードを入れた環境変数の名前（既定 LIMINALIA_WIN_PFX_PASSWORD）。",
+                  "type": "string"
+                },
+                "command": {
+                  "description": "外部の署名コマンド。\"{file}\" を署名するファイルのパスに置き換えて実行する。",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "timestampUrl": {
+                  "description": "タイムスタンプのサーバー（RFC 3161。既定 http://timestamp.digicert.com）。",
+                  "type": "string"
+                },
+                "ifMissing": {
+                  "description": "署名の道具（osslsigncode・signtool）が無いとき。\"fail\": 書き出しを止める（既定） / \"skip\": 理由を出して署名せずに続ける。",
+                  "enum": [
+                    "skip",
+                    "fail"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "wrap": {
+              "description": "実行ファイルを包む外部のコマンド（ストアが渡す DRM の道具など）。\"{file}\" を実行ファイルのパスに置き換え、署名の前に実行する。\n環境変数 LIMINALIA_WIN_WRAP_COMMAND（JSON の配列か空白区切り）が優先し、\"off\" なら行わない。",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "installer": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "perMachine": {
+                      "description": "すべての利用者に入れる（Program Files。管理者の権限が要る）。既定は入れる人だけ（%LOCALAPPDATA%\\Programs）。",
+                      "type": "boolean"
+                    },
+                    "desktopShortcut": {
+                      "description": "デスクトップのショートカットを作るチェックの初め（既定 true）。",
+                      "type": "boolean"
+                    },
+                    "languages": {
+                      "description": "画面の言語（既定 [\"ja\", \"en\"]。Windows の表示の言語で選ぶ）。",
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "ja",
+                          "en"
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "arch": {
+              "description": "Windows の CPU（\"x64\": 既定 / \"arm64\": ARM の Windows / \"ia32\": 32 ビットの Windows）。環境変数 LIMINALIA_WINDOWS_ARCH、LIMINALIA_ARCH の順に優先。",
+              "enum": [
+                "arm64",
+                "x64",
+                "ia32"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "linux": {
+          "description": "Linux 版。arch は CPU（\"x64\": 既定 / \"arm64\"）。環境変数 LIMINALIA_LINUX_ARCH、LIMINALIA_ARCH の順に優先。",
+          "type": "object",
+          "properties": {
+            "arch": {
+              "enum": [
+                "arm64",
+                "x64"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "$schema": {
+      "type": "string",
+      "description": "この Schema の場所（エディタの補完と説明に使う）"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "entry"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+{
+  "id": "fixture",
+  "title": "拡張機能の見本",
+  "entry": "start",
+  "languages": ["ja", "en"],
+  "plugins": ["./plugins/demo"],
+  "items": { "key": { "name": "鍵", "description": "古い真鍮の鍵" } },
+  "ui": {
+    "tones": { "dusk": { "color": "#c08040", "amount": 0.4 } },
+    "nvlStyles": { "letter": { "color": "#302010" }, "terminal": { "font": "monospace" } }
+  }
+}

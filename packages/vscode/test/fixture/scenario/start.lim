@@ -1,0 +1,24 @@
+// 見本の台本
+@use common
+
+# start
+@bg room_night.jpg time=1s
+@chara ユイカ normal at=left time=300ms
+ユイ「おはよう、今日は早いのね」
+　窓の外では、雨が上がりかけていた。
+@title-card text=第一章
+@glint time=300ms
+レン「待って{@chara ユイカ smile}」
+
+@choice
+- 北の道を行く -> #north_road
+- 南の道を行く -> chapter2#south if=(game.trust >= 1)
+@end
+
+# north_road
+@if game.trust >= 2
+ユイ「なら、話は早いわ」
+@else
+ユイ「……そう」
+@end
+@jump chapter2

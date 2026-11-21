@@ -1,0 +1,25 @@
+// 台本のテスト（lim test が流す）。「はじめから」画面なしで流し、選び方ごとに終わり方を確かめる。
+// 書き方は https://liminalia.skyta.dev/docs/design/format/ の「台本のテスト」。選ぶ文は、選択肢の文と同じか、その文を含むもの。
+
+# 望遠鏡をのぞいて願うと、レンズのふたをもらう
+choose 望遠鏡をのぞく
+choose 外で空を見上げる
+choose 願いごとを言ってみる
+expect game.looked && game.wished
+expect text "レンズのふた"
+expect reach epilogue#dawn
+expect no-errors
+
+# 望遠鏡をのぞかずに願うと、扉の鈴をもらう
+choose 外で空を見上げる
+choose 願いごとを言ってみる
+expect !game.looked && game.wished
+expect text "扉の鈴をひとつ外して"
+expect not text "レンズのふた"
+
+# 黙って見ていると、扉を開けておいてくれる
+choose 外で空を見上げる
+choose 2
+expect !game.wished
+expect text "扉を少しだけ開けておいてくれた"
+expect reach epilogue#dawn

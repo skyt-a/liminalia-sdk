@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "lang/<言語>.json（Liminalia の訳。language と lines のあるファイルだけ）",
+  "if": {
+    "type": "object",
+    "required": [
+      "language",
+      "lines"
+    ]
+  },
+  "then": {
+    "type": "object",
+    "properties": {
+      "language": {
+        "description": "言語（\"en\" など）。",
+        "type": "string"
+      },
+      "speakers": {
+        "description": "話者名（原文の名前 → 訳）。",
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "lines": {
+        "description": "本文の行と選択肢（鍵 → 原文と訳）。",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "description": "原文（訳す人が見るため。鍵を作った元）。",
+              "type": "string"
+            },
+            "text": {
+              "description": "訳。空なら原文を出す。",
+              "type": "string"
+            },
+            "translatedFrom": {
+              "description": "訳したときの原文。固定の行 ID の行で、訳したあとに原文を書き換えたあいだだけ（訳は使われ続ける）。\n表と XLIFF の --changed で書き出し、訳し直して取り込むと消える。",
+              "type": "string"
+            },
+            "speaker": {
+              "description": "話者（訳す人が見るため。選択肢は \"choice\"）。",
+              "type": "string"
+            },
+            "note": {
+              "description": "どこの文字か（コマンドの文字は \"@layer-text\" など、作品の設定の文字は \"extra.cg\" など。訳す人が見るため）。",
+              "type": "string"
+            },
+            "previous": {
+              "description": "原文を書き換える前の原文と訳（訳が空のあいだだけ。訳す人が見て直す）。",
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "contexts": {
+              "description": "場面ごとの訳（ラベルの名前 → 訳）。同じ原文が二つ以上の場面（ラベル。最初のラベルより前と",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "source",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "stale": {
+        "description": "今のシナリオに無い原文の訳（消さずに取っておく。要らなければ消してよい）。",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "description": "原文（訳す人が見るため。鍵を作った元）。",
+              "type": "string"
+            },
+            "text": {
+              "description": "訳。空なら原文を出す。",
+              "type": "string"
+            },
+            "translatedFrom": {
+              "description": "訳したときの原文。固定の行 ID の行で、訳したあとに原文を書き換えたあいだだけ（訳は使われ続ける）。\n表と XLIFF の --changed で書き出し、訳し直して取り込むと消える。",
+              "type": "string"
+            },
+            "speaker": {
+              "description": "話者（訳す人が見るため。選択肢は \"choice\"）。",
+              "type": "string"
+            },
+            "note": {
+              "description": "どこの文字か（コマンドの文字は \"@layer-text\" など、作品の設定の文字は \"extra.cg\" など。訳す人が見るため）。",
+              "type": "string"
+            },
+            "previous": {
+              "description": "原文を書き換える前の原文と訳（訳が空のあいだだけ。訳す人が見て直す）。",
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "contexts": {
+              "description": "場面ごとの訳（ラベルの名前 → 訳）。同じ原文が二つ以上の場面（ラベル。最初のラベルより前と",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "source",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "ui": {
+        "description": "システム画面の文言（\"title.start\" のような鍵 → 訳）。訳だけの文字列か、英語の原文を添えたもの（lim i18n が日本語と英語以外の言語に並べる）。\n訳が空なら英語の文言を出す。",
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "description": "英語の原文（既定のシステム画面の strings-en.ts）。",
+                  "type": "string"
+                },
+                "text": {
+                  "description": "訳。空なら英語の文言を出す。",
+                  "type": "string"
+                },
+                "translatedFrom": {
+                  "description": "訳したときの英語の原文（エンジンの版が上がって英語が変わったあいだだけ。訳は使われ続ける。訳し直したら消す）。",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "$schema": {
+        "type": "string",
+        "description": "この Schema の場所（エディタの補完と説明に使う）"
+      }
+    },
+    "required": [
+      "language"
+    ],
+    "additionalProperties": false
+  }
+}

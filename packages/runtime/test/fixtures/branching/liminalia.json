@@ -1,0 +1,15 @@
+{
+  "id": "branching",
+  "title": "分かれ道",
+  "version": "1.0.0",
+  "format": 2,
+  "entry": "start",
+  "screen": {
+    "width": 1280,
+    "height": 720
+  },
+  "variables": {
+    "game.courage": 0,
+    "game.found": false
+  }
+}

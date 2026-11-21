@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "position": {
+    "unit": "save-sample",
+    "index": 5
+  },
+  "locals": {},
+  "callStack": [],
+  "game": {
+    "n": 1,
+    "name": "ゆい"
+  },
+  "stage": {
+    "background": "room",
+    "sprites": {
+      "ユイ": {
+        "variant": "smile",
+        "appearance": "",
+        "at": "left",
+        "flip": false
+      }
+    },
+    "bgm": null,
+    "loopingSe": {},
+    "window": false,
+    "mask": null,
+    "camera": {
+      "zoom": 1,
+      "x": 0,
+      "y": 0,
+      "rotate": 0
+    },
+    "textSpeed": null,
+    "extra": {}
+  },
+  "seed": 1
+}

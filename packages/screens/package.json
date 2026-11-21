@@ -1,0 +1,31 @@
+{
+  "name": "@liminalia/screens",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "標準のシステム画面（タイトル、メニュー、セーブとロード、バックログ、コンフィグなど）のテンプレート、作品のテンプレートを確かめる決まり、標準の文言。DOM を使わない",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    ".": "./src/index.ts",
+    "./backlog": "./src/backlog.ts",
+    "./choice": "./src/choice.ts",
+    "./config": "./src/config.ts",
+    "./confirm": "./src/confirm.ts",
+    "./ending": "./src/ending.ts",
+    "./help": "./src/help.ts",
+    "./menu": "./src/menu.ts",
+    "./rules": "./src/rules.ts",
+    "./saveload": "./src/saveload.ts",
+    "./title": "./src/title.ts",
+    "./strings": "./src/strings.ts",
+    "./strings-en": "./src/strings-en.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/screens"
+  }
+}

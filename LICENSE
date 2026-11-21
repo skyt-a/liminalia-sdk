@@ -1,0 +1,106 @@
+Liminalia の利用条件
+====================
+
+Copyright (c) skyta
+
+このリポジトリのソースコード、資料、制作アプリ（Liminalia Studio）、コマンドラインの lim、
+VS Code の拡張機能、エンジン（書き出したゲームに入る実行部分を含む）は、オープンソースの
+ライセンスではなく、「Liminalia のライセンスと利用条件」に従って使えます。
+
+  利用条件の全文: https://liminalia.skyta.dev/license/
+  （このリポジトリでは site/src/pages/license.astro。英語版は site/src/pages/en/license.astro）
+  施行日と最終更新日は、全文のページに書きます。
+
+全文から要点を抜き出すと、次のとおりです。食い違うときは全文が優先し、訳したものと
+日本語のものが食い違うときは日本語のものが優先します。
+
+- 提供者は skyta です。Liminalia は無料で使えます。
+- Liminalia で作ったゲームと、そのシナリオ、画像、音などの権利は、作った人のものです。
+- 書き出したゲームに入るエンジンの実行部分は、ゲームと一緒になら無料で再配布できます。
+  使用料も、配った数や売上の報告も要りません。
+- エンジンの実行部分だけを取り出して、ゲームを作るためのソフトウェアとして配ることはできません。
+- Liminalia Studio、lim、VS Code の拡張機能は、改変せず無料で配る場合にかぎり、授業、
+  会社や団体の中、勉強会やゲームジャムで配れます。それ以外の再配布と、改変したものの配布はできません。
+- 不具合を調べるため、または自分で使うために、中身を読んだり解析したりしてもかまいません。
+- プラグインでコマンドや画面を追加することは改変に当たりません。作ったプラグインの権利は作った人のものです。
+- プラグインを書く部品 @liminalia/sdk（packages/sdk）は MIT ライセンスです（packages/sdk/LICENSE）。
+  ほかの公開している部品は、プラグインや拡張機能を作るために使えます。詳しくは全文の「公開している部品」の節にあります。
+- Liminalia は現状のまま提供し、提供者は保証しません。責任の範囲は全文のとおりです。
+
+サンプル素材
+------------
+
+次のフォルダの背景、立ち絵、BGM、効果音（サンプル素材）は CC0 1.0 で提供します。
+自分のゲームに使う、改変する、素材だけを配る、売るなど、どの使い方にも条件はありません。
+https://creativecommons.org/publicdomain/zero/1.0/deed.ja
+
+- templates/default/assets（Studio の新規作成と lim new で作るプロジェクトの素材）
+- site/tutorial-kit、site/tutorial/assets（チュートリアルの素材）
+- site/guide/assets（サイトの案内のゲームの素材）
+
+絵は OpenAI の画像生成（Codex）で作り、音は Liminalia のスクリプトで合成しました。
+絵をそのまま使ってゲームを配るときは、販売するストアのルールに従って、AI で作った素材を
+使っていることを申告してください。詳しくは全文の「ひな形とサンプル素材」の節にあります。
+
+オープンソースの部品
+--------------------
+
+Liminalia に含まれるオープンソースの部品（Electron、FFmpeg など）は、それぞれのライセンスに従います。
+一覧は https://liminalia.skyta.dev/license/third-party/ にあります。
+
+
+Liminalia license and terms of use
+==================================
+
+Copyright (c) skyta
+
+The source code and documentation in this repository, the Liminalia Studio editor app, the lim
+command line, the VS Code extension and the engine (including the engine runtime included in
+exported games) are not open source. You can use them under the Liminalia license and terms of use.
+
+  Full terms: https://liminalia.skyta.dev/en/license/
+  (In this repository, site/src/pages/en/license.astro. The Japanese version is site/src/pages/license.astro.)
+  The effective date and the date of the last update are given on the full terms page.
+
+The main points of the full terms are below. If they differ, the full terms take precedence, and
+if a translation differs from the Japanese version, the Japanese version takes precedence.
+
+- The provider is skyta. Liminalia is free to use.
+- The rights to the games you make with Liminalia, and to their scripts, images, sound and so on,
+  belong to the people who made them.
+- The engine runtime included in exported games can be redistributed free of charge together with
+  the game. There are no royalties, and you don't need to report how many copies you distribute or sell.
+- You may not take out only the engine runtime and distribute it as software for making games.
+- You may distribute Liminalia Studio, lim and the VS Code extension, unmodified and free of charge,
+  only in classes, within a company or organization, and at study groups or game jams. Any other
+  redistribution, and distributing modified versions, is not allowed.
+- You may read and analyze the internals to look into bugs or for your own use.
+- Adding commands or screens with plugins is not a modification. The rights to plugins you make
+  belong to you.
+- @liminalia/sdk (packages/sdk), the component for writing plugins, is under the MIT License
+  (packages/sdk/LICENSE). The other published components may be used to make plugins and extensions.
+  See "Published components" in the full terms for details.
+- Liminalia is provided as is, without warranty. The limits of liability are as in the full terms.
+
+Sample assets
+-------------
+
+The backgrounds, sprites, BGM and sound effects (sample assets) in the following folders are
+provided under CC0 1.0. There are no conditions on any use, whether you use them in your own game,
+modify them, distribute the assets on their own or sell them.
+https://creativecommons.org/publicdomain/zero/1.0/deed.en
+
+- templates/default/assets (the assets of projects made with New Project in Studio and with lim new)
+- site/tutorial-kit, site/tutorial/assets (the tutorial assets)
+- site/guide/assets (the assets of the tour game on the site)
+
+The art was made with OpenAI's image generation (Codex), and the sound was synthesized with
+Liminalia's scripts. If you distribute a game that uses the art as is, disclose that it uses
+AI-generated assets, following the rules of the stores you sell on. See "Templates and sample
+assets" in the full terms for details.
+
+Open source components
+----------------------
+
+The open source components included in Liminalia (such as Electron and FFmpeg) are governed by
+their own licenses. The list is at https://liminalia.skyta.dev/en/license/third-party/.

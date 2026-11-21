@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Liminalia Test",
+  "scopeName": "source.liminalia-test",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#heading" },
+    { "include": "#expect" },
+    { "include": "#statement" }
+  ],
+  "repository": {
+    "comment": {
+      "match": "^\\s*//.*$",
+      "name": "comment.line.double-slash.liminalia-test"
+    },
+    "heading": {
+      "match": "^\\s*(#)\\s*(.*)$",
+      "captures": {
+        "1": { "name": "punctuation.definition.heading.liminalia-test" },
+        "2": { "name": "entity.name.section.liminalia-test" }
+      }
+    },
+    "expect": {
+      "begin": "^\\s*(expect)\\b\\s*(?:(not)\\s+)?(reach|text|ending|end|no-errors|no-warnings)?\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.liminalia-test" },
+        "2": { "name": "keyword.operator.logical.liminalia-test" },
+        "3": { "name": "support.function.liminalia-test" }
+      },
+      "end": "$",
+      "patterns": [{ "include": "#string" }, { "include": "#variable" }, { "include": "#number" }]
+    },
+    "statement": {
+      "begin": "^\\s*(from-state|from|set|seed|choose|rest|limit)\\b",
+      "beginCaptures": { "1": { "name": "keyword.control.liminalia-test" } },
+      "end": "$",
+      "patterns": [{ "include": "#string" }, { "include": "#variable" }, { "include": "#number" }]
+    },
+    "string": {
+      "match": "\"(?:[^\"\\\\]|\\\\.)*\"",
+      "name": "string.quoted.double.liminalia-test"
+    },
+    "variable": {
+      "match": "\\b(?:game|system|temp)\\.[\\w.]+",
+      "name": "variable.other.liminalia-test"
+    },
+    "number": {
+      "match": "(?<![\\w.])\\d+(?:\\.\\d+)?\\b",
+      "name": "constant.numeric.liminalia-test"
+    }
+  }
+}

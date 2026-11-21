@@ -1,0 +1,161 @@
+// 星を待つ丘 — Liminalia のひな形の物語。書き換えて自分の作品にしてください。
+// 書き方はサイトのチュートリアル（https://liminalia.skyta.dev/tutorial/）にあります。
+// コマンドの使い方はコマンドリファレンス（https://liminalia.skyta.dev/reference/）にあります。
+// 「はじめから」はこのファイルの先頭から始まる（liminalia.json の entry）。
+//
+// このファイルのシーンの流れ:
+//   start     夕方の天文台で、アカリとソウが出会う
+//   night     夜になる。場面転換は @scene-change（暗転の時間は liminalia.json の commandDefaults に書いてある）
+//   menu      望遠鏡、ラジオ、外の選択肢。望遠鏡をのぞいたかを変数に覚える
+//   midnight  流れ星。願いごとを言うか、黙って見ているか（これも変数に覚える）
+//   ending    選び方で結びが変わり、epilogue.lim の夜明けへ続く
+// radio のシーンはラジオの声。知らせの文を変数に入れてから @call で呼ぶ。
+// 素材は assets/ に、キャラクターと立ち絵は cast.json にある（サンプル素材のことは「素材について.txt」）。
+
+# start
+@set game.looked = false
+@set game.wished = false
+@mask
+@bg hill_dusk.webp
+@bgm quiet_night.wav volume=60 time=2s
+@mask-off time=1500ms
+@window show time=300ms
+　坂をのぼりきった先に、小さな天文台がある。
+　丸い屋根の、町のだれも使わなくなった古い天文台だ。
+　今夜は百年に一度の{r 流星群|りゅうせいぐん}が来るらしい。{click}……と、ラジオは朝から同じことばかり言っている。
+@chara アカリ normal at=center time=400ms
+アカリ「着いた……っ。この坂、こんなに長かったっけ」
+　息を整えながら、わたしは鞄の中の{r 双眼鏡|そうがんきょう}をたしかめた。
+@se chime.wav
+　扉につるされた小さな鈴が、風もないのにちりんと鳴った。
+@chara アカリ surprised at=left time=300ms
+@chara ソウ normal at=right time=400ms
+ソウ「……お客さんか。めずらしいな」
+アカリ「わっ。ご、ごめんなさい。勝手に入ろうとしたわけじゃなくて」
+ソウ「入っていいよ。ここはもう、だれの物でもないから」
+@chara アカリ normal at=left
+　ソウと名乗ったその人は、ずっと前からこの天文台の鍵を預かっているのだという。
+ソウ「流れ星を見に来たんだろう。{br}だったら、まだ早い。本番は夜がもっと深くなってからだ」
+アカリ「じゃあ、それまでここで待たせてもらってもいいですか」
+@chara ソウ smile at=right
+ソウ「どうぞ。待つのは、この場所のいちばん得意なことだから」
+
+# night
+@scene-change hill_night.webp
+@chara アカリ normal at=left time=400ms
+@chara ソウ normal at=right time=400ms
+　日が落ちると、丘の上はすっかり星の天井になった。
+　町の明かりは遠く、天文台の窓だけがぽつんと{r 灯|とも}っている。
+ソウ「さて。待つあいだ、何をしていようか」
+
+# menu
+@choice
+- 望遠鏡をのぞく -> #telescope
+- ラジオをつける -> #radio_on
+- 外で空を見上げる -> #outside
+@end
+
+# telescope
+@set game.looked = true
+ソウ「この望遠鏡は古いけど、レンズだけは毎年みがいてる」
+@chara-hide-all time=300ms
+@window hide
+@camera zoom=1.6 x=-380 y=-210 time=1500ms ease=easeOutSine
+@window show
+　レンズの向こうで、月の欠けた縁が、思っていたよりずっとごつごつしていた。
+アカリ「月って、こんなに近かったんだ」
+ソウ「近く見えるだけさ。{click}手をのばしても、ちゃんと遠い」
+@reset-camera time=1s
+@chara アカリ smile at=left time=300ms
+@chara ソウ normal at=right time=300ms
+アカリ「遠いのに、ちゃんと見えるんですね」
+@jump #menu
+
+# radio_on
+@set temp.news = "今夜の流星群は、午前零時ごろにもっとも多く見られる見込みです"
+@call #radio
+@chara アカリ normal at=left
+アカリ「……やっぱり、ずっと同じこと言ってる」
+@chara ソウ smile at=right
+ソウ「同じことを言い続けてくれるのは、案外ありがたいものだよ」
+@jump #menu
+
+# outside
+@chara-hide ソウ time=300ms
+@chara アカリ normal at=center time=300ms
+　扉の外に出ると、夜の風が頬に冷たかった。
+　見上げた空は広すぎて、どこから流れ星が来るのか見当もつかない。
+@se gust.wav
+@quake time=500ms count=4 horizontal=8 vertical=3
+@chara アカリ surprised at=center
+　突然の強い風に、天文台の扉ががたがたと鳴った。
+アカリ「わ、わっ……！」
+@chara アカリ surprised at=left time=300ms
+@chara ソウ normal at=right time=300ms
+ソウ「この丘の風は、ときどき星より先に来るんだ。{br}……そろそろ時間だよ」
+
+# midnight
+@set temp.news = "午前零時をお知らせします。流星群が、まもなくいちばん多くなる時刻です"
+@call #radio
+@chara アカリ normal at=left
+アカリ「始まる……！」
+@chara-hide-all time=500ms
+@window hide
+@camera zoom=1.3 y=-100 time=2s ease=easeOutSine
+@mask color=#ffffff time=150ms
+@mask-off time=600ms
+@window show
+　{speed 90ms ひとつ、またひとつ。}{br}　空のあちこちで、細い光が線を引いては消えていく。
+　息をするのも忘れて、わたしはそれを数えようとして――すぐにあきらめた。
+@reset-camera time=1500ms
+@chara アカリ smile at=left time=400ms
+@chara ソウ smile at=right time=400ms
+ソウ「流れ星が消えるまでに、願いごとを三回。そう言うだろう」
+アカリ「三回なんてむりですよ。{click}{@chara アカリ surprised at=left}速すぎます！」
+@chara ソウ normal at=right
+ソウ「だから、みんな短い願いごとにするんだ。……君はどうする？」
+@choice
+- 願いごとを言ってみる -> #wish
+- 黙って見ている -> #watch
+@end
+
+# wish
+@set game.wished = true
+@chara アカリ normal at=left
+アカリ「えっと……『また、ここに来られますように』！」
+@chara ソウ surprised at=right
+ソウ「……それ、ちゃんと三回言えた？」
+@chara アカリ smile at=left
+アカリ「一回だけです。でも、大きな声で言ったから、きっと聞こえてます」
+@jump #ending
+
+# watch
+@set game.wished = false
+@chara アカリ normal at=left
+　わたしは何も言わずに、ただ光の行き先を目で追った。
+　願いごとを考えているうちに、星のほうが先に消えてしまう。
+ソウ「それもいい。{br}見ているだけで、ちゃんと覚えていられるから」
+
+# ending
+@if game.wished && game.looked
+　流れ星がまばらになったころ、ソウは望遠鏡のレンズのふたを、わたしの手のひらにのせた。
+ソウ「来年も、レンズをみがきに来てくれないか。ひとりだと、つい手を抜くんだ」
+@chara アカリ smile at=left
+アカリ「はい。約束です」
+@elif game.wished
+　流れ星がまばらになったころ、ソウは扉の鈴をひとつ外して、わたしに持たせてくれた。
+ソウ「また来るなら、これを鳴らしてくれればいい。すぐわかる」
+@else
+　流れ星がまばらになったころ、ソウは何も言わずに、ただ扉を少しだけ開けておいてくれた。
+ソウ「この扉は、閉めないでおくよ」
+@end
+@stop-bgm time=2s
+@jump epilogue
+
+// ラジオの部品。temp.news に読ませる知らせを入れてから @call する。
+# radio
+@se radio.wav channel=1
+@wait 600ms
+ラジオ「――こちらは丘の町の放送局です。{br}{= temp.news}」
+@stop-se channel=1 time=300ms
+@return

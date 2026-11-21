@@ -1,0 +1,56 @@
+// 分岐の見本（全ルートテストと lim coverage のテスト）。選択肢の入れ子、合流、条件付きの選択肢、変数で分かれる結末、別のファイルへの結末。
+// 選び方は 7 通り。どの選択肢でも同じ番号を選び続けると、勇気と落とし物の結末には届かない。
+　分かれ道に出た。
+@choice
+- 森の道を行く -> #forest
+- 川の道を行く -> #river
+@end
+
+# forest
+@set game.courage += 1
+　森は静かだった。
+@choice
+- 奥へ進む -> #deep
+- 引き返す -> #crossing
+@end
+
+# deep
+@set game.courage += 1
+　奥には古い祠があった。
+@jump #crossing
+
+# river
+　川の水は冷たかった。
+@jump #crossing
+
+# crossing
+　道はふたたび一つになった。
+@choice
+- 橋を渡る -> #bridge
+- 浅瀬を歩く -> #judge
+- 祠の鍵を使う -> #key if=(game.courage >= 2)
+@end
+
+# bridge
+@set game.found = true
+　橋の上で、落とし物を拾った。
+@jump #judge
+
+# key
+@set game.found = true
+　鍵は、門の錠にぴたりと合った。
+@jump #judge
+
+# judge
+@if game.courage >= 2 && game.found
+　すべてを知る者として、門をくぐった。
+@jump epilogue
+@elif game.courage >= 2
+　勇気だけを胸に、門をくぐった。
+@title-screen ending="勇気"
+@elif game.found
+　拾った落とし物が、門を開けた。
+@title-screen ending="落とし物"
+@end
+　何も持たずに、来た道を戻った。
+@title-screen ending="帰り道"

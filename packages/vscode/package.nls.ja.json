@@ -1,0 +1,9 @@
+{
+  "description": "Liminalia のシナリオ（.lim）を VS Code で書くための拡張機能。シンタックスハイライト、構文チェック、補完、ホバー説明、定義へ移動、参照の一覧、シンボル検索、整形、Quick Fix、名前の変更、ここからテストプレイ",
+  "untrusted": "信頼していないフォルダと、ワークスペースのフォルダの外のプロジェクトでは、プロジェクトのプラグインのコードを動かさない（組み込みと標準のコマンドだけでチェックする）。「ここからテストプレイ」でも、プロジェクトの中の lim を動かさず、立ち上げる lim studio はプラグインを読まない",
+  "config.node": "プラグインのコマンドをこの拡張機能の中で読めなかったときに、代わりに読む Node.js の実行ファイル。空なら VS Code に入っている Node.js を使う",
+  "config.lim": "「ここからテストプレイ」で、プロジェクトを開いている Studio が無いときに lim studio を起動する lim の場所（Node で動かす lim.mjs か、lim の実行ファイル。相対パスはプロジェクトから）。空ならプロジェクトの node_modules の @liminalia/cli を使う。npx は使わない",
+  "config.studioApp": "「ここからテストプレイ」でプロジェクトを開く Liminalia Studio の場所（Liminalia Studio.app か Liminalia Studio.exe）。空なら Mac は /Applications と ~/Applications、Windows は %LOCALAPPDATA%\\Programs と Program Files から探す",
+  "command.restartServer": "言語サーバーを再起動",
+  "command.playFromHere": "ここからテストプレイ"
+}

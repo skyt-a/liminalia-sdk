@@ -1,0 +1,20 @@
+{
+  "name": "@liminalia/sdk",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "description": "プラグインを書くための部品。命令を一つの表で定義し、仕様と実行時の処理を作る",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.8.1",
+    "@liminalia/runtime": "0.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/sdk"
+  }
+}

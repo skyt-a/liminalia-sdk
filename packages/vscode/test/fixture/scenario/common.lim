@@ -1,0 +1,8 @@
+// 共通の部品
+@define title-card(text: string, time: duration = 1s)
+@window hide
+@wait (time)
+@end
+
+# interlude
+@return

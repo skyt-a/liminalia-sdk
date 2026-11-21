@@ -1,0 +1,22 @@
+{
+  "speakers": ["ユイ", "レン", "？？？"],
+  "cast": {
+    "ユイカ": {
+      "defaultAppearance": "default",
+      "appearances": {
+        "default": {
+          "variants": {
+            "normal": { "image": "yuika/normal.png", "frame": { "positions": { "left": { "left": 0, "top": 0 }, "center": { "left": 420, "top": 0 }, "right": { "left": 840, "top": 0 }, "far": { "left": 900, "top": 0 } } } },
+            "smile": { "image": "yuika/smile.png", "frame": { "positions": { "left": { "left": 0, "top": 0 }, "center": { "left": 420, "top": 0 }, "right": { "left": 840, "top": 0 } } } }
+          }
+        },
+        "casual": {
+          "variants": {
+            "normal": { "image": "yuika/casual_normal.png" }
+          }
+        }
+      }
+    },
+    "レン": { "appearances": {} }
+  }
+}

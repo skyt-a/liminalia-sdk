@@ -1,0 +1,88 @@
+{
+  "comments": {
+    "lineComment": "//"
+  },
+  "brackets": [
+    [
+      "{",
+      "}"
+    ],
+    [
+      "(",
+      ")"
+    ],
+    [
+      "「",
+      "」"
+    ],
+    [
+      "『",
+      "』"
+    ],
+    [
+      "（",
+      "）"
+    ]
+  ],
+  "autoClosingPairs": [
+    {
+      "open": "{",
+      "close": "}"
+    },
+    {
+      "open": "(",
+      "close": ")"
+    },
+    {
+      "open": "「",
+      "close": "」"
+    },
+    {
+      "open": "『",
+      "close": "』"
+    },
+    {
+      "open": "（",
+      "close": "）"
+    },
+    {
+      "open": "\"",
+      "close": "\"",
+      "notIn": [
+        "string"
+      ]
+    }
+  ],
+  "surroundingPairs": [
+    [
+      "{",
+      "}"
+    ],
+    [
+      "(",
+      ")"
+    ],
+    [
+      "「",
+      "」"
+    ],
+    [
+      "『",
+      "』"
+    ],
+    [
+      "（",
+      "）"
+    ],
+    [
+      "\"",
+      "\""
+    ]
+  ],
+  "folding": {
+    "markers": {
+      "start": "^\\s*@(if|while|with|choice|define|script|html)\\b",
+      "end": "^\\s*@end\\b"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Write Liminalia scripts (.lim) in VS Code: highlighting, checks, completion, hovers, go to definition, find references, symbol search, formatting, quick fixes, renaming and play from here",
+  "untrusted": "In untrusted folders and projects outside the workspace folders, the project's plugin code doesn't run (checks use only the built-in and standard commands). Play from Here also doesn't run the lim inside the project, and the lim studio it starts doesn't load plugins",
+  "config.node": "The Node.js executable used to load plugin commands when they can't be loaded inside the extension. Empty uses the Node.js bundled with VS Code",
+  "config.lim": "The location of lim used by Play from Here to start lim studio when no Studio has the project open (lim.mjs, which runs with Node, or a lim executable; relative paths are from the project). Empty uses @liminalia/cli in the project's node_modules. npx isn't used",
+  "config.studioApp": "The location of the Studio app (Liminalia Studio.app or Liminalia Studio.exe) used by Play from Here to open the project. Empty looks in /Applications and ~/Applications on Mac, and in %LOCALAPPDATA%\\Programs and Program Files on Windows",
+  "command.restartServer": "Restart Language Server",
+  "command.playFromHere": "Play from Here"
+}

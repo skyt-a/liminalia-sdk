@@ -1,0 +1,747 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Liminalia",
+  "scopeName": "source.liminalia",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#script"
+    },
+    {
+      "include": "#html"
+    },
+    {
+      "include": "#choice"
+    },
+    {
+      "include": "#label"
+    },
+    {
+      "include": "#control"
+    },
+    {
+      "include": "#command-line"
+    },
+    {
+      "include": "#speaker"
+    },
+    {
+      "include": "#line-id"
+    },
+    {
+      "include": "#inline"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.double-slash.liminalia",
+      "match": "^[ \\t]*(//).*$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.comment.liminalia"
+        }
+      }
+    },
+    "script": {
+      "begin": "^[ \\t]*(@)(script)[ \\t]*$",
+      "end": "^[ \\t]*(@)(end)[ \\t]*$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "keyword.control.script.liminalia"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "keyword.control.end.liminalia"
+        }
+      },
+      "contentName": "meta.embedded.block.typescript",
+      "patterns": [
+        {
+          "include": "source.ts"
+        }
+      ]
+    },
+    "html": {
+      "begin": "^[ \\t]*(@)(html)\\b.*$",
+      "end": "^[ \\t]*(@)(end)[ \\t]*$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "entity.name.function.command.liminalia"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "keyword.control.end.liminalia"
+        }
+      },
+      "contentName": "meta.embedded.block.html",
+      "patterns": [
+        {
+          "include": "text.html.basic"
+        }
+      ]
+    },
+    "choice": {
+      "begin": "^[ \\t]*(@)(choice)\\b.*$",
+      "end": "^[ \\t]*(@)(end)\\b.*$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "keyword.control.choice.liminalia"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.liminalia"
+        },
+        "2": {
+          "name": "keyword.control.end.liminalia"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#option"
+        }
+      ]
+    },
+    "option": {
+      "name": "meta.option.liminalia",
+      "match": "^[ \\t]*(-)(?:[ \\t](.*))?[ \\t](->)[ \\t]+(\\([^)]*\\)|\\S+)(.*)$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.list.begin.liminalia"
+        },
+        "2": {
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        },
+        "3": {
+          "name": "keyword.operator.arrow.liminalia"
+        },
+        "4": {
+          "patterns": [
+            {
+              "include": "#target"
+            }
+          ]
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#line-id"
+            },
+            {
+              "include": "#args"
+            }
+          ]
+        }
+      }
+    },
+    "line-id": {
+      "name": "comment.other.line-id.liminalia",
+      "match": "(?<=[ \\t])#line:[A-Za-z0-9_-]+$"
+    },
+    "label": {
+      "patterns": [
+        {
+          "match": "^[ \\t]*(#)[ \\t]+(\\S+)[ \\t]*$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.label.liminalia"
+            },
+            "2": {
+              "name": "entity.name.section.label.liminalia"
+            }
+          }
+        },
+        {
+          "name": "invalid.illegal.label.liminalia",
+          "match": "^[ \\t]*#\\S.*$"
+        }
+      ]
+    },
+    "control": {
+      "patterns": [
+        {
+          "match": "^[ \\t]*(@)(if|elif|while|for|function)\\b(.*)$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.control.conditional.liminalia"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#expression"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(else|end|content)\\b",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.control.conditional.liminalia"
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(return|with)\\b",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.control.flow.liminalia"
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(jump|call)\\b[ \\t]*(.*)$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.control.flow.liminalia"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#target"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(use)\\b[ \\t]*(\\S*)",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.control.import.liminalia"
+            },
+            "3": {
+              "name": "entity.name.namespace.liminalia"
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(set)\\b(.*)$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.set.liminalia"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#expression"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "match": "^[ \\t]*(@)(let)\\b[ \\t]*([\\p{L}_][\\p{L}\\p{N}_]*)?(.*)$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.let.liminalia"
+            },
+            "3": {
+              "name": "variable.other.local.liminalia"
+            },
+            "4": {
+              "patterns": [
+                {
+                  "include": "#expression"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "begin": "^[ \\t]*(@)(define)\\b[ \\t]*([a-z][a-z0-9-]*)?(\\()?",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.keyword.liminalia"
+            },
+            "2": {
+              "name": "storage.type.function.liminalia"
+            },
+            "3": {
+              "name": "entity.name.function.liminalia"
+            },
+            "4": {
+              "name": "punctuation.definition.parameters.begin.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "match": "([a-z][a-z0-9-]*)[ \\t]*(:)[ \\t]*([a-z]+)",
+              "captures": {
+                "1": {
+                  "name": "variable.parameter.liminalia"
+                },
+                "2": {
+                  "name": "punctuation.separator.type.liminalia"
+                },
+                "3": {
+                  "name": "support.type.liminalia"
+                }
+              }
+            },
+            {
+              "match": "=",
+              "name": "keyword.operator.assignment.liminalia"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.parameter.liminalia"
+            },
+            {
+              "match": "\\)",
+              "name": "punctuation.definition.parameters.end.liminalia"
+            },
+            {
+              "include": "#plain-literal"
+            }
+          ]
+        }
+      ]
+    },
+    "command-line": {
+      "name": "meta.command.liminalia",
+      "begin": "^[ \\t]*(@)([a-z][a-z0-9-]*)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.command.liminalia"
+        },
+        "2": {
+          "name": "entity.name.function.command.liminalia"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#args"
+        }
+      ]
+    },
+    "speaker": {
+      "match": "^[ \\t]*([^\\s@#/\\\\{「『（(\"“:：　、。！？!?…―-][^\\s{「『（(\"“:：、。！？!?…]{0,15}?)(?=[「『（(]| ?[\"“])",
+      "captures": {
+        "1": {
+          "name": "entity.name.tag.speaker.liminalia"
+        }
+      }
+    },
+    "args": {
+      "patterns": [
+        {
+          "match": "(?<![^ \\t])([a-z][a-z0-9-]*)(=)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.liminalia"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.liminalia"
+            }
+          }
+        },
+        {
+          "include": "#literal"
+        },
+        {
+          "include": "#target"
+        }
+      ]
+    },
+    "literal": {
+      "patterns": [
+        {
+          "include": "#paren-expression"
+        },
+        {
+          "include": "#plain-literal"
+        }
+      ]
+    },
+    "target": {
+      "patterns": [
+        {
+          "include": "#paren-expression"
+        },
+        {
+          "match": "(?<![^ \\t=])([\\w./-]*)(#)([\\p{L}\\p{N}_-]+)",
+          "captures": {
+            "1": {
+              "name": "entity.name.namespace.file.liminalia"
+            },
+            "2": {
+              "name": "punctuation.definition.label.liminalia"
+            },
+            "3": {
+              "name": "entity.name.section.label.liminalia"
+            }
+          }
+        }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.liminalia",
+      "begin": "\"",
+      "end": "\"|$",
+      "patterns": [
+        {
+          "name": "constant.character.escape.liminalia",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "paren-expression": {
+      "name": "meta.expression.liminalia",
+      "begin": "\\(",
+      "end": "\\)|$",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.expression.begin.liminalia"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.expression.end.liminalia"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#paren-expression"
+        },
+        {
+          "match": "\\b(game|system|temp)\\b((?:\\.[\\p{L}_][\\p{L}\\p{N}_]*)*)",
+          "captures": {
+            "1": {
+              "name": "variable.language.scope.liminalia"
+            },
+            "2": {
+              "name": "variable.other.property.liminalia"
+            }
+          }
+        },
+        {
+          "name": "support.function.liminalia",
+          "match": "\\b(random|floor|ceil|round|min|max|abs|len|includes)(?=\\s*\\()"
+        },
+        {
+          "name": "constant.language.liminalia",
+          "match": "\\b(true|false|null)\\b"
+        },
+        {
+          "name": "constant.numeric.liminalia",
+          "match": "\\b\\d+(?:\\.\\d+)?\\b"
+        },
+        {
+          "name": "keyword.operator.liminalia",
+          "match": "==|!=|<=|>=|&&|\\|\\||\\+=|-=|\\*=|/=|[-+*/%<>!?:=]"
+        },
+        {
+          "name": "variable.other.liminalia",
+          "match": "[\\p{L}_][\\p{L}\\p{N}_]*"
+        }
+      ]
+    },
+    "inline": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.liminalia",
+          "match": "\\\\."
+        },
+        {
+          "match": "(\\{)(r)[ \\t]+([^|}]*)(\\|)([^}]*)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            },
+            "4": {
+              "name": "punctuation.separator.ruby.liminalia"
+            },
+            "5": {
+              "name": "string.unquoted.ruby.liminalia"
+            },
+            "6": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          }
+        },
+        {
+          "match": "(\\{)(br|click)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          }
+        },
+        {
+          "name": "meta.embedded.expression.liminalia",
+          "begin": "(\\{)(=)",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#expression"
+            }
+          ]
+        },
+        {
+          "name": "meta.command.inline.liminalia",
+          "begin": "(\\{)(@)([a-z][a-z0-9-]*)",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "punctuation.definition.command.liminalia"
+            },
+            "3": {
+              "name": "entity.name.function.command.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#args"
+            }
+          ]
+        },
+        {
+          "name": "markup.bold.liminalia",
+          "begin": "(\\{)(b)[ \\t]",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        },
+        {
+          "name": "markup.italic.liminalia",
+          "begin": "(\\{)(i)[ \\t]",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        },
+        {
+          "name": "meta.markup.liminalia",
+          "begin": "(\\{)(c|mark)[ \\t]+(#[0-9a-fA-F]{3,8})[ \\t]?",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            },
+            "3": {
+              "name": "constant.other.color.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        },
+        {
+          "name": "meta.markup.liminalia",
+          "begin": "(\\{)(size|speed)[ \\t]+(\\S+?)(?=[ \\t}])[ \\t]?",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            },
+            "3": {
+              "name": "constant.numeric.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        },
+        {
+          "name": "meta.markup.variants.liminalia",
+          "begin": "(\\{)(seq|cycle|once|shuffle)[ \\t]",
+          "end": "\\}|$",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.markup.liminalia"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.end.liminalia"
+            }
+          },
+          "patterns": [
+            {
+              "name": "punctuation.separator.variants.liminalia",
+              "match": "(?<!\\\\)\\|"
+            },
+            {
+              "include": "#inline"
+            }
+          ]
+        }
+      ]
+    },
+    "plain-literal": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "match": "(?<![\\w.#-])(-?\\d+(?:\\.\\d+)?)(ms|s)\\b",
+          "captures": {
+            "1": {
+              "name": "constant.numeric.duration.liminalia"
+            },
+            "2": {
+              "name": "keyword.other.unit.liminalia"
+            }
+          }
+        },
+        {
+          "name": "constant.numeric.liminalia",
+          "match": "(?<![\\w.#-])-?\\d+(?:\\.\\d+)?(?![\\w.])"
+        },
+        {
+          "name": "constant.language.boolean.liminalia",
+          "match": "(?<![\\w-])(true|false)(?![\\w-])"
+        },
+        {
+          "name": "constant.other.color.liminalia",
+          "match": "(?<![\\w#])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![\\w-])"
+        }
+      ]
+    }
+  }
+}
