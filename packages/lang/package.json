@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/lang",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "新形式シナリオ（.lim）の構文解析・式・命令レジストリ・検査",
@@ -11,6 +11,9 @@
     "./media": "./src/media.ts",
     "./message-catalog": "./src/message-catalog.ts",
     "./line-syntax": "./src/line-syntax.ts"
+  },
+  "dependencies": {
+    "@liminalia/sdk": "0.9.0"
   },
   "repository": {
     "type": "git",

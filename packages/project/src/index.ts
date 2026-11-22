@@ -4,7 +4,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { assetNameResolver, LFS_HEAD_BYTES, configValueProblems, VARIABLE_KEY, encodingDiagnostic, jsonSyntaxError, readConfigJson, lineColumn, jsonLines, type Diagnostic, buildFlow, buildStoryMap, CORE_COMMANDS, scriptExportHtml, scriptExportLines, scriptExportText, createRegistry, expandExtra, extraWithChapters, parse, shownImages, toCsv, voiceScriptRows, type ChapterInfo, type CommandDefaults, type ExtraConfig, type Flow, type ItemsConfig, type PackManifest, type Script, type TargetHook, type UiConfig, type VariantDictionary, type VoiceLock, type VoiceScriptRow, type PunctuationConfig, type SoundCheckConfig } from "@liminalia/lang";
 import { UI_THEMES, type UiThemePreset, type UiThemeValues } from "@liminalia/lang";
-import { checkPluginManifest, combinePlugins, engineMismatches, PLUGIN_API_VERSION, type CommandPlugin } from "@liminalia/sdk";
+import { checkPluginManifest, combinePlugins, engineMismatches, PLUGIN_API_VERSION, type CommandPlugin } from "@liminalia/plugin-host";
 import { listPackSources, listScenarioFiles, packScenarioPlace, readScenarioFile } from "./scenario-files.ts";
 import { within } from "./contained-path.ts";
 import { RESTRICTED_PLUGIN_MESSAGE, restrictedFromEnv } from "./trust.ts";

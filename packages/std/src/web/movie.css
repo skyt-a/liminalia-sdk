@@ -1,0 +1,7 @@
+/* @movie の字幕（WebVTT）。動画の下に、読みやすい縁取りで */
+video.lim-movie::cue {
+  font-size: 30px;
+  line-height: 1.5;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+}

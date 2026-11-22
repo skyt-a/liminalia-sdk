@@ -1,5 +1,5 @@
 import { argOrigin, type Args, type TextOrigin } from "@liminalia/runtime";
-import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/plugin-host";
 import { IMAGE_LAYERS, num, readExtra, text, writeExtra, type ImageLayer, type LayerItem } from "./image.ts";
 
 /**

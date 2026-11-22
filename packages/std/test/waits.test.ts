@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CommandSpec, ParamType } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type PresentEvent } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 
 /**

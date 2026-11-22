@@ -1,0 +1,161 @@
+// Waiting for Stars: the Liminalia template story. Rewrite it to make it your own.
+// The tutorial on the website shows how to write a story (https://liminalia.skyta.dev/en/tutorial/).
+// The command reference explains every command (https://liminalia.skyta.dev/en/reference/).
+// New Game starts at the top of this file (entry in liminalia.json).
+//
+// The scenes in this file:
+//   start     At dusk, Akari meets Sou at the old observatory
+//   night     Night falls. @scene-change changes the scene (the fade time is in commandDefaults in liminalia.json)
+//   menu      Choices: the telescope, the radio, or going outside. A variable remembers whether Akari looked through the telescope
+//   midnight  The meteor shower. Make a wish, or watch in silence (also kept in a variable)
+//   ending    The ending depends on the choices, then the story goes on to the dawn in epilogue.lim
+// The radio scene is the voice on the radio. Put the news in a variable, then call the scene with @call.
+// Assets are in assets/, and the characters and their sprites are in cast.json (SAMPLE-ASSETS.txt explains the sample assets).
+
+# start
+@set game.looked = false
+@set game.wished = false
+@mask
+@bg hill_dusk.webp
+@bgm quiet_night.wav volume=60 time=2s
+@mask-off time=1500ms
+@window show time=300ms
+At the top of the slope stands a small observatory.
+It has a round roof, and nobody in town uses it anymore.
+Tonight, they say, a {i once-in-a-century} meteor shower is coming. {click}At least, that's all the radio has been saying since morning.
+@chara Akari normal at=center time=400ms
+Akari "Made it! Was this hill always this long?"
+Catching my breath, I checked the binoculars in my bag.
+@se chime.wav
+The little bell hanging on the door jingled, though there wasn't any wind.
+@chara Akari surprised at=left time=300ms
+@chara Sou normal at=right time=400ms
+Sou "Oh, a visitor. That's rare."
+Akari "Oh! S-sorry. I wasn't trying to sneak in or anything."
+Sou "Come on in. This place doesn't belong to anyone anymore."
+@chara Akari normal at=left
+The young man said his name was Sou. He had been keeping the keys to the observatory for a long time.
+Sou "You came to see the shooting stars, right? {br}Then you're early. The real show starts once the night gets deeper."
+Akari "Then could I wait here until it starts?"
+@chara Sou smile at=right
+Sou "Be my guest. Waiting is what this place does best."
+
+# night
+@scene-change hill_night.webp
+@chara Akari normal at=left time=400ms
+@chara Sou normal at=right time=400ms
+Once the sun went down, the hilltop turned into a ceiling of stars.
+The lights of the town were far away, and only the observatory window glowed.
+Sou "Well, then. What shall we do while we wait?"
+
+# menu
+@choice
+- Look through the telescope -> #telescope
+- Turn on the radio -> #radio_on
+- Go outside and look up -> #outside
+@end
+
+# telescope
+@set game.looked = true
+Sou "This telescope is old, but I polish the lens every year."
+@chara-hide-all time=300ms
+@window hide
+@camera zoom=1.6 x=-380 y=-210 time=1500ms ease=easeOutSine
+@window show
+Through the lens, the edge of the moon looked far more rugged than I had imagined.
+Akari "I didn't know the moon was this close."
+Sou "It only looks close. {click}Reach out, and it's still far away."
+@reset-camera time=1s
+@chara Akari smile at=left time=300ms
+@chara Sou normal at=right time=300ms
+Akari "It's far away, but you can still see it clearly."
+@jump #menu
+
+# radio_on
+@set temp.news = "Tonight's meteor shower is expected to peak at around midnight."
+@call #radio
+@chara Akari normal at=left
+Akari "See? It keeps saying the same thing."
+@chara Sou smile at=right
+Sou "Something that keeps telling you the same thing can be a comfort."
+@jump #menu
+
+# outside
+@chara-hide Sou time=300ms
+@chara Akari normal at=center time=300ms
+When I stepped outside, the night wind was cold on my cheeks.
+The sky above was so wide that I had no idea where the shooting stars would come from.
+@se gust.wav
+@quake time=500ms count=4 horizontal=8 vertical=3
+@chara Akari surprised at=center
+A sudden gust rattled the observatory door.
+Akari "Whoa, whoa...!"
+@chara Akari surprised at=left time=300ms
+@chara Sou normal at=right time=300ms
+Sou "The wind on this hill sometimes arrives before the stars. {br}...It's almost time."
+
+# midnight
+@set temp.news = "It is now midnight. The meteor shower is about to reach its peak."
+@call #radio
+@chara Akari normal at=left
+Akari "It's starting...!"
+@chara-hide-all time=500ms
+@window hide
+@camera zoom=1.3 y=-100 time=2s ease=easeOutSine
+@mask color=#ffffff time=150ms
+@mask-off time=600ms
+@window show
+{speed 90ms One, then another.}{br}All over the sky, thin streaks of light drew lines and vanished.
+Forgetting to breathe, I tried to count them, and gave up almost at once.
+@reset-camera time=1500ms
+@chara Akari smile at=left time=400ms
+@chara Sou smile at=right time=400ms
+Sou "Make a wish three times before a shooting star fades. That's what they say, isn't it?"
+Akari "Three times? No way. {click}{@chara Akari surprised at=left}They're way too fast!"
+@chara Sou normal at=right
+Sou "That's why everyone keeps their wishes short. ...What about you?"
+@choice
+- Try making a wish -> #wish
+- Watch in silence -> #watch
+@end
+
+# wish
+@set game.wished = true
+@chara Akari normal at=left
+Akari "Um... 'I hope I can come back here again!'"
+@chara Sou surprised at=right
+Sou "...Did you really say that three times?"
+@chara Akari smile at=left
+Akari "Only once. But I said it really loud, so I'm sure it was heard."
+@jump #ending
+
+# watch
+@set game.wished = false
+@chara Akari normal at=left
+I didn't say anything. I just followed the light with my eyes.
+While I was still thinking of a wish, the stars faded first.
+Sou "That's fine too. {br}Just watching is enough to remember it."
+
+# ending
+@if game.wished && game.looked
+When the shooting stars had thinned out, Sou placed the telescope's lens cap in my palm.
+Sou "Would you come back next year to polish the lens? On my own, I tend to cut corners."
+@chara Akari smile at=left
+Akari "Yes. It's a promise."
+@elif game.wished
+When the shooting stars had thinned out, Sou took one of the bells off the door and let me hold it.
+Sou "If you come back, just ring this. I'll know right away."
+@else
+When the shooting stars had thinned out, Sou said nothing, and only left the door open a little.
+Sou "I'll leave this door open."
+@end
+@stop-bgm time=2s
+@jump epilogue
+
+// The radio. Put the news to read in temp.news, then @call this scene.
+# radio
+@se radio.wav channel=1
+@wait 600ms
+Radio "This is the hill town radio station. {br}{= temp.news}"
+@stop-se channel=1 time=300ms
+@return

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combinePlugins, runPluginChecks, undeclaredOverrides, type CommandPlugin } from "@liminalia/sdk";
+import { combinePlugins, runPluginChecks, undeclaredOverrides, type CommandPlugin } from "@liminalia/plugin-host";
 import { createRegistry, CORE_COMMANDS } from "@liminalia/lang";
 import { HeadlessHost } from "../src/headless.ts";
 import { Runtime } from "../src/runtime.ts";

@@ -1,4 +1,4 @@
-# npm に公開する（このリポジトリの部品 @liminalia/lang、@liminalia/runtime、@liminalia/sdk）。
+# npm に公開する（このリポジトリの部品。プラグインとの約束の @liminalia/sdk と、lim の @liminalia/cli の二つ）。
 # このファイルは正本リポジトリの scripts/public/publish-npm.yml を scripts/public-mirror.mjs が写したもの（ここでは直さない）。
 # - いつ: v1.2.3 の tag を push したとき（正本の版を写したコミットに打つ）と、手で動かしたとき（版を入れる。dry_run なら tag を打つ前に、
 #   動かした枝から組み立てて中身を比べるだけ）
@@ -7,7 +7,7 @@
 # - npm へは OIDC（trusted publishing）で出す。トークンは使わない。npm の各パッケージの Trusted Publisher にこのリポジトリと
 #   このファイルの名前（publish-npm.yml）を設定しておく
 # - npm stage publish で承認待ちにする。npmjs.com の Staged Packages で中身を見て 2FA で承認すると公開される
-#   （sdk は lang と runtime の同じ版に依るので、まとめて承認する）。出どころの証明（provenance）を付ける
+#   （二つは同じ版なので、まとめて承認する）。出どころの証明（provenance）を付ける
 # - 版に - が入る（1.2.3-beta.1）なら dist-tag を next にする
 name: npm に公開する
 
@@ -80,9 +80,11 @@ jobs:
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
           mkdir -p out/tested
-          for name in lang runtime sdk; do
-            curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o "out/tested/liminalia-${name}-${version}.tgz" \
-              "https://github.com/${RELEASES_REPO}/releases/download/v${version}/liminalia-${name}-${version}.tgz"
+          # このリポジトリで組み立てた tarball と同じ名前のものを落とす（npm に出す部品のすべて）
+          for f in out/npm/tarballs/*.tgz; do
+            name="$(basename "$f")"
+            curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o "out/tested/${name}" \
+              "https://github.com/${RELEASES_REPO}/releases/download/v${version}/${name}"
           done
           shasum -a 256 out/npm/tarballs/*.tgz out/tested/*.tgz >> "$GITHUB_STEP_SUMMARY"
       - name: 中身が同じかを確かめ、承認待ちにする

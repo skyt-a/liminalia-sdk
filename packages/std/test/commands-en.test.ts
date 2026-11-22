@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { englishGaps } from "@liminalia/lang";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 import { STD_COMMANDS_EN } from "../src/commands/en.ts";
 

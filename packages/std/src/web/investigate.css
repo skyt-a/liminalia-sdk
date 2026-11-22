@@ -1,0 +1,202 @@
+/* @investigate（調べる場所）。色と形は標準のシステム画面の変数（--lm-*）から取るので、テーマに合わせて変わる */
+@layer liminalia {
+  .lm-investigate {
+    position: absolute;
+    inset: 0;
+    color: var(--lm-fg);
+    font-family: var(--lm-ui-font, inherit);
+  }
+
+  .lm-investigate-stage,
+  .lm-investigate-spots {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lm-investigate-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lm-investigate-spot {
+    position: absolute;
+    padding: 0;
+    background: transparent;
+    border: 0.5px solid transparent;
+    border-radius: var(--lm-radius, 4px);
+    cursor: pointer;
+  }
+
+  .lm-investigate-spot:hover,
+  .lm-investigate-spot:focus-visible,
+  .lm-investigate-spot[data-armed="true"] {
+    border-color: var(--lm-accent);
+    background: color-mix(in srgb, var(--lm-accent) 14%, transparent);
+    outline: none;
+  }
+
+  /* 調べた場所: 右上に小さな印 */
+  .lm-investigate-spot[data-done="true"]::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lm-fg-muted, var(--lm-fg));
+  }
+
+  .lm-investigate-head {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    /* 指で触る端末では、右上のメニューのボタンを避ける（--lm-menu-room-x。web の input.css） */
+    right: max(24px, var(--lm-menu-room-x, 0px));
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+  }
+
+  .lm-investigate-head > * {
+    pointer-events: auto;
+  }
+
+  .lm-investigate-title {
+    margin: 0;
+    padding: 6px 14px;
+    font: 400 calc(20px * var(--lm-text-scale, 1) * var(--lm-touch, 1)) var(--lm-text-font, inherit);
+    letter-spacing: 0.1em;
+    background: var(--lm-screen-bg);
+    border-radius: var(--lm-radius, 4px);
+  }
+
+  .lm-investigate-finish {
+    margin-left: auto;
+  }
+
+  /* 「場所を示す」は右へ寄せ、「調べ終える」をその隣に置く */
+  .lm-investigate-reveal {
+    margin-left: auto;
+  }
+
+  .lm-investigate-reveal + .lm-investigate-finish {
+    margin-left: 0;
+  }
+
+  /* 調べた必須の場所の数（progress） */
+  .lm-investigate-progress {
+    padding: 6px 12px;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    font-variant-numeric: tabular-nums;
+    color: var(--lm-fg-muted, var(--lm-fg));
+    background: var(--lm-screen-bg);
+    border-radius: var(--lm-radius, 4px);
+  }
+
+  /* 「場所を示す」を押している間は、調べられる場所をすべて光らせる */
+  .lm-investigate[data-reveal="true"] .lm-investigate-spot {
+    border-color: var(--lm-accent);
+    background: color-mix(in srgb, var(--lm-accent) 14%, transparent);
+  }
+
+  .lm-investigate-finish:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* 視点の札の顔 */
+  .lm-investigate-view[data-face="true"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lm-investigate-face {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 0.5px solid var(--lm-border);
+  }
+
+  .lm-investigate-view[aria-pressed="false"] .lm-investigate-face {
+    opacity: 0.6;
+  }
+
+  /* 扉の題（初めて入ったときだけ） */
+  .lm-investigate-opening {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--lm-screen-bg) 70%, transparent);
+    cursor: pointer;
+  }
+
+  .lm-investigate-opening-title {
+    margin: 0;
+    font: 400 calc(40px * var(--lm-text-scale, 1) * var(--lm-touch, 1)) var(--lm-text-font, inherit);
+    letter-spacing: 0.2em;
+    color: var(--lm-fg);
+  }
+
+  .lm-investigate-tip {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    padding: 8px 18px;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    background: var(--lm-screen-bg);
+    border: 0.5px solid var(--lm-border);
+    border-radius: var(--lm-radius, 4px);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* 指で一度押して名前を出しているとき。名前を押しても調べる */
+  .lm-investigate-tip.is-armed {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  /*
+   * 指で触る端末と縦長の作品（舞台の lm-touch。web の style.css の --lm-touch、--lm-touch-target）: 見出し、札、ボタンも大きくし、
+   * 押す所を指の大きさにする。指でない横長の作品では、標準の部品の大きさのまま
+   */
+  .lm-touch .lm-investigate .lm-tab {
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch));
+    min-height: var(--lm-touch-target);
+  }
+
+  .lm-touch .lm-investigate .lm-button {
+    font-size: calc(17px * var(--lm-text-scale, 1) * var(--lm-touch));
+    min-height: var(--lm-touch-target);
+  }
+
+  .lm-touch .lm-investigate-head {
+    flex-wrap: wrap;
+  }
+
+  .lm-touch .lm-investigate-face {
+    width: calc(36px * var(--lm-touch));
+    height: calc(36px * var(--lm-touch));
+  }
+
+  .lm-touch .lm-investigate-spot[data-done="true"]::after {
+    width: calc(8px * var(--lm-touch));
+    height: calc(8px * var(--lm-touch));
+  }
+
+  /* 小さい場所も指で押せる広さで当てる（見えない広がり。--lm-touch-target に満たない向きだけ広げる） */
+  .lm-touch .lm-investigate-spot::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, calc((100% - var(--lm-touch-target)) / 2));
+  }
+}

@@ -1,5 +1,5 @@
 import type { Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { BLEND_MODES, num, readExtra, text, writeExtra, type Blend } from "./image.ts";
 import { SCREEN_KEYS } from "./screen.ts";
 

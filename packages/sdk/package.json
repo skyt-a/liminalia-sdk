@@ -1,16 +1,18 @@
 {
   "name": "@liminalia/sdk",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
-  "description": "プラグインを書くための部品。命令を一つの表で定義し、仕様と実行時の処理を作る",
   "license": "MIT",
+  "description": "Liminalia のプラグインを書くための約束（型と定義の関数）。実装は lim と Liminalia Studio の側にある",
   "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "@liminalia/lang": "0.8.4",
-    "@liminalia/runtime": "0.8.4"
+    ".": "./src/index.ts",
+    "./std": "./src/std.ts",
+    "./web": "./src/web.ts",
+    "./studio": "./src/studio.ts",
+    "./studio-server": "./src/studio-server.ts",
+    "./import": "./src/import.ts",
+    "./host": "./src/host.ts"
   },
   "repository": {
     "type": "git",

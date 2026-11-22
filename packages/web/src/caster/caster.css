@@ -1,0 +1,651 @@
+/*
+ * 立ち絵の位置調整画面（開発サーバーの /__liminalia/cast。制作画面では「キャラクター」のタブの「位置」に ?embed=1 で入る）。
+ * 制作画面と同じ決まり: 色は Radix Colors（sage・teal）、文字の大きさは 12・14・16px、線は 0.5px、角丸は 4・6・10px。
+ * 立ち絵を置く舞台だけは、ゲームの画面に近づけるため、配色にかかわらず暗い。暗い配色は html の dark-theme（main.ts が付ける）。
+ * 左右の欄の幅は、境目をドラッグして変えられる（--left・--right。main.ts が覚える）。
+ */
+@import "@radix-ui/colors/sage.css";
+@import "@radix-ui/colors/sage-dark.css";
+@import "@radix-ui/colors/teal.css";
+@import "@radix-ui/colors/teal-dark.css";
+@import "@radix-ui/colors/red.css";
+@import "@radix-ui/colors/red-dark.css";
+@import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/amber-dark.css";
+@import "@radix-ui/colors/grass.css";
+@import "@radix-ui/colors/grass-dark.css";
+@import "@radix-ui/colors/black-alpha.css";
+@import "@radix-ui/colors/white-alpha.css";
+
+:root {
+  --sheet: var(--sage-1);
+  --paper: var(--sage-2);
+  --el-hover: var(--sage-4);
+  --rule: var(--sage-6);
+  --rule-strong: var(--sage-7);
+  --rule-hover: var(--sage-8);
+  --ink: var(--sage-12);
+  --ink-soft: var(--sage-11);
+  --cue: var(--teal-11);
+  --cue-wash: var(--teal-3);
+  --cue-focus: var(--teal-8);
+  --cue-solid: var(--teal-9);
+  --cue-solid-hover: var(--teal-10);
+  --mark: var(--red-11);
+  --warn: var(--amber-11);
+  --warn-wash: var(--amber-3);
+  --ok: var(--grass-11);
+  --stage: var(--black-a12);
+  --stage-line: var(--white-a7);
+  --fs-s: 12px;
+  --fs-m: 14px;
+  --fs-l: 16px;
+  --line: 0.5px;
+  --r-s: 4px;
+  --r-m: 6px;
+  --r-l: 10px;
+  --left: 288px;
+  --right: 256px;
+  color-scheme: light;
+}
+:root.dark-theme {
+  color-scheme: dark;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--sheet);
+  color: var(--ink);
+  font: var(--fs-m) / 1.5 "Zen Kaku Gothic New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
+}
+
+.caster {
+  display: grid;
+  grid-template-columns: var(--left) minmax(0, 1fr) var(--right);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "bar bar bar"
+    "note note note"
+    "left view right"
+    "status status status";
+  height: 100vh;
+}
+
+.bar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px 0 16px;
+  background: var(--paper);
+  border-bottom: var(--line) solid var(--rule);
+}
+.bar h1 {
+  margin: 0;
+  font-size: var(--fs-l);
+  font-weight: 600;
+}
+/* 制作画面の中では、題と遊ぶ画面への入口は制作画面が持つ */
+.embedded .bar h1,
+.embedded .bar #title,
+.embedded .bar .link {
+  display: none;
+}
+.spacer {
+  flex: 1;
+}
+.muted {
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+.dirty {
+  color: var(--warn);
+  font-size: var(--fs-s);
+  font-weight: 600;
+}
+.writeback {
+  grid-area: note;
+  padding: 8px 16px;
+  background: var(--cue-wash);
+  color: var(--cue);
+  border-bottom: var(--line) solid var(--rule);
+}
+.writeback.warn {
+  background: var(--warn-wash);
+  color: var(--warn);
+}
+
+.panel {
+  position: relative;
+  overflow: auto;
+  padding: 12px 16px 16px;
+  background: var(--sheet);
+}
+.panel:first-of-type {
+  grid-area: left;
+  border-right: var(--line) solid var(--rule);
+}
+.panel:last-of-type {
+  grid-area: right;
+  border-left: var(--line) solid var(--rule);
+}
+/* 欄の幅を変えるつまみ（境目の上に細く重ねる。欄と同じ格子の区画に置く） */
+.splitter {
+  position: relative;
+  z-index: 10;
+  width: 0;
+  align-self: stretch;
+  cursor: col-resize;
+  touch-action: none;
+}
+.splitter.left {
+  grid-area: left;
+  justify-self: end;
+}
+.splitter.right {
+  grid-area: right;
+  justify-self: start;
+}
+.splitter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  width: 8px;
+}
+.splitter:hover::after,
+.splitter.dragging::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 2px;
+  background: var(--cue-solid);
+}
+.panel h2,
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: var(--fs-m);
+  font-weight: 600;
+}
+.panel h2:not(:first-child) {
+  margin-top: 24px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 6em minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.row > :nth-child(2):last-child {
+  grid-column: 2 / 4;
+}
+.row > span:first-child,
+.row > label:first-child {
+  color: var(--ink-soft);
+}
+.buttons {
+  display: flex;
+  gap: 4px;
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: var(--line) solid var(--rule-strong);
+  border-radius: var(--r-m);
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+}
+input[type="number"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+input[type="range"],
+input[type="checkbox"] {
+  accent-color: var(--cue-solid);
+}
+button {
+  height: 28px;
+  padding: 0 10px;
+  border: var(--line) solid var(--rule-strong);
+  border-radius: var(--r-m);
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+button:hover:not(:disabled) {
+  background: var(--el-hover);
+  border-color: var(--rule-hover);
+}
+button:disabled {
+  color: var(--ink-soft);
+  border-color: var(--rule);
+  cursor: default;
+}
+button.primary {
+  background: var(--cue-solid);
+  border-color: var(--cue-solid);
+  color: #fff;
+}
+button.primary:hover:not(:disabled) {
+  background: var(--cue-solid-hover);
+  border-color: var(--cue-solid-hover);
+}
+button.primary:disabled {
+  background: var(--el-hover);
+  border-color: var(--rule);
+  color: var(--ink-soft);
+}
+button.wide {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--cue-focus);
+  outline-offset: 1px;
+}
+.link {
+  color: var(--cue);
+  font-size: var(--fs-s);
+}
+.range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.range input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+.numbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.numbers label span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink-soft);
+  font-size: var(--fs-s);
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.check.disabled {
+  color: var(--ink-soft);
+}
+.note {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: var(--r-m);
+  background: var(--warn-wash);
+  color: var(--warn);
+  font-size: var(--fs-s);
+}
+
+/* ---- 舞台 ---- */
+.viewport {
+  grid-area: view;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  background: var(--stage);
+  /* 指は舞台の上でスクロールも拡大もしない（main.ts がドラッグとピンチで受ける） */
+  touch-action: none;
+}
+.stage-frame {
+  position: relative;
+  flex: none;
+  box-shadow: 0 0 0 var(--line) var(--stage-line);
+}
+.stage-frame.clip-game { overflow: hidden; }
+.stage {
+  --s: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--black-a12);
+  transform-origin: 0 0;
+  transform: scale(var(--s));
+  user-select: none;
+  touch-action: none;
+}
+/* 画面の外は暗くする（立ち絵と取っ手は外にはみ出しても見え、つかめる）。 */
+.stage .outside {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  outline: calc(1px / var(--s)) solid var(--white-a7);
+  box-shadow: 0 0 0 100000px var(--black-a9);
+}
+.stage .bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stage .grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(var(--white-a4) calc(1px / var(--s)), transparent calc(1px / var(--s))), linear-gradient(90deg, var(--white-a4) calc(1px / var(--s)), transparent calc(1px / var(--s)));
+  background-size: 25% 25%;
+}
+.stage.game-preview .grid { display: none; }
+.stage .game-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+}
+.stage .layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ghost,
+.position-preview {
+  position: absolute;
+  box-sizing: border-box;
+}
+.ghost img,
+.position-preview img,
+.target img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.position-preview {
+  border: calc(1px / var(--s)) solid var(--white-a8);
+}
+.ghost .label,
+.position-preview .label,
+.target .label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: calc(2px / var(--s)) calc(6px / var(--s));
+  border-radius: calc(4px / var(--s));
+  background: var(--black-a10);
+  color: var(--white-a12);
+  font-size: calc(12px / var(--s));
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.target {
+  position: absolute;
+  box-sizing: border-box;
+  outline: calc(1px / var(--s)) dashed var(--white-a10);
+  cursor: move;
+}
+.target:focus-visible {
+  outline: calc(1px / var(--s)) solid var(--teal-9);
+}
+.target .label {
+  top: auto;
+  bottom: calc(100% + 4px / var(--s));
+}
+.handle {
+  --h: calc(12px / var(--s));
+  position: absolute;
+  width: var(--h);
+  height: var(--h);
+  box-sizing: border-box;
+  border-radius: calc(2px / var(--s));
+  background: var(--white-a12);
+  border: calc(1px / var(--s)) solid var(--teal-9);
+}
+.handle[data-handle="nw"] { left: calc(var(--h) / -2); top: calc(var(--h) / -2); cursor: nwse-resize; }
+.handle[data-handle="n"] { left: calc(50% - var(--h) / 2); top: calc(var(--h) / -2); cursor: ns-resize; }
+.handle[data-handle="ne"] { right: calc(var(--h) / -2); top: calc(var(--h) / -2); cursor: nesw-resize; }
+.handle[data-handle="e"] { right: calc(var(--h) / -2); top: calc(50% - var(--h) / 2); cursor: ew-resize; }
+.handle[data-handle="se"] { right: calc(var(--h) / -2); bottom: calc(var(--h) / -2); cursor: nwse-resize; }
+.handle[data-handle="s"] { left: calc(50% - var(--h) / 2); bottom: calc(var(--h) / -2); cursor: ns-resize; }
+.handle[data-handle="sw"] { left: calc(var(--h) / -2); bottom: calc(var(--h) / -2); cursor: nesw-resize; }
+.handle[data-handle="w"] { left: calc(var(--h) / -2); top: calc(50% - var(--h) / 2); cursor: ew-resize; }
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--white-a11);
+  font-size: calc(14px / var(--s));
+}
+
+.status {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 16px;
+  background: var(--paper);
+  border-top: var(--line) solid var(--rule);
+  color: var(--ok);
+  font-size: var(--fs-s);
+  white-space: pre-wrap;
+}
+.status:empty {
+  display: none;
+}
+.status.error {
+  color: var(--mark);
+}
+
+/* ---- 差分を足す ---- */
+.dialog {
+  width: 520px;
+  padding: 20px 24px;
+  border: var(--line) solid var(--rule);
+  border-radius: 12px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 8px 24px var(--black-a3), 0 2px 6px var(--black-a2);
+}
+.dialog::backdrop {
+  background: var(--black-a6);
+}
+.drop {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  margin-bottom: 12px;
+  padding: 16px;
+  border: var(--line) dashed var(--cue);
+  border-radius: var(--r-l);
+  background: var(--cue-wash);
+  text-align: center;
+}
+.drop.active {
+  background: var(--teal-4);
+}
+.drop p {
+  margin: 0;
+  color: var(--cue);
+}
+.drop img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: var(--r-s);
+  background: repeating-conic-gradient(var(--sage-4) 0% 25%, var(--sage-2) 0% 50%) 50% / 16px 16px;
+}
+.path {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ---- 指で使う ---- */
+@media (pointer: coarse) {
+  /* iOS は 16px より小さい入力欄に触れると拡大する。欄とボタンは指で押せる大きさに */
+  select,
+  input[type="text"],
+  input[type="number"] {
+    height: 40px;
+    font-size: 16px;
+  }
+  button {
+    height: 40px;
+    min-width: 40px;
+  }
+  input[type="checkbox"] {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+  .check {
+    min-height: 40px;
+    margin-top: 0;
+  }
+  .stage {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  /* 取っ手の見た目は少し大きく、つかめる所はもっと広く */
+  .handle {
+    --h: calc(16px / var(--s));
+  }
+  .handle::before {
+    content: "";
+    position: absolute;
+    inset: calc(-8px / var(--s));
+  }
+}
+
+/*
+ * 指で使う狭い画面（スマホ版の「キャラクター」の「位置」。iframe の幅で決まる）: 3 列に入らないので、舞台を上に止めて、欄はその下を一列で流す。
+ * 格子の中では止まる範囲が自分の区画に限られるので、flex にする。
+ */
+@media (max-width: 640px), (pointer: coarse) and (max-width: 1023px), (pointer: coarse) and (max-height: 500px) {
+  .caster {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+  .caster > * {
+    flex: none;
+  }
+  .bar {
+    order: 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 8px;
+  }
+  .bar h1,
+  .bar #title,
+  .bar #scale {
+    display: none;
+  }
+  .writeback {
+    order: 1;
+  }
+  .viewport {
+    order: 2;
+    position: sticky;
+    top: 48px;
+    z-index: 10;
+    height: clamp(200px, 44dvh, 480px);
+    --stage-margin: 28px;
+  }
+  .panel,
+  .panel:first-of-type,
+  .panel:last-of-type {
+    overflow: visible;
+    border: 0;
+    border-top: var(--line) solid var(--rule);
+  }
+  .panel:first-of-type {
+    order: 3;
+  }
+  .panel:last-of-type {
+    order: 4;
+  }
+  .status {
+    order: 5;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+  }
+  .splitter,
+  .target .label {
+    display: none;
+  }
+  .dialog {
+    box-sizing: border-box;
+    width: calc(100vw - 16px);
+    max-width: none;
+    padding: 16px;
+  }
+}
+
+/* 横持ち: 高さが足りないので、舞台を右に止めて、欄は左で流す */
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse), (orientation: landscape) and (max-height: 500px) and (max-width: 640px) {
+  .viewport {
+    position: fixed;
+    top: 48px;
+    right: 0;
+    bottom: 0;
+    width: 58%;
+    height: auto;
+    border-left: var(--line) solid var(--rule);
+  }
+  .panel,
+  .panel:first-of-type,
+  .panel:last-of-type,
+  .writeback,
+  .status {
+    box-sizing: border-box;
+    width: 42%;
+  }
+}

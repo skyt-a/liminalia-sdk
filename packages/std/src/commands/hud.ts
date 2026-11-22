@@ -1,5 +1,5 @@
 import { argOrigin, type TextOrigin, type Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 常駐の表示（HUD）。遊んでいるあいだ出したままにするボタンと文字（TyranoScript の [button fix=true] と、日付や場所、好感度の表示）。

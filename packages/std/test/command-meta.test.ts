@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { check, COMMAND_GROUPS, COMMAND_META, CORE_COMMANDS, createRegistry, parse } from "@liminalia/lang";
 import { previewsWithoutMeta } from "../../lang/src/command-meta.ts";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 
 /** 組み込みの命令の情報（lang の command-meta.ts）が、組み込みと標準の命令と食い違っていないか。 */

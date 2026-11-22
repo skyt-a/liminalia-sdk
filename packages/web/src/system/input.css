@@ -1,0 +1,120 @@
+/*
+ * エンジンの CSS はカスケードレイヤー liminalia に入れる。作品の CSS（レイヤーの外）は、セレクタの強さを競わずに上書きできる。
+ */
+@layer liminalia {
+/*
+ * 遊ぶ人の操作の部品（input.ts）の見た目。システム画面を差し替えた作品でも使うので、色は既定のシステム画面の
+ * 変数（--lm-*）があればそれ、無ければ既定の色。作品の CSS で上書きできる。
+ */
+
+/* キー・ゲームパッドで選んでいるもの */
+
+.stage.lm-nav button:focus,
+.stage.lm-nav input:focus {
+  outline: 2px solid var(--lm-accent, #a9bfd2);
+  outline-offset: 3px;
+}
+
+/* 指で触る端末 */
+
+.lm-touch-menu {
+  display: none;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 10px 22px;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+  color: var(--lm-fg, #ecebe6);
+  background: rgba(10, 12, 18, 0.55);
+  border: 1px solid var(--lm-border, rgba(255, 255, 255, 0.16));
+  border-radius: var(--lm-radius, 4px);
+  z-index: 5;
+}
+
+.lm-rotate {
+  display: none;
+}
+
+/* 指で触れる入力があればメニューのボタンを出す */
+@media (any-pointer: coarse) {
+  .lm-touch-menu:not([hidden]) {
+    display: block;
+  }
+}
+
+/*
+ * 横長の作品を縦に持っているとき（舞台の外に出す。input.ts が付ける）。
+ * is-cover は画面全体を覆う（小さい画面。ゲームは止める）、is-notice は上に知らせだけ（収まる画面。「このまま遊ぶ」で閉じる）
+ */
+.lm-rotate.is-cover,
+.lm-rotate.is-notice {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #ecebe6;
+  /* システム画面と同じ書体（system-ui は、iOS 26 のシミュレーターの Safari で日本語が豆腐になった） */
+  font: 18px/1.6 var(--lm-ui-font, sans-serif);
+  text-align: center;
+}
+
+.lm-rotate.is-cover {
+  inset: 0;
+  padding: 32px;
+  background: #000;
+}
+
+.lm-rotate.is-notice {
+  top: max(16px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 10px 12px 10px 20px;
+  background: rgba(10, 12, 18, 0.9);
+  border: 0.5px solid var(--lm-border, rgba(255, 255, 255, 0.16));
+  border-radius: var(--lm-radius, 4px);
+}
+
+.lm-rotate-keep {
+  display: none;
+  white-space: nowrap;
+  padding: 6px 16px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0.5px solid var(--lm-accent, #a9bfd2);
+  border-radius: var(--lm-radius, 4px);
+}
+
+.lm-rotate.is-notice .lm-rotate-keep {
+  display: inline-block;
+}
+
+/* 制作画面の舞台がスマホの見え方を真似ているとき（html.lm-emulate-touch。main.ts） */
+html.lm-emulate-touch .lm-touch-menu:not([hidden]) {
+  display: block;
+}
+
+/*
+ * 遊ぶ人の操作を待つ画面（調べる画面・地図・図鑑・持ち物を選ぶ画面）を出している間（舞台の class の lm-menu-room）、
+ * 指で触る端末ではその画面が右上をメニューのボタンの分だけ空ける（右から --lm-menu-room-x、上から --lm-menu-room-y。舞台の px）
+ */
+@media (any-pointer: coarse) {
+  .stage.lm-menu-room {
+    --lm-menu-room-x: 184px;
+    --lm-menu-room-y: 84px;
+  }
+}
+
+html.lm-emulate-touch .stage.lm-menu-room {
+  --lm-menu-room-x: 184px;
+  --lm-menu-room-y: 84px;
+}
+
+/* 縦持ちの知らせは input.ts が端末の向きと html.lm-emulate-touch を見て付ける（上の .lm-rotate） */
+}

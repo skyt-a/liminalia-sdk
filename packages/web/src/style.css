@@ -1,0 +1,1524 @@
+/*
+ * エンジンの CSS はカスケードレイヤー liminalia に入れる。作品の CSS（レイヤーの外）は、セレクタの強さを競わずに上書きできる。
+ */
+@layer liminalia {
+:root {
+  --stage-w: 1280px;
+  --stage-h: 720px;
+  --message-bg: rgba(10, 12, 18, 0.78);
+  --message-fg: #f2f0ea;
+  --name-fg: #e8d9b0;
+  --font-fallback: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+  --font: var(--font-fallback);
+  /*
+   * 次の変数は liminalia.json の ui（ui-style.ts）が舞台に書く。書かなければ下の各所の既定の値:
+   * --text-size --text-line --text-shadow --read-fg --message-border --message-radius --message-image --message-padding
+   * --name-size --name-bg --name-border --name-image --glyph-fg
+   * --choice-width --choice-size --choice-gap --choice-fg --choice-bg --choice-hover-bg --choice-border --choice-image --choice-hover-image
+   */
+}
+
+/*
+ * 和文でない言語で遊んでいるとき（<html lang>。作品の languages の先頭か、遊ぶ人が選んだ言語）は、欧文の書体を先に置く。
+ * 和文の明朝の欧文は、字の形と字間が欧文の本文に向かないため。和文の字は後ろの明朝で出す。
+ * 前の版と同じに和文の明朝を先にするなら、ui.text.font に書くか、作品の CSS で :root の --font-fallback を決める。
+ */
+:root:not(:lang(ja), :lang(zh), :lang(ko)) {
+  --font-fallback: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  /* スマホ: 拡大・ダブルタップの拡大・引っぱりの跳ね返り・長押しの吹き出しを止める（縦のスクロールは画面の一覧のため残す） */
+  touch-action: pan-y;
+  overscroll-behavior: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  /* 長押しで文字や画面が選ばれないようにする（iPhone の Safari 系は -webkit- の指定が要る） */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 文字を入力する欄だけは選べる */
+input,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#viewport {
+  position: fixed;
+  inset: 0;
+}
+
+/* 作品の画面の大きさ（既定 1280×720。違えば dom-host.ts が舞台に --stage-w・--stage-h を書く）の舞台を、画面に収まる倍率で縮小・拡大する */
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  overflow: hidden;
+  background: #000;
+  transform-origin: center center;
+  /* 遊ぶ人が設定画面で選んだ書体（--player-font）を、作品の書体より先に */
+  font-family: var(--player-font, var(--font));
+  color: var(--message-fg);
+  user-select: none;
+  /*
+   * 禁則の強さ（ui.text.lineBreak）。舞台に決めて、本文、名前欄、選択肢、バックログ、システム画面、標準の命令の画面（図鑑、調べる画面、地図、
+   * チャット、常駐の表示など）のすべての文に継がせる（同じ文の折り返しが場所で変わらないように）
+   */
+  line-break: var(--line-break, auto);
+}
+
+/* 立ち絵の位置調整: ゲームの UI を編集画面の立ち絵の上に重ねる。 */
+html.lm-cast-overlay, html.lm-cast-overlay body, html.lm-cast-overlay .stage { background: transparent !important; }
+html.lm-cast-overlay .stage > .layer:first-child { visibility: hidden; }
+
+/* 禁則の強さを書いていなければ、日本語と中国語（遊んでいる言語。<html lang>）は行頭に小さい「ッ」や「ー」を置かない。:where で重みは上と同じ */
+.stage:where(:lang(ja), :lang(zh)) {
+  line-break: var(--line-break, strict);
+}
+
+/*
+ * 指で触る端末と縦長の作品（舞台の class の lm-touch。dom-host.ts）では、舞台を縮めて出しても、標準の命令の画面（図鑑、調べる画面、地図の選択）の
+ * 文字と押す所が小さくなりすぎないよう、文字を大きくする倍率 --lm-touch（書いた大きさがおおよそ画面の px になる。1〜2.5）と、
+ * 押す所の最小の大きさ --lm-touch-target（画面で 44px）を決める。--lm-ui-fit は基準の座標の 1px が画面で何 px になるか（dom-host.ts の fit）。
+ * 指でない横長の作品では決めない（今までの大きさ）
+ */
+.stage.lm-touch {
+  --lm-touch: clamp(1, calc(1 / var(--lm-ui-fit, 1)), 2.5);
+  --lm-touch-target: calc(44px * var(--lm-touch));
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+
+.background img,
+.background .fill,
+.background .lm-bg-color,
+.images > img.plane {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 被写界深度（@dof）でぼかすレイヤー。作品の @filter と重ねる（std の composeFilter も --dof-layer を足す） */
+.layer.background,
+.layer.sprites,
+.layer.images {
+  filter: var(--dof-layer,);
+  transition: filter var(--dof-time, 0ms) ease;
+}
+
+/* 立ち絵の重なり順（@chara の z）を、このレイヤーの中に閉じる */
+.layer.sprites {
+  isolation: isolate;
+}
+
+.sprite {
+  position: absolute;
+  /* 色調（@tone）と、話していない人物を暗く・ぼかす（@chara-config focus）。どちらも無ければ値が空になり、フィルタなし */
+  filter: var(--tone-filter,) var(--focus-filter,) var(--dof-sprite,);
+  /* 話していない人物を少し下げる（@chara-config focus=lower。上の余白なので、位置の top や出入りの動きとぶつからない） */
+  margin-top: var(--focus-lower, 0px);
+  transition:
+    filter var(--sprite-filter-time, 200ms) ease,
+    margin-top var(--sprite-filter-time, 200ms) ease;
+}
+
+/* プラグインが描く立ち絵（model）は、位置と大きさを決める静止画を隠す */
+.sprite.sprite-covered > img {
+  visibility: hidden;
+}
+
+.sprite img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mask {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.message {
+  position: absolute;
+  /* 位置と大きさ（ゲームの設定の ui.message は CSS 変数で渡る。作品の CSS は変数か left などを直に書いて変える） */
+  left: var(--message-left, 60px);
+  right: var(--message-right, 60px);
+  top: var(--message-top, auto);
+  bottom: var(--message-bottom, 28px);
+  width: var(--message-width, auto);
+  height: var(--message-height, auto);
+  min-height: var(--message-min-height, 150px);
+  padding: var(--message-padding, 26px 40px 30px);
+  box-sizing: border-box;
+  /* 設定画面の「枠の濃さ」（--window-opacity）を枠の色に掛ける（文字は薄くしない） */
+  background-color: color-mix(in srgb, var(--message-bg) calc(var(--window-opacity, 1) * 100%), transparent);
+  border: var(--message-border-width, 1px) solid var(--message-border, rgba(232, 217, 176, 0.25));
+  border-radius: var(--message-radius, 0);
+  font-size: calc(var(--text-size, 26px) * var(--text-scale, 1));
+  /* 遊ぶ人の「行間」（--player-line-spacing）を作品の行間に掛け、「文字の縁」（--player-text-shadow）を作品の影と縁取りの代わりにする */
+  line-height: calc(var(--text-line, 1.75) * var(--player-line-spacing, 1));
+  letter-spacing: var(--text-letter-spacing, 0.04em);
+  text-shadow: var(--player-text-shadow, var(--text-shadow, none));
+  opacity: 0;
+  transition: opacity 200ms;
+  /* 重なりの区切り。中の z-index（名前欄、枠の画像）は枠の中だけで効き、枠より上の層（@flash、@movie、暗転、overlay の絵）が覆えば名前欄も一緒に覆われる */
+  isolation: isolate;
+}
+
+/* 枠の画像。設定画面の「枠の濃さ」を文字に掛けないよう、絵だけの要素にする */
+.message-frame {
+  display: none;
+}
+
+.message.has-frame-image > .message-frame {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--message-image, none);
+  background-size: 100% 100%;
+  /* 角を伸ばさない枠の画像（ui.message.imageSlice）。線を太らせないので、本文の位置は変わらない */
+  border: var(--message-frame-border, 0) solid transparent;
+  border-image: var(--message-border-image, none);
+  border-radius: inherit;
+  opacity: var(--window-opacity, 1);
+  pointer-events: none;
+}
+
+/* 枠の下に敷く地（ui.message.backdrop）。枠の濃さ（--window-opacity）を掛ける */
+.message.has-backdrop::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--message-backdrop-height, 100%);
+  background: var(--message-backdrop);
+  opacity: var(--window-opacity, 1);
+  pointer-events: none;
+}
+
+.message.has-backdrop .text {
+  position: relative;
+}
+
+.message.visible {
+  opacity: 1;
+}
+
+/* 背景を替えているあいだ（@bg の hide-window）。次の本文で外す */
+.message.visible.bg-hidden {
+  opacity: 0;
+}
+
+/* 作品の演出がメッセージ枠を見せないでいる間（RenderContext.window）。@window の状態は変えない */
+.message.visible.lm-window-held {
+  opacity: 0;
+}
+
+/* 吹き出し（@balloon on）。位置と尾の位置（--balloon-tail）は描画側が話者の立ち絵から決める */
+.message.balloon {
+  padding: 18px 28px 20px;
+  border-radius: 18px;
+  background-color: var(--balloon-bg, rgba(250, 248, 242, 0.96));
+  background-image: none;
+  border: 1px solid var(--balloon-border, rgba(0, 0, 0, 0.2));
+  color: var(--balloon-fg, #26231e);
+  text-shadow: none;
+  font-size: calc(var(--text-size, 26px) * var(--text-scale, 1) * 0.9);
+}
+
+.message.balloon::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  left: var(--balloon-tail, 50%);
+  transform: translateX(-50%);
+  border: 16px solid transparent;
+  border-top-color: var(--balloon-bg, rgba(250, 248, 242, 0.96));
+  border-bottom: 0;
+}
+
+/* 尾を出さない吹き出し（@balloon tail=none） */
+.message.balloon.balloon-no-tail::after {
+  display: none;
+}
+
+/* あごの下に置いた吹き出し（頭の上に余地が無いとき）。尾は上の顔へ */
+.message.balloon-below::after {
+  bottom: auto;
+  top: -16px;
+  border: 16px solid transparent;
+  border-bottom-color: var(--balloon-bg, rgba(250, 248, 242, 0.96));
+  border-top: 0;
+}
+
+.message.balloon .name {
+  top: -16px;
+  left: 18px;
+  font-size: calc(var(--name-size, 22px) * 0.8 * var(--lm-text-scale, 1));
+}
+
+/* 顔ウィンドウ（ui.face）。話者の顔を枠の端に出し、本文と名前をその分ずらす */
+.message .face {
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  width: var(--face-width, 180px);
+  height: var(--face-height, 180px);
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+  display: none;
+}
+
+/* ui.face の x・y で置いたとき。下の has-face の余白も当てず、本文はずらさない */
+.message.face-placed .face {
+  left: var(--face-x, 0);
+  top: var(--face-y, 0);
+  bottom: auto;
+}
+
+.message.face-right .face {
+  left: auto;
+  right: 16px;
+}
+
+.message.has-face .face {
+  display: block;
+}
+
+.message.has-face:not(.face-right, .face-placed) {
+  padding-left: calc(var(--face-width, 180px) + 40px);
+}
+
+.message.has-face.face-right:not(.face-placed) {
+  padding-right: calc(var(--face-width, 180px) + 40px);
+}
+
+.message.has-face:not(.face-right, .face-placed) .name {
+  left: calc(var(--face-width, 180px) + 28px);
+}
+
+/* 本文の揃え（ui.text.align）。文字は初めから場所を取って出していくので、中央でも途中で行が動かない */
+.message .text {
+  text-align: var(--text-align, left);
+  /* 行末のぶら下げ（ui.text.hangingPunctuation。Safari だけ）・一行の字数（ui.text.lineChars）。禁則の強さは舞台から継ぐ（.stage） */
+  hanging-punctuation: var(--hanging, none);
+  max-inline-size: calc(var(--line-chars, 10000) * (1em + var(--text-letter-spacing, 0.04em)) + 0.5em);
+  padding-top: var(--text-top-gap, 0);
+  font-weight: var(--text-weight, inherit);
+  -webkit-text-stroke: var(--player-text-stroke, var(--text-stroke, 0 transparent));
+}
+
+/* 収まらない本文を枠の中でスクロールさせる（ui.message.scroll）。描画側が出している文字に合わせて下へ送る */
+.message.scroll .text {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* 動くカーソル（ui.cursor.animated）。OS のカーソルは隠し、画像を一番上に描く */
+.lm-cursor-hidden,
+.lm-cursor-hidden * {
+  cursor: none !important;
+}
+
+.lm-soft-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 10000;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 押したところの演出（ui.tap） */
+.lm-tap {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%);
+}
+
+/* 人物ごとの台詞の文字（cast.json の text。描画側が本文の入れ物に --lm-speaker-* を載せる）。遊ぶ人が選んだ書体が先 */
+[data-speaker-look] {
+  color: var(--lm-speaker-fg, inherit);
+  font-family: var(--player-font, var(--lm-speaker-font, inherit));
+  font-style: var(--lm-speaker-style, inherit);
+}
+
+/* 既読のページの本文（ui.text.readColor）。人物ごとの文字の色より先 */
+.message.is-read .text,
+.message.is-read .text [data-speaker-look] {
+  color: var(--read-fg, var(--lm-speaker-fg, inherit));
+}
+
+/* 遊ぶ人が「既読の文の色」を決めたとき（付けるなら作品の色か既定の色、付けないなら既読でない文と同じ） */
+.stage.lm-read-on .message.is-read .text,
+.stage.lm-read-on .message.is-read .text [data-speaker-look] {
+  color: var(--read-fg, color-mix(in srgb, var(--message-fg, #fff) 62%, #6f86a8));
+}
+
+.stage.lm-read-off .message.is-read .text,
+.stage.lm-read-off .message.is-read .text [data-speaker-look] {
+  color: var(--lm-speaker-fg, inherit);
+}
+
+.message .name {
+  position: absolute;
+  top: -22px;
+  left: 28px;
+  padding: var(--name-padding, 4px 18px);
+  background-color: var(--name-bg, rgba(10, 12, 18, 0.92));
+  background-image: var(--name-image, none);
+  background-size: 100% 100%;
+  border: var(--name-border-width, 1px) solid var(--name-border, rgba(232, 217, 176, 0.35));
+  border-image: var(--name-border-image, none);
+  color: var(--name-fg);
+  font-family: var(--name-font, inherit);
+  /* 文字サイズの設定（--lm-text-scale）。大きくした分だけ上へずらし、名前欄の下の端は同じところに置く */
+  font-size: calc(var(--name-size, 22px) * var(--lm-text-scale, 1));
+  margin-top: calc(var(--name-size, 22px) * var(--name-line, 1.4) * (1 - var(--lm-text-scale, 1)));
+  font-weight: var(--name-weight, inherit);
+  letter-spacing: var(--name-letter-spacing, inherit);
+  text-shadow: var(--name-shadow, inherit);
+  line-height: var(--name-line, 1.4);
+  z-index: 1;
+}
+
+/* 名前の左の縦の罫（ui.name.rule） */
+.message .name.has-rule::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  top: -3px;
+  width: 2px;
+  height: 34px;
+  background: var(--name-rule);
+}
+
+.message .name:empty {
+  display: none;
+}
+
+/* 作品の名前欄（WebPlugin.screens.name）。地と線と余白は作品の要素が持つ。名前の無いページ（地の文）は隠す */
+.message .name.lm-name-custom {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.message .name.lm-name-custom.is-empty {
+  display: none;
+}
+
+/*
+ * NVL: 画面全体に文章を積む（@nvl on）。はみ出した古い段落は上へ流れて隠れる。
+ * 見た目は ui.nvl（舞台の --nvl-*）と、@nvl on style= の名前を付けた見た目（ui.nvlStyles。枠の --nvl-*。ui-style.ts の nvlVars）
+ */
+.message.nvl {
+  /* メッセージ枠の位置の設定（ui.message）より先に、画面全体にする */
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: var(--nvl-padding, 72px 150px 96px);
+  border: 0;
+  border-radius: 0;
+  background: var(--nvl-image, none) center / cover no-repeat, var(--nvl-bg, rgba(6, 8, 12, 0.72));
+  display: flex;
+  flex-direction: column;
+  justify-content: var(--nvl-justify, flex-end);
+  overflow: hidden;
+  font-size: calc(var(--nvl-size, var(--text-size, 26px)) * var(--text-scale, 1));
+  line-height: calc(var(--nvl-line, var(--text-line, 1.75)) * var(--player-line-spacing, 1));
+}
+
+.message.nvl .name {
+  display: none;
+}
+
+.message.nvl .text {
+  display: flex;
+  flex-direction: column;
+  justify-content: var(--nvl-justify, flex-end);
+  min-height: 0;
+  color: var(--nvl-fg, var(--lm-speaker-fg, inherit));
+  font-family: var(--player-font, var(--nvl-font, var(--lm-speaker-font, inherit)));
+  text-align: var(--nvl-align, var(--text-align, left));
+}
+
+.message.nvl .nvl-page {
+  margin: 0;
+  margin-block-end: var(--paragraph-gap, 0.5em);
+  text-indent: 0;
+  /* 段落ごとのフェード（ui.nvl の fade。既定はしない） */
+  animation: lim-nvl-page var(--nvl-fade, 0ms) ease-out both;
+}
+
+@keyframes lim-nvl-page {
+  from {
+    opacity: 0;
+  }
+}
+
+.message.nvl .nvl-name {
+  display: var(--nvl-names, inline);
+  margin-inline-end: 0.2em;
+  color: var(--name-fg);
+}
+
+/*
+ * 縦書き（@vertical on・ui.message.vertical）。行は右から左へ進み、ルビは文字の右に付く。
+ * 枠の位置と大きさを書いていなければ、画面の右に縦長に置く（書いていれば ui-style.ts が上書きする）。吹き出しは横書きのまま。
+ */
+.message.vertical:not(.balloon):not(.nvl) {
+  left: var(--message-left, auto);
+  right: var(--message-right, 60px);
+  top: var(--message-top, 28px);
+  bottom: var(--message-bottom, 28px);
+  width: var(--message-width, var(--vertical-width, 420px));
+  min-height: var(--message-min-height, 0);
+  padding: var(--message-padding, 48px 36px 36px);
+}
+
+.message.vertical:not(.balloon) .text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  height: 100%;
+}
+
+/*
+ * NVL の縦書き: 段落は右から積み、はみ出したら描画側が左へ送る（古い段落は右へ流れて隠れる）。
+ * はみ出しを切るのは左右だけにしたいので、列の下（行末）に余白を足して切る範囲を広げ、同じだけ外の余白で戻す
+ * （列の長さは変わらず、行末にぶら下げた句読点が切れない）。
+ */
+.message.nvl.vertical .text {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.message.nvl.vertical .text,
+.message.scroll.vertical .text {
+  padding-bottom: 1em;
+  margin-bottom: -1em;
+}
+
+/* 縦書きの半角の数字・!? : 2 桁までは縦中横、3 桁からは一文字ずつ立てる（dom-host.ts が分ける） */
+.message.vertical:not(.balloon) .text .tcy {
+  text-combine-upright: all;
+}
+
+.message.vertical:not(.balloon) .text .upright {
+  text-orientation: upright;
+}
+
+/*
+ * 縦書きのルビは親文字の右。親文字の箱（.ruby。一字ぶんの幅）の右端から置く
+ * （inline のままだと、WebKit は縦書きの文字の箱の中での left の基準を Chrome と違えて取り、ルビの大きさでも位置が動くため）。
+ * 親文字との間は ui.text.rubyGap（親文字の em。ルビの em に直す）。
+ */
+.message.vertical:not(.balloon) .text .ruby .rt {
+  left: calc(100% + var(--ruby-gap, 0) / var(--ruby-size, 0.45) * 1em);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+/* 縦書きでスクロールさせる枠（ui.message.scroll）は、行の進む左へ送る */
+.message.scroll.vertical .text {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+/*
+ * ルビは行の高さに数えず、行の上の余白に載せる（ルビのある行だけ下がったり、ルビが出た瞬間に行が動いたりしないように）。
+ * 親文字より長いルビは、親文字の中央から左右にはみ出す。親文字は途中で折り返さない。
+ * <ruby><rt> は使わず span で組む（WebKit は rt の position:absolute を受け付けないため。dom-host.ts の appendText）。
+ * 親文字は一字の高さの箱（inline-block・行の高さ 1）にして、その上端から置く。inline のままだと箱の高さがフォントの上下の余白で決まり、
+ * 余白の大きいフォント（Zen Kaku Gothic New は上に 0.33em）ではルビが字面から浮く。
+ */
+.message .text .ruby {
+  display: inline-block;
+  position: relative;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.message .text .ruby .rt {
+  position: absolute;
+  left: 50%;
+  /* 親文字との間（ui.text.rubyGap は親文字の em。ルビの em に直す） */
+  bottom: calc(100% + var(--ruby-gap, 0) / var(--ruby-size, 0.45) * 1em);
+  transform: translateX(-50%);
+  font-size: calc(var(--ruby-size, 0.45) * 1em);
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/*
+ * 本文の一文字（.ch。ルビは親文字とルビで一つ、{img} は画像一つ）。公開の口（docs/plugins.md の「本文の一文字」）:
+ * - 出し始める時刻は要素の animation-delay（文字の番号 × 一文字の時間）。出し切ったら（クリック、スキップ、一度に出すページ）.shown が付く
+ * - 出し方は --lm-reveal-animation（動きの名前。lim-reveal はフェード、lim-reveal-rise は浮かび上がる）、--lm-reveal-time（一文字の長さ）、
+ *   --lm-reveal-easing（緩急）。liminalia.json の ui.text.reveal と revealTime が舞台に書く。作品の CSS で上書きしてもよい
+ */
+.ch {
+  position: relative;
+  opacity: 0;
+  animation: var(--lm-reveal-animation, lim-reveal) var(--lm-reveal-time, 120ms) var(--lm-reveal-easing, ease-out) forwards;
+}
+
+.ch.shown {
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes lim-reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+/* 浮かび上がる（ui.text.reveal: "rise"）。行の組みを変えないよう、位置は top で動かす */
+@keyframes lim-reveal-rise {
+  from {
+    opacity: 0;
+    top: var(--lm-reveal-rise, 0.35em);
+  }
+  to {
+    opacity: 1;
+    top: 0;
+  }
+}
+
+/* 文字の動き（{fx …}）。--i は文字の番号、--reveal はその文字が出る時刻、--fx-strength は動きの大きさ、--fx-speed は速さの倍率（{fx … strength= speed=}） */
+.tfx {
+  display: inline-block;
+  --fx-k: var(--fx-strength, 1);
+  --fx-v: var(--fx-speed, 1);
+}
+
+.tfx-shake {
+  animation: lim-fx-shake calc(120ms / var(--fx-v)) steps(2, end) infinite;
+  animation-delay: calc(var(--i) * -37ms / var(--fx-v));
+}
+
+.tfx-wave {
+  animation: lim-fx-wave calc(1.4s / var(--fx-v)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -90ms / var(--fx-v));
+}
+
+.tfx-glow {
+  animation: lim-fx-glow calc(1.8s / var(--fx-v)) ease-in-out infinite;
+}
+
+.tfx-pop {
+  animation: lim-fx-pop calc(320ms / var(--fx-v)) cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation-delay: var(--reveal, 0ms);
+}
+
+.tfx-fade {
+  animation: lim-fx-fade calc(900ms / var(--fx-v)) ease-out both;
+  animation-delay: var(--reveal, 0ms);
+}
+
+@keyframes lim-fx-shake {
+  0% {
+    transform: translate(calc(0.03em * var(--fx-k)), calc(-0.03em * var(--fx-k)));
+  }
+  50% {
+    transform: translate(calc(-0.03em * var(--fx-k)), calc(0.04em * var(--fx-k)));
+  }
+  100% {
+    transform: translate(calc(0.02em * var(--fx-k)), calc(0.02em * var(--fx-k)));
+  }
+}
+
+@keyframes lim-fx-wave {
+  0%,
+  100% {
+    transform: translateY(calc(0.08em * var(--fx-k)));
+  }
+  50% {
+    transform: translateY(calc(-0.12em * var(--fx-k)));
+  }
+}
+
+@keyframes lim-fx-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 calc(0.1em * var(--fx-k)) currentColor;
+  }
+  50% {
+    text-shadow: 0 0 calc(0.5em * var(--fx-k)) currentColor, 0 0 calc(1em * var(--fx-k)) currentColor;
+  }
+}
+
+@keyframes lim-fx-pop {
+  from {
+    transform: scale(calc(1 + 0.8 * var(--fx-k)));
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes lim-fx-fade {
+  from {
+    opacity: 0;
+    filter: blur(calc(0.08em * var(--fx-k)));
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.glyph {
+  display: inline-block;
+  /* 本文の終わりとの間（縦書きでは上下。ui.glyph.gap は印の文字の大きさの倍率）と大きさ（ui.glyph.size） */
+  margin-inline-start: var(--glyph-gap, 0.3em);
+  font-size: var(--glyph-size, 0.7em);
+  color: var(--glyph-fg, var(--name-fg));
+  animation: lim-glyph 900ms ease-in-out infinite;
+}
+
+/* 形で描く印（ui.glyph.shape）。文字の大きさ（--glyph-size）を一辺にする */
+.glyph-shape {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  margin-block-end: 0.6667em;
+}
+
+.glyph-shape-diamond {
+  border: 0.1667em solid var(--glyph-fg, var(--name-fg));
+  transform: rotate(45deg);
+}
+
+.glyph-shape-diamond.glyph-breathe {
+  animation-name: lim-glyph-breathe-diamond;
+}
+
+.glyph-shape-triangle {
+  width: 0;
+  height: 0;
+  border-inline: 0.5em solid transparent;
+  border-block-start: 0.8em solid var(--glyph-fg, var(--name-fg));
+}
+
+.glyph-shape-dot {
+  border-radius: 50%;
+  background: var(--glyph-fg, var(--name-fg));
+}
+
+.glyph-shape-bar {
+  height: 0.2em;
+  width: 1.4em;
+  background: var(--glyph-fg, var(--name-fg));
+}
+
+.glyph-breathe {
+  animation: lim-glyph-breathe 1.9s ease-in-out infinite;
+}
+
+@keyframes lim-glyph-breathe {
+  50% {
+    transform: scale(0.62);
+    opacity: 0.45;
+  }
+}
+
+@keyframes lim-glyph-breathe-diamond {
+  0%,
+  100% {
+    transform: rotate(45deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(45deg) scale(0.62);
+    opacity: 0.45;
+  }
+}
+
+.glyph img {
+  height: 1.4em;
+  vertical-align: middle;
+}
+
+.glyph-blink {
+  animation: lim-glyph-blink 1000ms steps(2, jump-none) infinite;
+}
+
+.glyph-none {
+  animation: none;
+}
+
+@keyframes lim-glyph-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes lim-glyph {
+  50% {
+    transform: translateY(4px);
+    opacity: 0.5;
+  }
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--choice-gap, 18px);
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 作品の選択肢（WebPlugin.screens.choice）を出している間は層に lm-choices-custom が付く。作品の要素は押せるようにし、標準のボタンの見た目（.choices > button）は当てない */
+.choices.lm-choices-custom > * {
+  pointer-events: auto;
+}
+
+/* ui.choice.backdrop は立ち絵の上、本文の下（問いの文を読めるように）。書いた作品だけに効く */
+.stage.lm-choice-backdrop:has(> .choices > button) > .fx {
+  background: var(--choice-backdrop) 0 0 / 100% 100% no-repeat;
+}
+
+.lm-choice-top .choices {
+  justify-content: flex-start;
+  padding-top: var(--choice-y, 0);
+  box-sizing: border-box;
+}
+
+.choices > button {
+  pointer-events: auto;
+  position: relative;
+  width: var(--choice-fixed-width, auto);
+  min-width: var(--choice-fixed-width, var(--choice-width, 560px));
+  height: var(--choice-height, auto);
+  min-height: var(--choice-min-height, 0);
+  margin: var(--choice-margin, 0);
+  padding: var(--choice-padding, 14px 32px);
+  font: var(--choice-weight, 400) calc(var(--choice-size, 24px) * var(--text-scale, 1)) / var(--choice-line, normal) var(--player-font, var(--choice-font, var(--font)));
+  letter-spacing: var(--choice-letter-spacing, normal);
+  text-align: var(--choice-align, center);
+  overflow-wrap: anywhere;
+  color: var(--choice-fg, var(--message-fg));
+  background-color: var(--choice-bg, rgba(10, 12, 18, 0.85));
+  background-image: var(--choice-image, var(--choice-gradient, none));
+  background-size: 100% 100%;
+  border: var(--choice-border-width, 1px) solid var(--choice-border, rgba(232, 217, 176, 0.4));
+  border-image: var(--choice-border-image, none);
+  border-radius: var(--choice-radius, 0);
+  backdrop-filter: var(--choice-blur, none);
+  text-shadow: var(--choice-shadow, var(--text-shadow, none));
+  cursor: var(--choice-cursor, pointer);
+  transition: var(--choice-transition, none);
+}
+
+/* 選択肢の飾り（ui.choice.ornament）。左右の括弧は重ねると少し開く。本文の流れに出す選択肢（.choice-inline）には効かない */
+.lm-choice-brackets .choices:not(.choice-inline) > button::before,
+.lm-choice-brackets .choices:not(.choice-inline) > button::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 10px;
+  border: 1px solid var(--choice-ornament-color, var(--choice-border, currentColor));
+  pointer-events: none;
+  transition: width 0.25s ease;
+}
+
+.lm-choice-brackets .choices:not(.choice-inline) > button::before {
+  left: -1px;
+  border-right: 0;
+}
+
+.lm-choice-brackets .choices:not(.choice-inline) > button::after {
+  right: -1px;
+  border-left: 0;
+}
+
+.lm-choice-brackets .choices:not(.choice-inline) > button:hover::before,
+.lm-choice-brackets .choices:not(.choice-inline) > button:hover::after,
+.lm-choice-brackets .choices:not(.choice-inline) > button:focus-visible::before,
+.lm-choice-brackets .choices:not(.choice-inline) > button:focus-visible::after {
+  width: 14px;
+}
+
+.lm-choice-underline .choices:not(.choice-inline) > button::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 6px;
+  height: 1px;
+  background: var(--choice-ornament-color, currentColor);
+  pointer-events: none;
+}
+
+/* 選択肢を出している間、メッセージ枠を隠す（ui.choice.hideMessage） */
+.lm-choice-hide-message:has(> .choices > button) .message {
+  display: none;
+}
+
+.choices > button:hover,
+.choices > button:focus-visible {
+  background-color: var(--choice-hover-bg, rgba(60, 52, 36, 0.92));
+  background-image: var(--choice-hover-image, var(--choice-image, var(--choice-hover-gradient, var(--choice-gradient, none))));
+  border-color: var(--choice-hover-border, var(--choice-border, rgba(232, 217, 176, 0.4)));
+  border-image: var(--choice-hover-border-image, var(--choice-border-image, none));
+  box-shadow: var(--choice-hover-shadow, none);
+  color: var(--choice-hover-fg, var(--choice-fg, var(--message-fg)));
+  outline: none;
+}
+
+/* 先を読んだことのある選択肢（ui.choice.readColor。書かなければ少し薄くする） */
+.choices > button.is-read {
+  color: var(--choice-read-fg, var(--choice-fg, var(--message-fg)));
+  opacity: var(--choice-read-opacity, 0.7);
+}
+
+/* 巻き戻しで戻ってから、前に選んだものしか選べない選択肢（ui.rollback.fixChoices） */
+.choices > button.is-locked {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+/*
+ * 本文の流れに出す選択肢（ui.choice.position: inline。サウンドノベル式）。
+ * 文字を出す所の終わりに書き込み、行頭の印が選んでいる行を指す。選ぶとボタンは文字の行に戻り、
+ * 選んだ行に印が残って本文の一部になる（.is-done）
+ */
+.message .choice-inline {
+  display: block;
+  gap: 0;
+  margin: 0;
+  margin-block-end: var(--paragraph-gap, 0.5em);
+  pointer-events: none;
+}
+
+.message .choice-inline > button,
+.message .choice-inline > span {
+  display: block;
+  position: relative;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  padding-inline-start: 1.6em;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-indent: 0;
+  overflow-wrap: anywhere;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
+  text-shadow: inherit;
+}
+
+.message .choice-inline > button {
+  pointer-events: auto;
+  cursor: var(--choice-cursor, pointer);
+}
+
+.message .choice-inline > button::before,
+.message .choice-inline > span::before {
+  content: "▶";
+  display: inline-block;
+  inline-size: 1.6em;
+  margin-inline-start: -1.6em;
+  color: transparent;
+  pointer-events: none;
+}
+
+.message .choice-inline > button:hover,
+.message .choice-inline > button:focus-visible,
+.message .choice-inline > button[data-lm-focus] {
+  color: var(--choice-hover-fg, inherit);
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.message .choice-inline > button:hover::before,
+.message .choice-inline > button:focus-visible::before,
+.message .choice-inline > button[data-lm-focus]::before {
+  color: inherit;
+}
+
+/* 先を読んだことのある選択肢（ui.choice.readColor。書かなければ少し薄くする） */
+.message .choice-inline > button.is-read {
+  color: var(--choice-read-fg, inherit);
+  opacity: var(--choice-read-opacity, 0.7);
+}
+
+.message .choice-inline > button.is-locked {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 選び終えた選択肢（.is-done）はただの文字の行。選んだ行に印が残る */
+.message .choice-inline.is-done > .is-picked::before {
+  color: inherit;
+}
+
+.start {
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: #ccc;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+.status {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font: 12px ui-monospace, monospace;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  white-space: pre;
+  text-align: right;
+}
+
+.dev-link {
+  position: absolute;
+  top: 42px;
+  right: 12px;
+  /* システム画面（.lm-sys は 10）の下に置き、開いた画面の閉じるボタンにかぶらない */
+  z-index: 9;
+  font: 12px ui-monospace, monospace;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+}
+
+.dev-link:hover {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
+}
+
+.fx,
+.images {
+  pointer-events: none;
+}
+
+.overlay,
+.hud {
+  pointer-events: none;
+}
+
+.overlay > *,
+.hud > * {
+  pointer-events: auto;
+}
+
+/* 常駐の表示と残すカットインの層（メッセージ枠の上、暗転の下）。暗転しきっている間と、章の扉や全画面の動画を出している間は出さない */
+.stage.lm-masked > .hud,
+.stage.lm-ui-covered > .hud {
+  visibility: hidden;
+}
+
+/* 画像のボタンと押せる範囲（@choice の選択肢の image= / width= height=） */
+.choices > button.choice-image,
+.choices > button.choice-area {
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.choices > button.choice-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.choices > button.choice-area:hover,
+.choices > button.choice-area:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 調べる場所の短い説明（選択肢の行の tip=）。乗せたときだけ、範囲の上に出す */
+.choices > button.has-tip {
+  position: relative;
+  overflow: visible;
+}
+
+.choices > button.has-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  white-space: nowrap;
+  font-size: 18px;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(10, 12, 18, 0.85);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.choices > button.has-tip:hover::after,
+.choices > button.has-tip:focus-visible::after {
+  opacity: 1;
+}
+
+/* 文字入力と確認の枠（@text-input・@dialog） */
+/* 素材の読み込みを待っている印（0.5 秒を超えたときだけ。dom-host.ts の busy） */
+.lm-busy {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 0.5px solid rgba(236, 235, 230, 0.8);
+  border-top-color: transparent;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: lm-busy 900ms linear infinite;
+}
+
+.lm-busy[hidden] {
+  display: none;
+}
+
+@keyframes lm-busy {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lm-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* 枠の線とボタンの色はシステム画面の色（ui.system の border、controlBg、fg。--lm-dialog-*）。書いていなければ前の版と同じ暗い色 */
+.lm-panel-box {
+  min-width: 480px;
+  max-width: 820px;
+  padding: 28px 36px;
+  background: var(--message-bg);
+  border: 1px solid var(--lm-dialog-border, rgba(232, 217, 176, 0.4));
+  font-size: 24px;
+  line-height: 1.6;
+}
+
+.lm-panel-box p {
+  margin: 0 0 18px;
+  white-space: pre-wrap;
+}
+
+.lm-panel-box input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 12px;
+  font: 24px var(--font);
+}
+
+.lm-panel-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.lm-panel-buttons button {
+  padding: 8px 28px;
+  font: 22px var(--font);
+  color: var(--lm-dialog-button-fg, var(--message-fg));
+  background: var(--lm-dialog-button-bg, rgba(10, 12, 18, 0.85));
+  border: 1px solid var(--lm-dialog-border, rgba(232, 217, 176, 0.4));
+  cursor: pointer;
+}
+
+/* 空のまま決められないとき（@text-input required=true） */
+.lm-panel-buttons button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* 決めた形に合わないとき（@text-input pattern=） */
+.lm-panel-box input[aria-invalid] {
+  outline: 0.5px solid #d98c8c;
+}
+
+/* 指で触る端末: 画面のキーボードを除いた見えている範囲の上に寄せる（--lm-visible-top・--lm-visible-height は play.ts が置く） */
+.lm-panel.lm-panel-touch {
+  align-items: start;
+}
+
+.lm-panel.lm-panel-touch .lm-panel-box {
+  margin-top: calc(var(--lm-visible-top, 0px) + 24px);
+  max-height: calc(var(--lm-visible-height, 100%) - 48px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* ゲームパッドで打つ画面のキーボード（@text-input） */
+.lm-keyboard {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.lm-keyboard-keys {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-content: start;
+  gap: 4px 16px;
+}
+
+.lm-keyboard-row {
+  display: flex;
+  gap: 4px;
+}
+
+.lm-keyboard button {
+  min-width: 40px;
+  padding: 4px 8px;
+  font: 20px var(--font);
+  color: var(--lm-dialog-button-fg, var(--message-fg));
+  background: var(--lm-dialog-button-bg, rgba(10, 12, 18, 0.85));
+  border: 0.5px solid var(--lm-dialog-border, rgba(232, 217, 176, 0.4));
+  cursor: pointer;
+}
+
+.lm-keyboard button[aria-pressed="true"],
+.lm-keyboard button:focus-visible {
+  border-color: rgba(232, 217, 176, 0.95);
+}
+
+.lm-keyboard-tools {
+  display: flex;
+  gap: 8px;
+}
+
+/*
+ * 積み上げる通知（@notify・RenderContext.notify）。右上から下へ積む。位置と見た目は作品の CSS で .lm-notices・.lm-notice を、
+ * 種類ごとに .lm-notice--<種類>（data-kind）を書いて変える。出し入れは data-lm-state（enter・in・out）
+ */
+.lm-notices {
+  position: absolute;
+  top: var(--lm-notice-top, 24px);
+  right: var(--lm-notice-right, 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--lm-notice-gap, 10px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.lm-notice {
+  max-width: var(--lm-notice-width, 420px);
+  padding: 10px 18px;
+  font: calc(18px * var(--lm-text-scale, 1)) / 1.6 var(--font);
+  /* 地と文字と印の色はシステム画面の色（ui.system の screenBg、fg、accent）。書いていなければ暗い地 */
+  color: var(--lm-notice-fg, var(--message-fg));
+  background: var(--lm-notice-bg, rgba(10, 12, 18, 0.86));
+  border-left: 3px solid var(--lm-notice-accent, var(--lm-notice-theme-accent, #e8d9b0));
+  transition:
+    opacity 320ms,
+    translate 320ms ease;
+}
+
+.lm-notice[data-lm-state="enter"] {
+  opacity: 0;
+  translate: 24px 0;
+}
+
+.lm-notice[data-lm-state="out"] {
+  opacity: 0;
+}
+
+.lm-notice--success {
+  --lm-notice-accent: #8fd19e;
+}
+
+.lm-notice--warning {
+  --lm-notice-accent: #f0c36d;
+}
+
+.lm-notice--error {
+  --lm-notice-accent: #f08a8a;
+}
+
+.lm-notice-title {
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+/* 指で触る端末と縦長の作品（舞台の lm-touch）では、標準の命令の画面と同じ倍率で大きくする（画面で 12px 以上） */
+.stage.lm-touch .lm-notices {
+  top: calc(var(--lm-notice-top, 24px) * var(--lm-touch));
+  right: calc(var(--lm-notice-right, 24px) * var(--lm-touch));
+}
+
+.stage.lm-touch .lm-notice {
+  max-width: calc(var(--lm-notice-width, 420px) * var(--lm-touch));
+  padding: calc(10px * var(--lm-touch)) calc(18px * var(--lm-touch));
+  font-size: calc(18px * var(--lm-text-scale, 1) * var(--lm-touch));
+}
+
+.stage.lm-touch .lm-notice-title {
+  font-size: 0.85em;
+}
+
+/* RenderContext.toast（システム画面を差し替えた作品では overlay に出す） */
+.layer.overlay > .lm-toast {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 24px;
+  font-size: 16px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.78);
+  pointer-events: none;
+  transition: opacity 400ms;
+}
+}
+
+/* 用語集の用語（押すと説明が出る） */
+.ch.lm-term {
+  color: var(--term-fg, inherit);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
+/* 変数の監視（開発サーバーだけ。F9） */
+.lm-var-watch {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 380px;
+  max-height: 60%;
+  padding: 10px;
+  box-sizing: border-box;
+  font: 12px/1.4 ui-monospace, Menlo, monospace;
+  color: #e8e8e8;
+  background: rgba(10, 12, 16, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+}
+
+.lm-var-watch input {
+  font: inherit;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.lm-var-list {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lm-var-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+}
+
+.lm-var-pin {
+  padding: 0;
+  color: #f0c060;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.lm-var-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-var-value.is-bad {
+  border-color: #e05050;
+}
+
+/* スクリーンリーダーにだけ渡す本文（見えない） */
+.lm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 高コントラスト（設定画面）。枠を不透明な黒・文字を白に、選択肢とボタンの縁をくっきりさせる */
+.lm-high-contrast .message {
+  background-color: #000;
+  background-image: none;
+  border: 2px solid #fff;
+  color: #fff;
+  text-shadow: none;
+}
+
+.lm-high-contrast .message .text .ch {
+  color: #fff;
+}
+
+.lm-high-contrast .choices > button {
+  color: #fff;
+  background-color: #000;
+  background-image: none;
+  border: 2px solid #fff;
+  text-shadow: none;
+}
+
+.lm-high-contrast .choices > button:hover,
+.lm-high-contrast .choices > button:focus-visible {
+  color: #000;
+  background-color: #ffeb3b;
+}
+
+.lm-high-contrast .ch.lm-term {
+  color: #ffeb3b;
+}
+
+.lm-var-watch[hidden] {
+  display: none;
+}
+
+/* 傍点（{dot …}）。形は ui.text.emphasis（--text-emphasis） */
+.lm-emphasis {
+  -webkit-text-emphasis: var(--text-emphasis, filled sesame);
+  text-emphasis: var(--text-emphasis, filled sesame);
+  -webkit-text-emphasis-position: over right;
+  text-emphasis-position: over right;
+}
+
+/* 本文の中の画像（{img …}）。既定の高さは文字の大きさ */
+.lm-inline-image {
+  height: 1em;
+  width: auto;
+  vertical-align: -0.12em;
+}
+
+/* 制限時間つきの選択肢（@choice timeout=）の残り時間 */
+.choices .choice-timer {
+  width: var(--choice-width, 560px);
+  max-width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--choice-fg, var(--message-fg));
+  transform-origin: left center;
+  animation: choice-timer var(--choice-time) linear forwards;
+}
+
+/* システム画面を開いている間は、残り時間も止まる（dom-host.ts の pauseTimers） */
+.stage.lm-timers-paused .choices .choice-timer {
+  animation-play-state: paused;
+}
+
+@keyframes choice-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* 効果音と BGM の字幕（コンフィグの「効果音の字幕」）。画面の右上に少しのあいだ出す */
+.lm-captions {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.lm-caption {
+  padding: 4px 14px;
+  font-size: 22px;
+  line-height: 1.5;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 4px;
+  animation: lm-caption 3.5s ease forwards;
+}
+
+@keyframes lm-caption {
+  0% {
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

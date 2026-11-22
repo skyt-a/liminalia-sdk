@@ -1,6 +1,6 @@
 import { fillHtml, scanHtml } from "@liminalia/lang";
 import { display, type Args } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { IMAGE_LAYERS, num, readExtra, text, writeExtra, type ImageLayer, type LayerItem } from "./image.ts";
 
 /**

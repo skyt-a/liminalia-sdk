@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HeadlessHost, Runtime } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std, { animState as A, imageState as S, movieState as M, screenState as C } from "../src/commands/index.ts";
 
 const { implementations } = combinePlugins([std]);

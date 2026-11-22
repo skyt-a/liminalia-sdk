@@ -1,0 +1,34 @@
+:: StoryData
+{
+  "ifid": "0B5B2B6A-8F0E-4A8B-9C38-2E5C6C0D1A11",
+  "format": "SugarCube",
+  "format-version": "2.36.1",
+  "start": "Start"
+}
+
+:: StoryInit
+<<set $ticket to false>>
+<<set $coins to 3>>
+
+:: Story JavaScript [script]
+Config.history.maxStates = 1;
+
+:: Start
+駅のホームにいる。小銭は <<print $coins>> 枚。
+<<if $coins gte 2>>切符が買える。
+<<elseif $coins eq 1>>あと少し足りない。
+<<else>>一枚もない。<</if>>
+<<link "切符を買う" "Buy">><</link>>
+[[待合室|Wait]]
+
+:: Buy
+<<set $coins -= 2, $ticket to true>>
+切符を買った。残りは $coins 枚。
+<<goto "Train">>
+
+:: Wait
+ベンチに座った。
+[[ホームへ戻る->Start]]
+
+:: Train
+<<if $ticket>>電車に乗った。<<else>>乗れなかった。<</if>>

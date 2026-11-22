@@ -1,5 +1,5 @@
 import { EvalError, type Args, type StageState, type Value } from "@liminalia/runtime";
-import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/plugin-host";
 import { EASING_NAMES, IMAGE_LAYERS, num, readExtra, spriteKey, text, writeExtra, type ImageLayer, type LayerItem } from "./image.ts";
 
 /**

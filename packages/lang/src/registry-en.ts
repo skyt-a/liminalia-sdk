@@ -1,3 +1,4 @@
+import { RULE_PARAMS, SKIP_PARAM } from "@liminalia/sdk";
 import { COMMAND_META } from "./command-meta.ts";
 import type { CommandSpec, ParamSpec } from "./registry.ts";
 
@@ -9,47 +10,9 @@ import type { CommandSpec, ParamSpec } from "./registry.ts";
  * 用語は Studio の英語表示（studio/src/client/strings-en.ts）にそろえる（sprite、sprite set、variant、message window など）。
  */
 
-/**
- * 一つのコマンドの英語。params はパラメータの名前ごと。keywords はパーツの欄の検索に使う言葉。
- * example は英語の例（人物の名前や見せる文字が日本語の例だけに書く）。人物の ID は Akari、Sou にし（サイトの英語版のリファレンスは
- * ひな形の アカリ、ソウ に置き換えて再生する）、素材は templates/default にあるものを使う。lim check を通るかは cli/test/example-en.test.ts が見る。
- */
-export interface CommandEnglish {
-  summary: string;
-  params?: Readonly<Record<string, string>>;
-  keywords?: readonly string[];
-  example?: string;
-}
-
-/** withEnglish が読む、コマンドの定義の形（CommandSpec と SDK の CommandDefinition の両方）。 */
-interface EnglishTarget {
-  name: string;
-  summaryEn?: string;
-  keywordsEn?: readonly string[];
-  exampleEn?: string;
-  params: Readonly<Record<string, { docEn?: string }>>;
-}
-
-/**
- * コマンドの定義に英語を重ねる（表の英語が先。表に無いものは定義に書いた英語のまま）。
- * プラグインも使える（@liminalia/sdk が同じものを出す）。表は名前 → { summary, params, keywords, example }。
- */
-export function withEnglish<T extends EnglishTarget>(commands: readonly T[], table: Readonly<Record<string, CommandEnglish>>): T[] {
-  return commands.map((c) => withCommandEnglish(c, table[c.name]));
-}
-
-/** 一つのコマンドに英語を重ねる（名前の重なる @choice の行と選択肢の行のため）。 */
-export function withCommandEnglish<T extends EnglishTarget>(c: T, en: CommandEnglish | undefined): T {
-  if (!en) return c;
-  const params: Record<string, { docEn?: string }> = {};
-  for (const [name, p] of Object.entries(c.params)) {
-    const docEn = en.params?.[name] ?? p.docEn;
-    params[name] = docEn === undefined ? p : { ...p, docEn };
-  }
-  const keywordsEn = en.keywords ?? c.keywordsEn;
-  const exampleEn = en.example ?? c.exampleEn;
-  return { ...c, summaryEn: en.summary, params, ...(keywordsEn ? { keywordsEn } : {}), ...(exampleEn ? { exampleEn } : {}) } as T;
-}
+// コマンドの定義に英語を重ねる関数の正本は @liminalia/sdk（プラグインも使う約束）
+export { withCommandEnglish, withEnglish, type CommandEnglish } from "@liminalia/sdk";
+import type { CommandEnglish } from "@liminalia/sdk";
 
 /** 英語で読むときの要約（英語が無ければ日本語）。 */
 export function commandSummary(spec: Pick<CommandSpec, "summary" | "summaryEn">, en: boolean): string {
@@ -797,10 +760,11 @@ export const CHOICE_EN: Readonly<Record<"block" | "option", CommandEnglish>> = {
 
 /** 共通のパラメータ（registry.ts の SKIP_PARAM、RULE_PARAMS など）の英語。 */
 export const SHARED_PARAMS_EN = {
-  skip: "Lets a click, the Enter key or a tap finish the effect at once. false prevents it (while skipping, it ends at once anyway)",
-  rule: "Rule image (grayscale; darker areas change first; overrides method)",
-  pattern: "Built-in rule, used when rule isn't given (wipe-left, circle-out, blinds, noise and so on)",
-  vague: "Softness of the rule's edge (0 to 255; higher is softer)",
+  // 演出を飛ばせるかとルール画像の引数の英語は、正本（@liminalia/sdk）と同じものを使う
+  skip: SKIP_PARAM.docEn as string,
+  rule: RULE_PARAMS.rule?.docEn as string,
+  pattern: RULE_PARAMS.pattern?.docEn as string,
+  vague: RULE_PARAMS.vague?.docEn as string,
   distance: "Distance moved for left, right, top and bottom (px)",
   volume: VOLUME,
 } as const;

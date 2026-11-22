@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <title>Liminalia Player</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <style>
+      /* 読み込みの表示（エンジンと作品の設定を読んでいる間。少し待っても終わらないときだけ出す。main.ts が外す） */
+      #lm-boot {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 64px;
+        margin-left: -32px;
+        border-top: 0.5px solid rgba(236, 235, 230, 0.7);
+        opacity: 0;
+        animation: lm-boot 1.2s ease-in-out 0.5s infinite alternate;
+      }
+      @keyframes lm-boot {
+        from {
+          opacity: 0.15;
+          transform: scaleX(0.25);
+        }
+        to {
+          opacity: 1;
+          transform: scaleX(1);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #lm-boot {
+          animation: none;
+          opacity: 0.6;
+        }
+      }
+      /* ファイルのまま（file://）開いたときの案内（下のスクリプトが出す） */
+      #lm-file-notice {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 24px;
+        box-sizing: border-box;
+        background: #000;
+        color: #ecebe6;
+        font: 16px/1.8 -apple-system, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+        text-align: center;
+      }
+      #lm-file-notice p {
+        margin: 0;
+        max-width: 36em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="lm-boot" aria-hidden="true"></div>
+    <div id="viewport"></div>
+    <script>
+      // 書き出したページをファイルのまま（file://）開くと、ブラウザがエンジン（モジュール）とプロジェクトの読み込みを止め、白い画面のままになる。
+      // 理由と遊び方を出す（ページの言語が日本語なら日本語、ほかは英語）
+      if (location.protocol === "file:") {
+        var lmBoot = document.getElementById("lm-boot");
+        if (lmBoot) lmBoot.remove();
+        var lmJa = /^ja\b/i.test(document.documentElement.lang);
+        var lmNotice = document.createElement("div");
+        lmNotice.id = "lm-file-notice";
+        lmNotice.setAttribute("role", "alert");
+        (lmJa
+          ? ["ファイルを直接開いても遊べません（ブラウザがゲームの読み込みを止めるため）。", "Web に置いたページで開くか、Liminalia Studio の書き出しの画面の「ブラウザで開く」で開いてください。"]
+          : ["This game can't be played by opening the file directly (the browser blocks loading the game).", "Open it from a web page, or with Open in browser on the Export screen of Liminalia Studio."]
+        ).forEach(function (text) {
+          var p = document.createElement("p");
+          p.textContent = text;
+          lmNotice.append(p);
+        });
+        document.body.append(lmNotice);
+      }
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

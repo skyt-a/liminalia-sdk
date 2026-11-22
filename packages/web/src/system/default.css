@@ -1,0 +1,2221 @@
+/*
+ * エンジンの CSS はカスケードレイヤー liminalia に入れる。作品の CSS（レイヤーの外）は、セレクタの強さを競わずに上書きできる。
+ */
+@layer liminalia {
+/*
+ * 既定のシステム画面。色・書体・角の丸みは下の CSS 変数で差し替えられる（:root か .lm-sys で上書きする）。
+ * それ以上に変えたいときは .lm-sys 以下を CSS で上書きするか、システム画面ごと差し替える。
+ * すべて 1280×720 の舞台の中に収まるように置く（縦長の作品は portrait.css が並べ替える）。
+ */
+:root {
+  /* 文字 */
+  --lm-fg: #ecebe6;
+  --lm-fg-muted: rgba(236, 235, 230, 0.58);
+  --lm-accent: #a9bfd2;
+  --lm-ui-font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif;
+  /* 本文・見出し（舞台の --font に合わせる） */
+  --lm-text-font: var(--font, serif);
+  /* 面 */
+  --lm-screen-bg: rgba(12, 14, 18, 0.95);
+  --lm-screen-blur: 10px;
+  --lm-backdrop: rgba(0, 0, 0, 0.55);
+  --lm-control-bg: rgba(255, 255, 255, 0.05);
+  --lm-control-hover: rgba(255, 255, 255, 0.13);
+  --lm-control-active: rgba(169, 191, 210, 0.24);
+  --lm-border: rgba(255, 255, 255, 0.16);
+  --lm-border-faint: rgba(255, 255, 255, 0.07);
+  --lm-thumb-bg: #000;
+  --lm-radius: 4px;
+  /* タイトル */
+  --lm-title-bg: radial-gradient(ellipse at center, #1d1f27 0%, #08090c 100%);
+  /* ゲーム中の帯 */
+  --lm-bar-fg: rgba(255, 255, 255, 0.62);
+  --lm-bar-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/*
+ * 高コントラスト（設定画面）。システム画面も白黒にくっきりさせる。
+ * 作品のテーマ（liminalia.json の ui.system）は舞台の style に直に書くので、遊ぶ人が選んだこちらを !important で勝たせる。
+ * 画像も外す（画像の上の文字は、くっきりさせられない）。
+ */
+.lm-high-contrast {
+  --lm-fg: #fff !important;
+  --lm-fg-muted: #e6e6e6 !important;
+  --lm-accent: #ffeb3b !important;
+  --lm-screen-bg: #000 !important;
+  --lm-screen-blur: 0px !important;
+  --lm-control-bg: #000 !important;
+  --lm-control-hover: #333 !important;
+  --lm-control-active: #554e00 !important;
+  --lm-border: #fff !important;
+  --lm-border-faint: #bbb !important;
+  --lm-screen-image: none !important;
+  --lm-button-image: none !important;
+  --lm-button-hover-image: none !important;
+  --lm-button-border: #fff !important;
+  --lm-frame-image: none !important;
+  --lm-frame-bg: #000 !important;
+  --lm-frame-border: #fff !important;
+  --lm-button-border-image: none !important;
+  --lm-button-hover-border-image: none !important;
+  --lm-frame-border-image: none !important;
+}
+
+/* 明るい配色（liminalia.json の ui.system.theme が light） */
+.lm-theme-light {
+  --lm-fg: #23242a;
+  --lm-fg-muted: rgba(35, 36, 42, 0.6);
+  --lm-accent: #3f6a8f;
+  --lm-screen-bg: rgba(246, 245, 241, 0.96);
+  --lm-backdrop: rgba(255, 255, 255, 0.45);
+  --lm-control-bg: rgba(0, 0, 0, 0.04);
+  --lm-control-hover: rgba(0, 0, 0, 0.08);
+  --lm-control-active: rgba(63, 106, 143, 0.18);
+  --lm-border: rgba(0, 0, 0, 0.16);
+  --lm-border-faint: rgba(0, 0, 0, 0.07);
+  --lm-thumb-bg: #ddd;
+  --lm-title-bg: radial-gradient(ellipse at center, #fbfaf7 0%, #e5e2da 100%);
+}
+
+.lm-sys {
+  z-index: 10;
+  pointer-events: none;
+  font-family: var(--lm-ui-font);
+  color: var(--lm-fg);
+}
+
+.lm-sys > * {
+  pointer-events: auto;
+}
+
+:where(.lm-sys) button {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* ---- 部品 ---- */
+
+/*
+ * ボタンの地の画像（ui.system.images.button・buttonHover）は --lm-button-image・--lm-button-hover-image で受け、
+ * ボタンの大きさに伸ばす。画像があるときは ui-style.ts が地の色と線（--lm-button-border）を透明にする。
+ */
+.lm-button,
+.lm-tab,
+.lm-toggle {
+  padding: 8px 22px;
+  font-size: calc(17px * var(--lm-text-scale, 1));
+  background-color: var(--lm-control-bg);
+  background-image: var(--lm-button-image, none);
+  background-size: 100% 100%;
+  border: 1px solid var(--lm-button-border, var(--lm-border));
+  border-image: var(--lm-button-border-image, none);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-button:hover,
+.lm-tab:hover,
+.lm-toggle:hover,
+.lm-button:focus-visible,
+.lm-tab:focus-visible,
+.lm-toggle:focus-visible {
+  background-color: var(--lm-control-hover);
+  background-image: var(--lm-button-hover-image, var(--lm-button-image, none));
+  border-image: var(--lm-button-hover-border-image, var(--lm-button-border-image, none));
+  outline: none;
+}
+
+.lm-primary,
+.lm-tab[aria-pressed="true"],
+.lm-toggle[aria-pressed="true"],
+.lm-button[aria-pressed="true"] {
+  background-color: var(--lm-control-active);
+  border-color: var(--lm-accent);
+}
+
+/* ---- 開始・タイトル ---- */
+
+.lm-gate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: #ccc;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+.lm-gate.has-image {
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.lm-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: var(--lm-title-align, center);
+  justify-content: center;
+  gap: 64px;
+  /* 左右に寄せたとき（ui.title.menu.align）の余白。中央では効かない */
+  padding-inline: 96px;
+  box-sizing: border-box;
+  background: var(--lm-title-bg);
+}
+
+/* タイトル画面の背景の画像（liminalia.json の ui.title.background） */
+/* 作品が作るタイトル（WebPlugin.title）。並べ方は作品に任せ、舞台いっぱいに置く */
+.lm-title.lm-title-custom {
+  display: block;
+}
+
+.lm-title-custom > * {
+  position: absolute;
+  inset: 0;
+}
+
+.lm-title.has-image {
+  background-size: cover;
+  background-position: center;
+}
+
+/* 題名の代わりの画像（ui.title.logo） */
+.lm-title-logo {
+  max-width: 70%;
+  max-height: 40%;
+  object-fit: contain;
+}
+
+.lm-title-name {
+  margin: 0;
+  font: 500 56px var(--lm-text-font);
+  letter-spacing: 0.12em;
+  text-shadow: var(--lm-title-shadow, none);
+}
+
+.lm-title-menu {
+  display: flex;
+  flex-direction: var(--lm-title-direction, column);
+  gap: var(--lm-title-gap, 14px);
+}
+
+.lm-title-button {
+  min-width: var(--lm-title-button-width, 280px);
+  padding: 12px 24px;
+  /* タイトルのボタンははじめから大きいので、文字サイズの設定は 1.5 倍まで（ボタンが多くても画面に収まるように） */
+  font-size: calc(21px * min(var(--lm-text-scale, 1), 1.5));
+  letter-spacing: 0.08em;
+  background-color: var(--lm-title-button-bg, var(--lm-control-bg));
+  background-image: var(--lm-button-image, none);
+  background-size: 100% 100%;
+  border: 1px solid var(--lm-button-border, var(--lm-border));
+  border-image: var(--lm-button-border-image, none);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-title-button:hover:not(:disabled),
+.lm-title-button:focus-visible {
+  background-color: var(--lm-control-hover);
+  background-image: var(--lm-button-hover-image, var(--lm-button-image, none));
+  border-image: var(--lm-button-hover-border-image, var(--lm-button-border-image, none));
+  outline: none;
+}
+
+.lm-title-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---- 画面の共通 ---- */
+
+/* 作品の画面（system.openScreen）の枠。見た目は持たず、舞台いっぱいに置いて下への入力を止める */
+.lm-custom-screen {
+  position: absolute;
+  inset: 0;
+  font-family: initial;
+  color: initial;
+}
+
+.lm-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 56px 36px;
+  box-sizing: border-box;
+  background: var(--lm-screen-bg);
+  /* 全面の画面の背景の画像（ui.system.images.screen）。メニューは下で背景ごと置き換えるので、画像は出ない */
+  background-image: var(--lm-screen-image, none);
+  background-size: cover;
+  background-position: center;
+  backdrop-filter: blur(var(--lm-screen-blur));
+  animation: lm-fade-in 140ms ease-out;
+}
+
+@keyframes lm-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.lm-screen-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: none;
+  padding-bottom: 16px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--lm-border);
+}
+
+.lm-screen-title {
+  margin: 0;
+  min-width: 120px;
+  font: 400 calc(30px * var(--lm-text-scale, 1)) var(--lm-text-font);
+  letter-spacing: 0.1em;
+}
+
+.lm-close {
+  margin-left: auto;
+}
+
+/* 遊ぶ人の操作を待つ画面（持ち物を選ぶ画面・図鑑）では、指で触る端末の右上のメニューのボタンを避ける（input.css の --lm-menu-room-x） */
+[data-lm-allow-menu] .lm-screen-header {
+  margin-right: max(0px, calc(var(--lm-menu-room-x, 0px) - 40px));
+}
+
+/* ---- セーブ・ロード ---- */
+
+.lm-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+/* 開いた画面の根（role="dialog"）はフォーカスを受けるだけで、枠は出さない */
+[data-lm-screen]:focus {
+  outline: none;
+}
+
+.lm-tab {
+  min-width: 46px;
+  padding: 6px 12px;
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-slots {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 14px 20px;
+}
+
+.lm-slot-wrap {
+  position: relative;
+  min-height: 0;
+}
+
+.lm-slot {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 10px;
+  box-sizing: border-box;
+  text-align: left;
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-border-faint);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-slot:hover:not(:disabled),
+.lm-slot:focus-visible {
+  background: var(--lm-control-hover);
+  border-color: var(--lm-border);
+  outline: none;
+}
+
+.lm-slot:disabled {
+  cursor: default;
+}
+
+.lm-slot-thumb {
+  flex: none;
+  height: 100%;
+  aspect-ratio: var(--lm-stage-aspect, 16 / 9);
+  background: var(--lm-thumb-bg);
+  border: 1px solid var(--lm-border-faint);
+  overflow: hidden;
+}
+
+.lm-slot-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lm-empty .lm-slot-thumb {
+  background: transparent;
+  border-style: dashed;
+}
+
+.lm-slot-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.lm-slot-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: calc(15px * var(--lm-text-scale, 1));
+}
+
+.lm-slot-name {
+  color: var(--lm-accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.lm-slot-date {
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-slot-text {
+  font: calc(17px * var(--lm-text-scale, 1))/1.55 var(--lm-text-font);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lm-empty .lm-slot-text {
+  color: var(--lm-fg-muted);
+}
+
+/* バックログの本文は選んでコピーできる */
+.lm-log-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 章の名前とプレイ時間 */
+.lm-slot-sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+  font-size: calc(13px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-slot-chapter {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-slot-time {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 章の名前の行があれば、本文の頭は一行に（下のボタンに重ならないように） */
+.lm-slot-meta:has(.lm-slot-sub) .lm-slot-text {
+  -webkit-line-clamp: 1;
+}
+
+/* スロットのメモ・保護・コピー・移動・削除 */
+.lm-slot-tools {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.lm-slot-tool {
+  padding: 2px 10px;
+  font-size: calc(13px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-border-faint);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-slot-tool:hover:not(:disabled),
+.lm-slot-tool:focus-visible {
+  color: var(--lm-fg);
+  border-color: var(--lm-border);
+  outline: none;
+}
+
+.lm-slot-tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lm-slot-memo {
+  font-size: calc(14px * var(--lm-text-scale, 1));
+  color: var(--lm-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-slot-memo-input {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 60%;
+  font: inherit;
+  font-size: calc(14px * var(--lm-text-scale, 1));
+  padding: 2px 6px;
+  color: var(--lm-fg);
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-accent);
+  border-radius: var(--lm-radius);
+  box-sizing: border-box;
+}
+
+/*
+ * メモがあれば、本文の頭の行にメモを出す（本文の頭は出さない）。メモは右下のメモと保護のボタンの上の行に収まり、ボタンと重ならない。
+ * 本文の頭は、スロットの絵と章の名前で見分けられる
+ */
+.lm-slot-meta:has(.lm-slot-memo) .lm-slot-text {
+  display: none;
+}
+
+.lm-slot-lock {
+  margin-left: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-size: calc(12px * var(--lm-text-scale, 1));
+  padding: 0 8px;
+  color: var(--lm-fg-muted);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+}
+
+.lm-slot.is-source {
+  border-color: var(--lm-accent);
+}
+
+.lm-slot-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.lm-slot-banner[hidden] {
+  display: none;
+}
+
+.lm-slot-delete {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 2px 10px;
+  font-size: calc(13px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  background: transparent;
+  border: 1px solid var(--lm-border-faint);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-slot-delete:hover,
+.lm-slot-delete:focus-visible {
+  color: var(--lm-fg);
+  border-color: var(--lm-border);
+  outline: none;
+}
+
+/* ---- 履歴 ---- */
+
+.lm-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 16px;
+  outline: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lm-border) transparent;
+}
+
+.lm-log-entry {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  gap: 28px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--lm-border-faint);
+}
+
+/* 検索で外れたページ（hidden）。上の display: grid が hidden を上書きしないように */
+.lm-log-entry[hidden] {
+  display: none;
+}
+
+.lm-log-speaker {
+  text-align: right;
+  color: var(--lm-accent);
+  font: calc(19px * var(--lm-text-scale, 1))/1.8 var(--lm-text-font);
+}
+
+/* そのページから読み直すボタン（本文の右。重ねた項目だけ見せる） */
+.lm-log-jump {
+  align-self: center;
+  padding: 4px 12px;
+  font-size: calc(14px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.lm-log-entry:hover .lm-log-jump,
+.lm-log-jump:focus-visible {
+  opacity: 1;
+}
+
+.lm-log-jump:hover {
+  color: var(--lm-fg);
+  background: var(--lm-control-hover);
+}
+
+/* ボイスを鳴らし直すボタン（話者名の左） */
+.lm-log-voice {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  padding: 0;
+  vertical-align: 2px;
+  border: 1px solid var(--lm-border);
+  border-radius: 50%;
+  background: var(--lm-control-bg);
+  color: var(--lm-fg);
+  font-size: calc(11px * var(--lm-text-scale, 1));
+  line-height: 28px;
+  cursor: pointer;
+}
+
+.lm-log-voice:hover,
+.lm-log-voice:focus-visible {
+  background: var(--lm-control-hover);
+  outline: none;
+}
+
+.lm-log-text {
+  /* 遊ぶ人が設定画面で選んだ書体（--player-font）を、作品の書体より先に（メッセージ枠の本文と同じ） */
+  font: calc(21px * var(--lm-text-scale, 1))/1.8 var(--player-font, var(--lm-text-font));
+  letter-spacing: 0.03em;
+}
+
+/* 人物ごとの台詞の文字（cast.json の text）。メッセージ枠と同じく、遊ぶ人が選んだ書体が先 */
+.lm-log-text[data-speaker-look] {
+  color: var(--lm-speaker-fg, inherit);
+  font-family: var(--player-font, var(--lm-speaker-font, var(--lm-text-font)));
+  font-style: var(--lm-speaker-style, normal);
+}
+
+/* 選んだ選択肢: 話者の欄の「選択肢」は薄く、選んだ文はアクセントカラー */
+.lm-log-choice .lm-log-speaker {
+  color: var(--lm-fg-muted);
+}
+
+.lm-log-choice .lm-log-text {
+  color: var(--lm-accent);
+}
+
+.lm-log-text rt {
+  font-size: 0.5em;
+  letter-spacing: 0;
+}
+
+.lm-log-empty {
+  margin-top: 80px;
+  text-align: center;
+  color: var(--lm-fg-muted);
+}
+
+/* ---- 設定 ---- */
+
+.lm-config-rows {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.lm-config-rows[hidden],
+.lm-preview[hidden] {
+  display: none;
+}
+
+.lm-config-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 120px;
+  align-items: center;
+  gap: 24px;
+  min-height: 44px;
+}
+
+.lm-config-label {
+  font-size: calc(18px * var(--lm-text-scale, 1));
+}
+
+.lm-config-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lm-config-end {
+  width: 3.2em;
+  flex: none;
+  text-align: center;
+  font-size: calc(14px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-range {
+  flex: 1;
+  accent-color: var(--lm-accent);
+  cursor: pointer;
+}
+
+/* つまみの絵（ui.system.images.sliderThumb）。高コントラストでは標準のつまみに戻す */
+.lm-slider-image:not(.lm-high-contrast) .lm-range {
+  appearance: none;
+  height: 4px;
+  background: var(--lm-border);
+}
+
+.lm-slider-image:not(.lm-high-contrast) .lm-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--lm-slider-thumb) center / contain no-repeat;
+}
+
+.lm-slider-image:not(.lm-high-contrast) .lm-range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: var(--lm-slider-thumb) center / contain no-repeat;
+}
+
+.lm-config-value {
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-segmented {
+  gap: 8px;
+}
+
+.lm-toggle {
+  min-width: 140px;
+}
+
+/* 選ぶものが多い並び（ウィンドウの大きさ）: 詰めて折り返す */
+.lm-segmented.lm-wrap {
+  flex-wrap: wrap;
+}
+
+.lm-segmented.lm-wrap .lm-toggle {
+  min-width: 0;
+  padding-inline: 14px;
+}
+
+.lm-preview {
+  position: relative;
+  flex: none;
+  margin-top: 28px;
+  padding: 26px 32px 22px;
+  min-height: 112px;
+  box-sizing: border-box;
+  background: var(--message-bg, rgba(10, 12, 18, 0.78));
+  border: 1px solid var(--lm-border);
+}
+
+.lm-preview-label {
+  position: absolute;
+  top: -11px;
+  left: 20px;
+  padding: 0 10px;
+  font-size: calc(13px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  background: var(--lm-screen-bg);
+}
+
+.lm-preview-text {
+  /* テキスト速度の見本なので、本文と同じ倍率（--text-scale） */
+  font: calc(23px * var(--text-scale, 1))/1.75 var(--lm-text-font);
+  letter-spacing: 0.04em;
+  color: var(--message-fg, var(--lm-fg));
+}
+
+.lm-config-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: none;
+  margin-top: 16px;
+}
+
+/* ---- メニュー（右クリック・Esc） ---- */
+
+.lm-menu {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--lm-backdrop);
+  backdrop-filter: none;
+}
+
+/* メニューと確認の枠。枠の画像（ui.system.images.frame）は枠の大きさに伸ばし、そのときは地の色と線を透明にする（ui-style.ts） */
+.lm-menu-panel {
+  width: 560px;
+  padding: 28px 40px 32px;
+  box-sizing: border-box;
+  background-color: var(--lm-frame-bg, var(--lm-screen-bg));
+  background-image: var(--lm-frame-image, none);
+  border-image: var(--lm-frame-border-image, none);
+  background-size: 100% 100%;
+  border: 1px solid var(--lm-frame-border, var(--lm-border));
+  border-radius: var(--lm-radius);
+}
+
+.lm-menu-panel .lm-screen-title {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.lm-menu-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.lm-menu-resume {
+  width: 100%;
+  margin-top: 18px;
+}
+
+/* ---- ゲーム中の帯（メッセージ枠の下） ---- */
+
+/* 帯は中身の幅で、文言は折り返さない。舞台に収まらなければ menu.ts が --lm-menubar-fit で文字と余白を小さくする */
+.lm-menubar {
+  position: absolute;
+  right: 64px;
+  bottom: 2px;
+  display: flex;
+  gap: 2px;
+  width: max-content;
+}
+
+.lm-menubar[hidden] {
+  display: none;
+}
+
+/* 帯の位置（liminalia.json の ui.menuBar.position） */
+.lm-menubar-at-bottom-left {
+  left: 64px;
+  right: auto;
+}
+
+.lm-menubar-at-bottom-center {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+.lm-menubar-at-top-right {
+  top: 8px;
+  bottom: auto;
+}
+
+.lm-menubar-at-top-left {
+  top: 8px;
+  bottom: auto;
+  left: 64px;
+  right: auto;
+}
+
+.lm-menubar-button {
+  padding: calc(3px * var(--lm-menubar-fit, 1)) calc(9px * var(--lm-menubar-fit, 1));
+  font-size: calc(13px * var(--lm-menubar-fit, 1));
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  color: var(--lm-bar-fg);
+  text-shadow: var(--lm-bar-shadow);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* 絵のボタン（ui.menuBar.images）。文字は読み上げのために残し、見た目だけ隠す */
+.lm-menubar-button.has-image {
+  width: calc(44px * var(--lm-menubar-fit, 1));
+  height: calc(28px * var(--lm-menubar-fit, 1));
+  padding: 0;
+  font-size: 0;
+  background-image: var(--lm-bar-image);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.lm-menubar-button.has-image[aria-pressed="true"] {
+  background-image: var(--lm-bar-active-image, var(--lm-bar-image));
+  text-decoration: none;
+}
+
+.lm-menubar-button.has-image:hover,
+.lm-menubar-button.has-image:focus-visible {
+  filter: brightness(1.25);
+}
+
+.lm-menubar-button:hover,
+.lm-menubar-button:focus-visible {
+  color: var(--lm-fg);
+  outline: none;
+}
+
+.lm-menubar-button[aria-pressed="true"] {
+  color: var(--lm-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/*
+ * オート中・スキップ中の表示（ui.indicator の位置）。色は帯と同じ変数（ui.menuBar.color・shadow とテーマ）。押せない（下へ通す）。
+ * 印はオートが三角一つ、スキップが二つ。作品の CSS は .lm-indicator[data-state="auto"] などで替えられる
+ */
+.lm-sys > .lm-indicator {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--lm-bar-fg);
+  text-shadow: var(--lm-bar-shadow);
+  pointer-events: none;
+}
+
+.lm-indicator[hidden] {
+  display: none;
+}
+
+.lm-indicator-at-top-left {
+  top: 12px;
+  left: 16px;
+}
+
+.lm-indicator-at-top-right {
+  top: 12px;
+  right: 16px;
+}
+
+.lm-indicator-at-bottom-left {
+  bottom: 8px;
+  left: 16px;
+}
+
+.lm-indicator-at-bottom-right {
+  bottom: 8px;
+  right: 16px;
+}
+
+.lm-indicator-mark {
+  display: flex;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  animation: lm-indicator-pulse 1.4s ease-in-out infinite;
+}
+
+.lm-indicator-mark::before,
+.lm-indicator[data-state="skip"] .lm-indicator-mark::after {
+  content: "";
+  width: 0.62em;
+  height: 0.72em;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+@keyframes lm-indicator-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* 指で触る端末では大きく（舞台を縮めて出すため。メニューのボタンと同じ大きさの段） */
+@media (pointer: coarse) {
+  .lm-sys > .lm-indicator {
+    font-size: 22px;
+  }
+}
+
+html.lm-emulate-touch .lm-sys > .lm-indicator {
+  font-size: 22px;
+}
+
+/* 枠を隠している間 */
+.stage.lm-window-hidden .message {
+  visibility: hidden;
+}
+
+/* ---- 確認・知らせ ---- */
+
+.lm-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--lm-backdrop);
+}
+
+.lm-dialog {
+  min-width: 440px;
+  max-width: 680px;
+  padding: 30px 40px 28px;
+  box-sizing: border-box;
+  background-color: var(--lm-frame-bg, var(--lm-screen-bg));
+  background-image: var(--lm-frame-image, none);
+  border-image: var(--lm-frame-border-image, none);
+  background-size: 100% 100%;
+  border: 1px solid var(--lm-frame-border, var(--lm-border));
+  border-radius: var(--lm-radius);
+}
+
+.lm-dialog-message {
+  margin: 0 0 26px;
+  font-size: calc(20px * var(--lm-text-scale, 1));
+  line-height: 1.7;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.lm-dialog-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.lm-dialog-buttons .lm-button {
+  min-width: 120px;
+}
+
+.lm-sys > .lm-toast {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 24px;
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  /* 地はシステム画面の地の色（ui.system.screenBg）。書いていなければ暗い地 */
+  background: var(--lm-toast-bg, rgba(0, 0, 0, 0.78));
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  pointer-events: none;
+  transition: opacity 400ms;
+  z-index: 1;
+}
+
+.lm-toast.lm-leaving {
+  opacity: 0;
+}
+
+/* ---- おまけ（CG・回想・音楽・実績） ---- */
+
+.lm-extra-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lm-border) transparent;
+}
+
+.lm-extra-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 18px;
+}
+
+.lm-extra-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lm-extra-tile:disabled {
+  cursor: default;
+}
+
+.lm-extra-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: var(--lm-stage-aspect, 16 / 9);
+  overflow: hidden;
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  background: var(--lm-control-bg);
+}
+
+.lm-extra-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lm-extra-tile:not(:disabled):hover .lm-extra-thumb,
+.lm-extra-tile:focus-visible .lm-extra-thumb {
+  border-color: var(--lm-accent);
+  outline: none;
+}
+
+.lm-extra-tile:focus-visible {
+  outline: none;
+}
+
+.lm-extra-locked {
+  font-size: calc(30px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-title {
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-viewer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+  cursor: pointer;
+  animation: lm-fade-in 140ms ease-out;
+}
+
+.lm-extra-viewer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center;
+}
+
+/* CG の鑑賞: 指の操作は画面が受ける（拡大、移動、スワイプ）。拡大している間はつかんで動かす */
+.lm-extra-viewer:not(.lm-extra-movie) {
+  overflow: hidden;
+  touch-action: none;
+  outline: none;
+}
+
+.lm-extra-viewer.is-zoomed {
+  cursor: grab;
+}
+
+.lm-extra-page {
+  position: absolute;
+  right: 24px;
+  bottom: 18px;
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-extra-page:empty {
+  display: none;
+}
+
+/* CG の題と説明（絵の上に出すので、読めるように影を付ける） */
+.lm-extra-caption {
+  position: absolute;
+  left: 24px;
+  right: 120px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.lm-extra-caption-title {
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  color: var(--lm-fg);
+}
+
+.lm-extra-caption-text {
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-caption-text:empty {
+  display: none;
+}
+
+.lm-extra-viewer.is-zoomed .lm-extra-caption,
+.lm-extra-viewer.is-zoomed .lm-extra-page {
+  visibility: hidden;
+}
+
+/* CG のまとまり（group か章）のタブと、解放の数 */
+.lm-extra-groups {
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.lm-extra-list {
+  display: grid;
+  gap: 6px;
+}
+
+/* 音楽室: 一覧の下に再生の欄 */
+.lm-music {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 14px;
+  height: 100%;
+  min-height: 0;
+}
+
+.lm-music .lm-extra-list {
+  overflow-y: auto;
+  min-height: 0;
+  align-content: start;
+}
+
+.lm-extra-artist {
+  color: var(--lm-fg-muted);
+}
+
+.lm-music-player {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--lm-border-faint);
+  border-radius: var(--lm-radius);
+  background: var(--lm-control-bg);
+}
+
+.lm-music-now {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.lm-music-title {
+  font-size: 1.1em;
+}
+
+.lm-music-artist,
+.lm-music-description,
+.lm-music-time {
+  color: var(--lm-fg-muted);
+}
+
+.lm-music-description {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.lm-music-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.lm-music-seek {
+  width: 100%;
+  accent-color: var(--lm-accent);
+}
+
+.lm-music-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-music-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.lm-music-shuffle[aria-pressed="true"] {
+  border-color: var(--lm-accent);
+}
+
+.lm-extra-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 52px;
+  padding: 6px 16px;
+  border: 1px solid var(--lm-border-faint);
+  border-radius: var(--lm-radius);
+  background: var(--lm-control-bg);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.lm-extra-row {
+  cursor: pointer;
+}
+
+button.lm-extra-row:disabled {
+  cursor: default;
+  color: var(--lm-fg-muted);
+}
+
+button.lm-extra-row:not(:disabled):hover,
+button.lm-extra-row:focus-visible {
+  background: var(--lm-control-hover);
+  outline: none;
+}
+
+button.lm-extra-row[aria-pressed="true"] {
+  background: var(--lm-control-active);
+  border-color: var(--lm-accent);
+}
+
+.lm-extra-no,
+.lm-extra-date {
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-extra-name {
+  font-size: calc(19px * var(--lm-text-scale, 1));
+}
+
+.lm-extra-state {
+  font-size: calc(13px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+/* コンプリート率（おまけの見出しの下） */
+.lm-extra-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 12px;
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-extra-summary:empty {
+  display: none;
+}
+
+.lm-extra-summary-item.is-total {
+  color: var(--lm-fg);
+}
+
+.lm-extra-progress {
+  margin: 0 0 10px;
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lm-extra-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: calc(22px * var(--lm-text-scale, 1));
+  color: var(--lm-accent);
+}
+
+.lm-extra-icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.lm-extra-text {
+  display: grid;
+  gap: 2px;
+}
+
+.lm-extra-desc {
+  font-size: calc(15px * var(--lm-text-scale, 1));
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-achievement.is-locked .lm-extra-name,
+.lm-extra-achievement.is-locked .lm-extra-icon {
+  color: var(--lm-fg-muted);
+}
+
+/*
+ * ---- 大きな文字（コンフィグの文字サイズが 100% より大きいとき、舞台に lm-text-large） ----
+ * 文字を大きくしても画面に収まるよう、並べ方を詰める。セーブとロードは枠を高くして中で縦に送り（横長の作品は一列にする）、
+ * コンフィグは画面ごと縦に送る（見出しと閉じるボタンは上に残す）。メニューは中で縦に送る（横長の作品は三列にする）
+ */
+.stage.lm-text-large .lm-screen-header {
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.stage.lm-text-large .lm-screen-title {
+  min-width: 0;
+}
+
+.stage.lm-text-large .lm-tabs {
+  flex-wrap: wrap;
+}
+
+.stage.lm-text-large .lm-slots {
+  grid-template-rows: none;
+  grid-auto-rows: calc(112px * var(--lm-text-scale, 1));
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-slots {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 縦長の作品は幅が狭いので、絵を小さくして文字の幅を取る */
+.stage.lm-text-large.lm-portrait .lm-slots {
+  grid-template-rows: none;
+  grid-auto-rows: calc(126px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-text-large.lm-portrait .lm-slot-thumb {
+  height: auto;
+  width: 26%;
+  align-self: flex-start;
+}
+
+.stage.lm-text-large .lm-slot-head {
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 0;
+}
+
+/* スロットのボタンの並び（右下）の分だけ、本文の頭を上に収める */
+.stage.lm-text-large .lm-slot-meta {
+  padding-bottom: calc(28px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-text-large .lm-config {
+  overflow-y: auto;
+}
+
+.stage.lm-text-large .lm-config .lm-screen-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--lm-screen-bg);
+}
+
+.stage.lm-text-large .lm-config-rows {
+  flex: none;
+  overflow: visible;
+  grid-auto-rows: max-content;
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-config-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 24px;
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-config-label {
+  grid-column: 1 / -1;
+}
+
+.stage.lm-text-large .lm-config-control {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.stage.lm-text-large .lm-range {
+  min-width: 0;
+}
+
+.stage.lm-text-large .lm-toggle {
+  min-width: 0;
+}
+
+.stage.lm-text-large .lm-config-footer {
+  flex-wrap: wrap;
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-log-entry {
+  grid-template-columns: calc(180px * min(var(--lm-text-scale, 1), 1.4)) 1fr auto;
+}
+
+.stage.lm-text-large .lm-menu-panel {
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-menu-panel {
+  width: min(960px, calc(100% - 48px));
+}
+
+.stage.lm-text-large:not(.lm-portrait) .lm-menu-list {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.stage.lm-text-large.lm-portrait .lm-menu-button,
+.stage.lm-text-large.lm-portrait .lm-menu-resume {
+  min-height: 0;
+}
+
+.stage.lm-text-large .lm-dialog {
+  max-width: min(960px, calc(100% - 48px));
+}
+
+/* 主な入力が指なら、下の帯は隠す（小さすぎて押せない。代わりに右上のメニューのボタンを出す。input.css） */
+@media (pointer: coarse) {
+  .lm-menubar {
+    display: none;
+  }
+}
+
+/* 指で触れる端末では、履歴の「ここから」をいつも見せる（重ねられないため） */
+@media (hover: none) {
+  .lm-log-jump {
+    opacity: 1;
+  }
+}
+
+/* 制作画面の舞台がスマホの見え方を真似ているとき（html.lm-emulate-touch。main.ts） */
+html.lm-emulate-touch .lm-menubar {
+  display: none;
+}
+
+html.lm-emulate-touch .lm-log-jump {
+  opacity: 1;
+}
+
+/* フローチャート */
+.lm-flow-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  font: calc(14px * var(--lm-text-scale, 1)) var(--lm-ui-font);
+  color: var(--lm-fg-muted);
+}
+
+.lm-flow-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--lm-border);
+}
+
+.lm-flow-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lm-flow-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.lm-flow-canvas {
+  position: relative;
+  margin: 8px;
+}
+
+.lm-flow-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.lm-flow-lines path {
+  fill: none;
+  stroke: var(--lm-border-faint);
+  stroke-width: 1.5;
+}
+
+.lm-flow-lines path.is-known {
+  stroke: var(--lm-border);
+}
+
+.lm-flow-scene {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  text-align: left;
+  font: calc(14px * var(--lm-text-scale, 1)) var(--lm-ui-font);
+  color: var(--lm-fg);
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  cursor: pointer;
+}
+
+.lm-flow-scene:disabled {
+  cursor: default;
+}
+
+.lm-flow-scene.is-locked {
+  color: var(--lm-fg-muted);
+  border-color: var(--lm-border-faint);
+  background: transparent;
+}
+
+.lm-flow-scene:not(:disabled):hover,
+.lm-flow-scene:focus-visible {
+  background: var(--lm-control-hover);
+  border-color: var(--lm-accent);
+}
+
+.lm-flow-scene.is-end:not(.is-locked) {
+  border-color: var(--lm-accent);
+}
+
+.lm-flow-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+}
+
+.lm-flow-badge {
+  align-self: flex-start;
+  padding: 0 6px;
+  font-size: calc(12px * var(--lm-text-scale, 1));
+  color: var(--lm-accent);
+  border: 1px solid var(--lm-accent);
+  border-radius: 3px;
+}
+
+.lm-flow-endings .lm-flow-ending.is-locked {
+  color: var(--lm-fg-muted);
+}
+
+/* 用語集の説明（本文の用語を押したとき） */
+.lm-term-pop {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 420px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  font: calc(15px * var(--lm-text-scale, 1))/1.6 var(--lm-ui-font);
+  color: var(--lm-fg);
+  background: var(--lm-screen-bg);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  animation: lm-fade-in 120ms ease-out;
+}
+
+.lm-term-name {
+  font-weight: 700;
+  color: var(--lm-accent);
+}
+
+.lm-extra-group {
+  margin: 14px 0 2px;
+  font: 700 calc(14px * var(--lm-text-scale, 1)) var(--lm-ui-font);
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-term.is-locked .lm-extra-name,
+.lm-extra-chapter.is-locked .lm-extra-name {
+  color: var(--lm-fg-muted);
+}
+
+.lm-extra-chapter-thumb {
+  flex: none;
+  width: 128px;
+  aspect-ratio: var(--lm-stage-aspect, 16 / 9);
+  overflow: hidden;
+  background: var(--lm-thumb-bg);
+  border-radius: var(--lm-radius);
+}
+
+.lm-extra-chapter-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 起動の演出（ui.splash）。段（ロゴ・注意書き）は lm-splash-shown で浮かび、外れると沈む */
+.lm-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #000;
+  transition: opacity 600ms;
+}
+
+.lm-splash.lm-splash-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lm-splash-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  color: var(--lm-fg, #f2f0ea);
+  background: #000;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.lm-splash-screen.lm-splash-shown {
+  opacity: 1;
+}
+
+.lm-splash-logo-image {
+  max-width: 60%;
+  max-height: 50%;
+  object-fit: contain;
+}
+
+.lm-splash-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+.lm-splash-block {
+  max-width: 820px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  transition-delay: calc(400ms + var(--lm-splash-index, 0) * 450ms);
+}
+
+.lm-splash-shown .lm-splash-block {
+  opacity: 1;
+}
+
+.lm-splash-label {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+}
+
+.lm-splash-text {
+  font-size: 19px;
+  line-height: 1.9;
+}
+
+/* 自動で進むまでの残り（線が伸びきると次へ） */
+.lm-splash-rule {
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  bottom: 56px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+  transform-origin: left;
+  animation: lm-splash-rule linear both;
+  animation-delay: 500ms;
+}
+
+@keyframes lm-splash-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * エンディングの名前（@title-screen ending=）。暗転して名前と終わりの表記を浮かべ、どこを押してもタイトルへ進む。
+ * 名前は title= か種類の文言。title= があれば種類の文言（.lm-ending-kind）を上に小さく添える。種類は .lm-ending の data-kind。
+ * 色と大きさは liminalia.json の ui.ending（--lm-ending-*）、書いていなければシステム画面の色（--lm-title-bg、--lm-fg、--lm-accent）と本文の書体。
+ * 終わりの表記を名前の上に出す（ui.ending.mark が above）ときは舞台に lm-ending-mark-above、出さない（none）ときは lm-ending-mark-none が付く。
+ */
+.lm-ending {
+  padding: 0;
+  background: var(--lm-ending-image, none) center / cover no-repeat, var(--lm-ending-bg, var(--lm-title-bg, #0b0c10));
+  backdrop-filter: none;
+  animation: lm-fade-in 1s ease-out both;
+}
+
+.lm-ending-go {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lm-ending-fg, var(--lm-fg));
+  font-family: var(--lm-ending-font, var(--lm-text-font));
+  cursor: pointer;
+}
+
+.lm-ending-go:focus {
+  outline: none;
+}
+
+.lm-ending-kind {
+  margin-bottom: -10px;
+  font-size: calc(20px * var(--lm-text-scale, 1));
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: var(--lm-ending-kind-fg, var(--lm-accent));
+}
+
+.lm-ending-name {
+  font-size: calc(var(--lm-ending-size, 48px) * var(--lm-text-scale, 1));
+  letter-spacing: var(--lm-ending-letter-spacing, 0.16em);
+  text-indent: var(--lm-ending-letter-spacing, 0.16em);
+}
+
+.lm-ending-rule {
+  width: 96px;
+  border-top: 0.5px solid var(--lm-ending-rule, var(--lm-accent));
+}
+
+.lm-ending-mark {
+  font-size: calc(var(--lm-ending-mark-size, 26px) * var(--lm-text-scale, 1));
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: var(--lm-ending-mark-fg, var(--lm-fg-muted));
+}
+
+/* 終わりの表記を名前の上に（ui.ending.mark が above）。罫は名前と表記のあいだ */
+.lm-ending-mark-above .lm-ending-mark {
+  order: -2;
+}
+
+.lm-ending-mark-above .lm-ending-rule {
+  order: -1;
+}
+
+/* 終わりの表記を出さない（ui.ending.mark が none）、罫を引かない（ui.ending.rule が none） */
+.lm-ending-mark-none .lm-ending-mark,
+.lm-ending-mark-none .lm-ending-rule,
+.lm-ending-no-rule .lm-ending-rule {
+  display: none;
+}
+
+.lm-ending-kind,
+.lm-ending-name,
+.lm-ending-rule,
+.lm-ending-mark {
+  animation: lm-ending-rise 900ms ease-out both;
+  animation-delay: 900ms;
+}
+
+.lm-ending-kind {
+  animation-delay: 700ms;
+}
+
+.lm-ending-rule {
+  animation-delay: 1200ms;
+}
+
+.lm-ending-mark {
+  animation-delay: 1400ms;
+}
+
+@keyframes lm-ending-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.4em);
+  }
+}
+
+/* 注意書き（ui.contentWarning） */
+.lm-warning {
+  align-items: center;
+  justify-content: center;
+}
+
+.lm-warning-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 720px;
+}
+
+.lm-warning-text {
+  margin: 0;
+  font: calc(17px * var(--lm-text-scale, 1))/1.9 var(--lm-ui-font);
+  color: var(--lm-fg);
+  white-space: pre-wrap;
+}
+
+.lm-warning-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 履歴を探す */
+.lm-log-find {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.lm-log-search {
+  width: calc(260px * var(--lm-text-scale, 1));
+  padding: 6px 10px;
+  font: calc(15px * var(--lm-text-scale, 1)) var(--lm-ui-font);
+  color: var(--lm-fg);
+  background: var(--lm-control-bg);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+}
+
+.lm-log-count {
+  font: calc(14px * var(--lm-text-scale, 1)) var(--lm-ui-font);
+  color: var(--lm-fg-muted);
+}
+
+.lm-log-entry.is-hit .lm-log-text {
+  color: var(--lm-accent);
+}
+}
+
+/* 持ち物（liminalia.json の items）: 左に持っているもの、右に選んだものの絵と説明 */
+.lm-items-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 28px;
+}
+
+.lm-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  align-content: start;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lm-border) transparent;
+}
+
+.lm-items-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  background: var(--lm-control-bg);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lm-items-tile[aria-pressed="true"],
+.lm-items-tile:focus-visible {
+  border-color: var(--lm-accent);
+  outline: none;
+}
+
+.lm-items-thumb,
+.lm-items-picture {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.lm-items-thumb img,
+.lm-items-picture img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 選んだものの絵は詳しい欄の上に決まった高さで置き、絵はその中に収める（下の名前と説明に重ねない） */
+.lm-items-picture {
+  display: block;
+  flex: none;
+  aspect-ratio: auto;
+  height: min(240px, 45%);
+  min-height: 96px;
+}
+
+.lm-items-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lm-items-label {
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  text-align: center;
+}
+
+.lm-items-count {
+  margin-left: 6px;
+  color: var(--lm-fg-muted);
+}
+
+.lm-items-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.lm-items-name {
+  margin: 0;
+  font-size: calc(22px * var(--lm-text-scale, 1));
+}
+
+.lm-items-desc {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.lm-items-use {
+  align-self: flex-start;
+}
+
+.lm-items-empty {
+  color: var(--lm-fg-muted);
+}
+
+/* 動かさないマウスのカーソルを隠す（コンフィグ）。ゲーム中だけ、動かせばすぐ出る */
+.lm-cursor-idle,
+.lm-cursor-idle * {
+  cursor: none !important;
+}
+
+.lm-cursor-idle .lm-soft-cursor {
+  visibility: hidden;
+}
+
+/* 色覚の補正（コンフィグ）。舞台全体に色の行列をかける */
+.stage {
+  filter: var(--lm-color-vision,);
+}
+
+/* かけている間は、舞台の中のキャンバス（粒子・砂嵐・揺れる立ち絵など、毎コマ描き直すもの）を別の層にする。
+   WebKit は、フィルタをかけた舞台の中でキャンバスが描き変わるたびに舞台の絵をすべて描き直すので、コマが落ちる（color-vision.ts） */
+.stage.lm-color-vision canvas {
+  will-change: transform;
+}
+
+/* コンフィグの「操作」: キーとゲームパッドの割り当て（行が多いので中で送る） */
+.lm-config-rows.lm-controls {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lm-border) transparent;
+}
+
+.lm-config-group {
+  margin: 8px 0 4px;
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  font-weight: 600;
+  color: var(--lm-fg-muted);
+}
+
+.lm-config-keys {
+  font-family: var(--lm-mono, ui-monospace, monospace);
+}
+
+/* おまけのムービー: 画面いっぱいに、操作の帯つきで */
+.lm-extra-movie video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.lm-extra-movie video::cue {
+  font-size: calc(30px * var(--lm-text-scale, 1));
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* おまけの立ち絵の鑑賞: 左にキャラクター、中に差分の並び、右に大きな立ち絵 */
+.lm-chars {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  height: 100%;
+  min-height: 0;
+}
+
+.lm-chars-list {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.lm-chars-person[aria-pressed="true"] {
+  border-color: var(--lm-accent);
+}
+
+.lm-chars-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  min-height: 0;
+}
+
+.lm-chars-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.lm-chars-name {
+  margin: 0;
+  font-size: calc(24px * var(--lm-text-scale, 1));
+}
+
+.lm-chars-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lm-chars-variant {
+  min-width: 0;
+  padding-inline: 14px;
+}
+
+.lm-chars-picture {
+  display: grid;
+  place-items: end center;
+  min-height: 0;
+}
+
+.lm-chars-picture img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 操作説明: 操作の表と、作品が足すページ */
+.lm-help-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lm-border) transparent;
+}
+
+.lm-help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: calc(17px * var(--lm-text-scale, 1));
+}
+
+.lm-help-table th,
+.lm-help-table td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--lm-border-faint);
+}
+
+.lm-help-table thead th {
+  font-size: calc(14px * var(--lm-text-scale, 1));
+  font-weight: 400;
+  color: var(--lm-fg-muted);
+}
+
+.lm-help-table tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lm-help-page {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.lm-help-page img {
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.lm-help-text {
+  margin: 0;
+  max-width: 900px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

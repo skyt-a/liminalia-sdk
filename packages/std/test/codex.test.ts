@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { checkData, CORE_COMMANDS, createRegistry, parse, parseExpr } from "@liminalia/lang";
 import { evaluate, HeadlessHost, Runtime, type Value } from "@liminalia/runtime";
-import { combinePlugins, runPluginChecks } from "@liminalia/sdk";
+import { combinePlugins, runPluginChecks } from "@liminalia/plugin-host";
 import std, { codex as C, investigation as I } from "../src/commands/index.ts";
 
 const { implementations, specs } = combinePlugins([std]);

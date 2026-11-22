@@ -1,0 +1,36 @@
+{
+  "name": "@liminalia/web",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "ブラウザで .lim を再生する描画側（DOM と CSS、Web Audio）と、プラグインを読み込むプレイヤー",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.9.0",
+    "@liminalia/plugin-host": "0.9.0",
+    "@liminalia/runtime": "0.9.0",
+    "@liminalia/screens": "0.9.0",
+    "@liminalia/sdk": "0.9.0",
+    "@radix-ui/colors": "3.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0",
+    "@liminalia/studio": "0.9.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./caster-server": "./src/caster/server.ts",
+    "./pwa-icons": "./pwa-icons.ts",
+    "./ui-strings": "./src/system/ui-strings.ts",
+    "./screen-table": "./src/screen-preview/table.ts",
+    "./screen-rules": "./src/system/screens/rules.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/web"
+  }
+}

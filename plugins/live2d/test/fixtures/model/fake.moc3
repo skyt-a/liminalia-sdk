@@ -1,0 +1,21 @@
+{
+  "canvas": { "width": 400, "height": 600, "ppu": 300 },
+  "parameters": [
+    { "id": "ParamAngleX", "min": -30, "max": 30, "default": 0 },
+    { "id": "ParamSmile", "min": 0, "max": 1, "default": 0 },
+    { "id": "ParamMouthOpenY", "min": 0, "max": 1, "default": 0 },
+    { "id": "ParamEyeLOpen", "min": 0, "max": 1, "default": 1 },
+    { "id": "ParamEyeROpen", "min": 0, "max": 1, "default": 1 },
+    { "id": "ParamBreath", "min": 0, "max": 1, "default": 0 },
+    { "id": "ParamHidden", "min": 0, "max": 1, "default": 0 },
+    { "id": "ParamHair", "min": -10, "max": 10, "default": 0 }
+  ],
+  "parts": ["PartBody"],
+  "drawables": [
+    { "id": "Body", "rect": [-0.5, -1, 0.5, 0.6], "uv": [0, 0, 0.5, 0.5], "uvSwap": { "param": "ParamSmile", "uv": [0.5, 0, 1, 0.5] }, "moveX": { "param": "ParamAngleX", "k": 0.01 }, "part": "PartBody", "order": 0 },
+    { "id": "Mouth", "rect": [-0.15, -0.3, 0.15, 0.0], "uv": [0, 0.5, 0.5, 1], "grow": { "param": "ParamMouthOpenY" }, "part": "PartBody", "order": 2 },
+    { "id": "Eyes", "rect": [-0.3, 0.2, 0.3, 0.35], "uv": [0.5, 0.5, 1, 1], "show": { "param": "ParamEyeLOpen" }, "part": "PartBody", "order": 3 },
+    { "id": "Hat", "rect": [-0.5, 0.62, 0.5, 0.95], "uv": [0.5, 0.5, 1, 1], "masks": [4], "part": "PartBody", "order": 4 },
+    { "id": "HatMask", "rect": [-0.2, 0.62, 0.2, 0.95], "uv": [0.5, 0.5, 1, 1], "show": { "param": "ParamHidden" }, "order": 5 }
+  ]
+}

@@ -1,0 +1,55 @@
+# 作品のリポジトリに置く GitHub Actions のひな形（.github/workflows/liminalia-export.yml として置く）。
+# Actions の画面の「Run workflow」でブラウザ版を書き出し、実行の画面の成果物（browser）に zip で残す。
+# 説明は https://liminalia.skyta.dev/docs/studio-mobile/ の「書き出す」。
+name: ゲームの書き出し
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: エディション（liminalia.json の build.variants の名前。空なら標準）
+        required: false
+        default: ""
+
+env:
+  # 使うエンジンの版（エンジンのリポジトリの版のタグ）。ひな形と、制作画面が置く設定には、そのときのエンジンの版を書いてある。
+  # エンジンの変更で急に落ちないように固定する。新しくするときは、ここを書き換えて通るかを確かめる
+  LIMINALIA_ENGINE_REF: v0.9.0
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      # ブラウザ版だけを書き出すので、Electron 本体は落とさない
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 制作画面で Git LFS に入れた素材も取る（取らないとポインタのファイルのまま検査と書き出しに渡る。LFS を使わない作品では何もしない）
+          lfs: true
+      # エンジン（lim）。npm に出ていないあいだはリポジトリから取る。非公開なら読める token を secrets に置いて渡す
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: skyt-a/liminalia
+          ref: ${{ env.LIMINALIA_ENGINE_REF }}
+          path: .liminalia-engine
+          # token: ${{ secrets.LIMINALIA_ENGINE_TOKEN }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: .liminalia-engine/package-lock.json
+      - name: エンジンを入れる
+        run: npm ci
+        working-directory: .liminalia-engine
+      - name: ブラウザ版を書き出す
+        env:
+          VARIANT: ${{ inputs.variant }}
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs build . browser --no-verify ${VARIANT:+--variant "$VARIANT"}
+      - name: 書き出したものを残す
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: browser
+          path: dist/browser/
+          if-no-files-found: error

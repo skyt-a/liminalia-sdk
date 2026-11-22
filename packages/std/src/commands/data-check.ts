@@ -1,5 +1,5 @@
 import { DEFAULT_SCREEN, isPortrait, jsonLines, uiScale, type Argument, type ScreenSize, type Script, type Statement } from "@liminalia/lang";
-import type { PluginCheckProject, PluginDiagnostic } from "@liminalia/sdk";
+import type { PluginCheckProject, PluginDiagnostic } from "@liminalia/plugin-host";
 import { CODEX_FILE, readCodex } from "./codex.ts";
 import { INVESTIGATION_FILE, readInvestigation, type InvestigationRect } from "./investigate.ts";
 import { parseMask } from "./image.ts";

@@ -1,5 +1,5 @@
 import { argOrigin, CHAT_KEEP, CHAT_KEY, readChat, textOrigins, type Chat, type ChatMessage, type Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { text } from "./image.ts";
 
 /**

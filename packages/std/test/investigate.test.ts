@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { checkData, CORE_COMMANDS, createRegistry, jsonLines, parse, scriptLabels } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type PresentEvent, type Value } from "@liminalia/runtime";
-import { combinePlugins, runPluginChecks } from "@liminalia/sdk";
+import { combinePlugins, runPluginChecks } from "@liminalia/plugin-host";
 import std, { investigation as I } from "../src/commands/index.ts";
 import { mapPanelRect } from "../src/commands/data-check.ts";
 

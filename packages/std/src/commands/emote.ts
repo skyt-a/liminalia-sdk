@@ -1,5 +1,5 @@
 import type { Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 立ち絵に付いて動く漫符（@emote・@emote-off）。汗、怒り、驚き、疑問、ハート、きらめき、音符と、作品の画像。

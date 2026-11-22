@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { check, CORE_COMMANDS, createRegistry, parse } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type PresentEvent, type SaveData, type Value } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std, { htmlState as H, imageState as S } from "../src/commands/index.ts";
 
 const { implementations, specs } = combinePlugins([std]);

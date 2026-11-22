@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HeadlessHost, readChat, Runtime, type Translator, type Value } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std, { imageState as S } from "../src/commands/index.ts";
 
 /** 置いたままの文字（@layer-text・@chat）を、言語を替えたときと別の言語でロードしたときに今の言語で出し直す（Runtime.retranslate）。 */

@@ -1,0 +1,22 @@
+{
+  "id": "waiting_for_stars",
+  "title": "Waiting for Stars",
+  "version": "1.0.0",
+  "entry": "start",
+  "titleScreen": true,
+  "screen": {
+    "width": 1280,
+    "height": 720
+  },
+  "build": {
+    "icon": "icon.png"
+  },
+  "commandDefaults": {
+    "scene-change": {
+      "time": "1200ms"
+    }
+  },
+  "languages": [
+    "en"
+  ]
+}

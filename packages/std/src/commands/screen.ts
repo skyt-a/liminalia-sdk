@@ -1,5 +1,5 @@
 import type { Value } from "@liminalia/runtime";
-import { RULE_PARAMS, t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk";
+import { RULE_PARAMS, t, type CommandDefinition, type ParamDefinition } from "@liminalia/plugin-host";
 import { EASING_NAMES, FILTER_LAYERS, num, text, type FilterLayer } from "./image.ts";
 
 /** @layer-camera の ease の候補（CSS の ease と jQuery の easing 名）。 */

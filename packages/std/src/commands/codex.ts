@@ -1,6 +1,6 @@
 import { parseExpr, type DataDeclaration, type Expr } from "@liminalia/lang";
 import { truthy, type CommandContext, type Value } from "@liminalia/runtime";
-import { d, t, type CommandDefinition } from "@liminalia/sdk";
+import { d, t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 図鑑（記録・用語集・持ち物の説明など）。データは data/codex.json。

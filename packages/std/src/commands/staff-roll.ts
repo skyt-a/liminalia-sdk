@@ -1,5 +1,5 @@
 import { parseCredits } from "@liminalia/lang";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { leaveParam, presentLeaving } from "./chapter.ts";
 
 /**

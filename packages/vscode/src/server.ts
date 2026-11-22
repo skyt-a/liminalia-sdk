@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { basename, join, resolve, sep } from "node:path";
 import { translateDiagnosticText, type DataDeclaration, type Registry } from "@liminalia/lang";
 import type { CommandImpl } from "@liminalia/runtime";
-import type { CommandPlugin } from "@liminalia/sdk";
+import type { CommandPlugin } from "@liminalia/plugin-host";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { createConnection, DidChangeConfigurationNotification, ErrorCodes, ProposedFeatures, ResponseError, TextDocuments, TextDocumentSyncKind, type Diagnostic } from "vscode-languageserver/node";
 import { URI } from "vscode-uri";

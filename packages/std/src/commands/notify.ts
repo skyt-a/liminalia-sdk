@@ -1,4 +1,4 @@
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 積み上げる通知（@notify）。描画側の RenderContext.notify に渡す。出した通知は状態（セーブ）に残さず、ロードで消える。

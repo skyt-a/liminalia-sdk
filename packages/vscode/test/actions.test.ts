@@ -1,5 +1,5 @@
 import { collectTranslatable, parse, voiceLines } from "@liminalia/lang";
-import { d } from "@liminalia/sdk";
+import { d } from "@liminalia/plugin-host";
 import { describe, expect, it } from "vitest";
 import type { Diagnostic as LspDiagnostic, TextEdit } from "vscode-languageserver";
 import { formatEdits, labelAt, playTarget, quickFixes, renameLabelEdit } from "../src/actions.ts";

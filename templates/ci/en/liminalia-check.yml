@@ -1,0 +1,66 @@
+# A GitHub Actions template for your project's repository (copy it to .github/workflows/liminalia-check.yml).
+# On every push and pull request, it runs lim check (warnings fail too), the all-routes test and the script tests (lim test), and annotates the lines with problems.
+# More: https://liminalia.skyta.dev/en/docs/ci/
+name: Check the scripts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # The engine version to use (a version tag in the engine's repository). lim new --ci writes the version of the lim that created the project.
+  # It's fixed so that changes to the engine don't suddenly break this workflow. To use a newer engine, change it here and check that everything passes
+  LIMINALIA_ENGINE_REF: v0.9.0
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # Exporting (Electron) doesn't happen here, so don't download the Electron binary
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+      # Messages from lim in English
+      LIMINALIA_LANG: en
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Also fetch assets stored in Git LFS by Studio (otherwise the pointer files go to the check and the export; does nothing for projects without LFS)
+          lfs: true
+      # The engine (lim). Until it's on npm, get it from its repository. If the repository is private, pass a token that can read it from secrets
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: skyt-a/liminalia # The engine's repository (if you use a copy of the engine, change this to its name)
+          ref: ${{ env.LIMINALIA_ENGINE_REF }}
+          path: .liminalia-engine
+          # token: ${{ secrets.LIMINALIA_ENGINE_TOKEN }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: .liminalia-engine/package-lock.json
+      - name: Install the engine
+        run: npm ci
+        working-directory: .liminalia-engine
+      - name: Check (annotate errors and warnings, and fail on warnings too)
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs check . --github --strict
+      - name: Formatting of command lines
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs fmt . --check
+      - name: All-routes test (play from the start and list the endings reached)
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs coverage . --runs 4
+      - name: Script tests (the choices and expectations in tests/*.limtest; does nothing without tests)
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs test . --github
+      # Play the exported browser version to the end (needs Chromium; delete everything below if you don't need it)
+      - name: Install Chromium
+        timeout-minutes: 10
+        run: npx playwright-core install --with-deps chromium-headless-shell
+        working-directory: .liminalia-engine
+      - name: Export the browser version and play it to the end
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs playtest . --rebuild --runs 2
+      - name: Keep the screens where it stopped
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: playtest
+          path: dist/playtest/
+          if-no-files-found: ignore

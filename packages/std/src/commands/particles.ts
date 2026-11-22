@@ -1,5 +1,5 @@
 import type { Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { num, text } from "./image.ts";
 
 /**

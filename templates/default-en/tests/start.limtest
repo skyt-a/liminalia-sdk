@@ -1,0 +1,25 @@
+// Script tests (lim test runs them). Each test plays from New Game without a screen and checks how it ends for the choices made.
+// See "Script tests" in https://liminalia.skyta.dev/en/docs/design/format/. The text to choose is the option's text, or part of it.
+
+# Looking through the telescope and making a wish gets the lens cap
+choose Look through the telescope
+choose Go outside and look up
+choose Try making a wish
+expect game.looked && game.wished
+expect text "lens cap"
+expect reach epilogue#dawn
+expect no-errors
+
+# Making a wish without looking through the telescope gets a bell from the door
+choose Go outside and look up
+choose Try making a wish
+expect !game.looked && game.wished
+expect text "took one of the bells off the door"
+expect not text "lens cap"
+
+# Watching in silence leaves the door open
+choose Go outside and look up
+choose 2
+expect !game.wished
+expect text "left the door open a little"
+expect reach epilogue#dawn

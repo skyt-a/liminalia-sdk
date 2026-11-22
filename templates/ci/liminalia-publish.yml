@@ -1,0 +1,100 @@
+# 作品のリポジトリに置く GitHub Actions のひな形（.github/workflows/liminalia-publish.yml として置く）。
+# 版のタグ（v1.0.0 など）を push したときか、Actions の画面の「Run workflow」で、ブラウザ版と Windows 版と Linux 版を書き出して配る。
+# - ブラウザ版を GitHub Pages に置く（リポジトリの Settings → Pages の Source を「GitHub Actions」にしておく）
+# - itch.io の API キーを secrets の BUTLER_API_KEY に置き、liminalia.json の build.itch.target を書けば、itch.io にも上げる
+# - 書き出したものは、実行の画面の成果物（game）にも残す
+# 説明は https://liminalia.skyta.dev/docs/distribution/ の「itch.io と GitHub Pages」。
+name: ゲームを配る
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  # 使うエンジンの版（エンジンのリポジトリの版のタグ v0.2.0 などか、コミット）。いつ書き出しても同じエンジンになるように固定する。
+  # ひな形には、そのときのエンジンの版を書いてある。エンジンを新しくするときは、ここを書き換えて確かめてから配る
+  # （使ったエンジンの版は、書き出したものの project/build.json に残る）
+  LIMINALIA_ENGINE_REF: v0.9.0
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+    steps:
+      - name: エンジンの版を確かめる
+        if: env.LIMINALIA_ENGINE_REF == ''
+        run: |
+          echo "::error::このファイルの LIMINALIA_ENGINE_REF に、使うエンジンのタグかコミットを書いてください"
+          exit 1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 制作画面で Git LFS に入れた素材も取る（取らないとポインタのファイルのまま書き出しに渡る。LFS を使わない作品では何もしない）
+          lfs: true
+      # 版のタグで動いたときは、タグ（v1.0.1）と liminalia.json の version（1.0.1）が同じかを確かめる（上げ忘れたまま配らない）
+      - name: 作品の版を確かめる
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(node -p "require('./liminalia.json').version ?? ''")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::タグ $GITHUB_REF_NAME と liminalia.json の version（${version}）が違います。version を上げてからタグを付けてください"
+            exit 1
+          fi
+      # エンジン（lim）。npm に出ていないあいだはリポジトリから取る。非公開なら読める token を secrets に置いて渡す
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: skyt-a/liminalia # エンジンのリポジトリ（写したエンジンを使うなら、その名前に書き換える）
+          ref: ${{ env.LIMINALIA_ENGINE_REF }}
+          path: .liminalia-engine
+          # token: ${{ secrets.LIMINALIA_ENGINE_TOKEN }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: .liminalia-engine/package-lock.json
+      - name: エンジンを入れる
+        run: npm ci
+        working-directory: .liminalia-engine
+      - name: 書き出す（ブラウザ版、Windows 版、Linux 版）
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs build . browser,windows,linux --no-verify --zip
+      - name: 書き出したものを残す
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: game
+          path: |
+            dist/browser/
+            dist/windows/*/*.zip
+            dist/linux/*/*.tar.gz
+          if-no-files-found: error
+      - name: Pages に置くブラウザ版を選ぶ
+        id: browser
+        run: echo "dir=$(ls -d dist/browser/*/ | head -n 1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: ${{ steps.browser.outputs.dir }}
+      # itch.io（API キーがあるときだけ）。butler は itch.io の配る場所から取る
+      - name: butler を入れる
+        if: env.BUTLER_API_KEY != ''
+        run: |
+          curl -fsSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d "$RUNNER_TEMP/butler"
+          chmod +x "$RUNNER_TEMP/butler/butler"
+          echo "$RUNNER_TEMP/butler" >> "$GITHUB_PATH"
+      - name: itch.io へ上げる
+        if: env.BUTLER_API_KEY != ''
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs publish . itch browser,windows,linux
+
+  pages:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -1,0 +1,21 @@
+/*
+ * エンジンの CSS はカスケードレイヤー liminalia に入れる。作品の CSS（レイヤーの外）は、セレクタの強さを競わずに上書きできる。
+ */
+@layer liminalia {
+/* @html で置いた HTML（接頭辞 lim-html）。中の見た目は style 属性か、作品の CSS の class で付ける。 */
+.lim-html {
+  position: absolute;
+  pointer-events: none;
+  color: #fff;
+}
+
+.lim-html img {
+  max-width: 100%;
+}
+
+/* wait=true の @html の、押して飛ぶ要素（押すまで次に進まない）。 */
+.lim-html[data-waiting] [data-jump] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+}

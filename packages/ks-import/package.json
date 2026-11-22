@@ -1,0 +1,27 @@
+{
+  "name": "@liminalia/ks-import",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "TyranoScript の .ks を読み、新形式へ移すための取り込み口（字句解析・構造解決・診断）",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.9.0",
+    "@liminalia/plugin-host": "0.9.0",
+    "@liminalia/project": "0.9.0",
+    "@liminalia/sdk": "0.9.0"
+  },
+  "devDependencies": {
+    "@liminalia/runtime": "0.9.0",
+    "@liminalia/std": "0.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/ks-import"
+  }
+}

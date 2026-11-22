@@ -1,0 +1,21 @@
+{
+  "name": "@liminalia/plugin-host",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "プラグインを読み込んで動かすエンジンの側の部品（命令の定義を仕様にする、プラグインと作品の検査）。プラグインを書く人は @liminalia/sdk を使う",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@liminalia/lang": "0.9.0",
+    "@liminalia/runtime": "0.9.0",
+    "@liminalia/sdk": "0.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/plugin-host"
+  }
+}

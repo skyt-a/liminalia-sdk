@@ -1,0 +1,17 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "fake.moc3",
+    "Textures": ["fake.64/texture_00.png"],
+    "Physics": "fake.physics3.json",
+    "Expressions": [{ "Name": "smile", "File": "expressions/smile.exp3.json" }],
+    "Motions": {
+      "Idle": [{ "File": "motions/idle.motion3.json" }],
+      "surprised": [{ "File": "motions/jump.motion3.json", "FadeInTime": 0.2, "FadeOutTime": 0.2 }]
+    }
+  },
+  "Groups": [
+    { "Target": "Parameter", "Name": "EyeBlink", "Ids": ["ParamEyeLOpen", "ParamEyeROpen"] },
+    { "Target": "Parameter", "Name": "LipSync", "Ids": ["ParamMouthOpenY"] }
+  ]
+}

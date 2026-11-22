@@ -1,4 +1,4 @@
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 漫画的な一回きりの演出（@speedlines・@burst）。状態には残さず、描画側が出して片付ける（RenderContext.scope）。

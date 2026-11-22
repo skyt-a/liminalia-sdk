@@ -1,0 +1,36 @@
+/* エンジンの CSS はカスケードレイヤー liminalia に入れる（作品の CSS が上書きできる）。 */
+@layer liminalia {
+/* 新しいバージョンの知らせ（build-watch.ts）。システム画面を差し替えた作品でも出すので、色は --lm-* があればそれ */
+.lm-update {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 20px;
+  font-size: calc(16px * var(--lm-text-scale, 1));
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--lm-fg, #ecebe6);
+  background: rgba(10, 12, 18, 0.9);
+  border: 0.5px solid var(--lm-border, rgba(255, 255, 255, 0.16));
+  border-radius: var(--lm-radius, 4px);
+}
+
+.lm-update button {
+  padding: 4px 14px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0.5px solid var(--lm-border, rgba(255, 255, 255, 0.16));
+  border-radius: var(--lm-radius, 4px);
+  cursor: pointer;
+}
+
+.lm-update button.lm-update-reload {
+  border-color: var(--lm-accent, #a9bfd2);
+}
+}

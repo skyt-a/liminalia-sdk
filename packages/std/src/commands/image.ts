@@ -1,5 +1,5 @@
 import type { Args, Value } from "@liminalia/runtime";
-import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/plugin-host";
 import type { Look } from "./anim.ts";
 
 /**

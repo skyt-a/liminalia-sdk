@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { check, CORE_COMMANDS, createRegistry, parse } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type Translator } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std, { hudState as H } from "../src/commands/index.ts";
 
 /** 常駐の表示（@hud-button・@hud-text）の命令の側。 */

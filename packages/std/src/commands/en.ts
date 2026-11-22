@@ -1,4 +1,4 @@
-import type { CommandEnglish } from "@liminalia/sdk";
+import type { CommandEnglish } from "@liminalia/plugin-host";
 
 /**
  * 標準のコマンドの英語（index.ts が withEnglish で定義に重ねる）。用語は @liminalia/lang の registry-en.ts と同じ。

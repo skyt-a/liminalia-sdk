@@ -1,0 +1,309 @@
+/* チャットアプリ風の画面（@chat-open）。色・大きさは CSS 変数で替えられる（ui.chat はこの変数を舞台に書く） */
+.lim-chat {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  width: var(--chat-width, 380px);
+  height: var(--chat-height, 640px);
+  overflow: hidden;
+  font: var(--chat-size, 16px) / 1.5 var(--chat-font, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif);
+  color: var(--chat-fg, #1c1c1e);
+  background: var(--chat-bg, #e9edf2);
+  background-image: var(--chat-image, none);
+  border: 10px solid var(--chat-frame, #111);
+  border-radius: 36px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.lim-chat-head {
+  flex: none;
+  padding: 18px 16px 12px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--chat-head-fg, inherit);
+  background: var(--chat-head-bg, #f7f8fa);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.lim-chat-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px 18px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.lim-chat-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.lim-chat-row.is-me {
+  align-items: flex-end;
+}
+
+.lim-chat-name {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--chat-name, #5d6470);
+}
+
+.lim-chat-bubble {
+  max-width: 78%;
+  padding: 8px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--chat-other-fg, inherit);
+  background: var(--chat-other-bg, #fff);
+  border-radius: var(--chat-radius, 16px) var(--chat-radius, 16px) var(--chat-radius, 16px) var(--chat-tail-radius, 4px);
+}
+
+.lim-chat-row.is-me .lim-chat-bubble {
+  color: var(--chat-me-fg, #fff);
+  background: var(--chat-me-bg, #2f7cf6);
+  border-radius: var(--chat-radius, 16px) var(--chat-radius, 16px) var(--chat-tail-radius, 4px) var(--chat-radius, 16px);
+}
+
+.lim-chat-bubble.has-image img {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  margin-top: 4px;
+  border-radius: 10px;
+}
+
+/* 相手の吹き出しの横の顔（ui.chat.showFace）。同じ話者が続けば場所だけ取る */
+.lim-chat-row.has-face {
+  display: grid;
+  grid-template-columns: var(--chat-face-size, 56px) minmax(0, 1fr);
+  column-gap: 10px;
+  justify-items: start;
+}
+
+.lim-chat-face {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: var(--chat-face-size, 56px);
+  height: var(--chat-face-size, 56px);
+  overflow: hidden;
+  font-size: calc(var(--chat-face-size, 56px) * 0.42);
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--chat-name, #5d6470);
+  border-radius: 50%;
+}
+
+.lim-chat-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 15%;
+}
+
+.lim-chat-row.is-next .lim-chat-face {
+  visibility: hidden;
+  height: 0;
+}
+
+.lim-chat-row.has-face .lim-chat-name,
+.lim-chat-row.has-face .lim-chat-bubble {
+  grid-column: 2;
+}
+
+/* 入力中の「…」（ui.chat.typing） */
+.lim-chat-bubble.is-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  min-height: 1.5em;
+}
+
+.lim-chat-dot {
+  width: 0.4em;
+  height: 0.4em;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: lim-chat-dot 1s ease-in-out infinite;
+}
+
+.lim-chat-dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.lim-chat-dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes lim-chat-dot {
+  30% {
+    opacity: 0.85;
+    transform: translateY(-0.12em);
+  }
+}
+
+/* ---- ふだんの台詞をチャットにする作品（ui.chat.dialogue）。舞台いっぱいに置き、メッセージ枠の代わりに出す ---- */
+
+.lim-chat.is-dialogue {
+  inset: 0;
+  transform: none;
+  width: auto;
+  height: auto;
+  font-family: var(--player-font, var(--chat-font, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif));
+  font-size: calc(var(--chat-size, 26px) * var(--text-scale, 1));
+  line-height: 1.6;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.stage.lm-ui-scaled > .lim-chat.is-dialogue {
+  zoom: var(--lm-ui-scale);
+}
+
+.stage.lm-chat-dialogue > .message {
+  visibility: hidden;
+}
+
+/* @nvl on・@vertical on・@balloon on の間と、枠を隠している間（@window hide は @chat-open で開いた画面を除く） */
+.stage:not(.lm-chat-dialogue) > .lim-chat.is-dialogue,
+.stage.lm-window-hidden > .lim-chat.is-dialogue,
+.lim-chat.is-dialogue:not(.is-opened):has(+ .message:not(.visible)) {
+  visibility: hidden;
+}
+
+.lim-chat.is-dialogue .lim-chat-head {
+  padding: 26px 24px 18px;
+  font-size: 0.92em;
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 題が無ければ上の帯は出さない */
+.lim-chat.is-dialogue .lim-chat-head:empty {
+  display: none;
+}
+
+/* 下は操作の帯（system/portrait.css）と、選択肢の帯（--chat-reply-h）の分を空ける */
+.lim-chat.is-dialogue .lim-chat-list {
+  gap: 16px;
+  padding: 28px 22px calc(84px + var(--chat-reply-h, 0px));
+}
+
+.lim-chat.is-dialogue .lim-chat-row {
+  flex: none;
+}
+
+.lim-chat.is-dialogue .lim-chat-row.is-next {
+  margin-top: -8px;
+}
+
+.lim-chat.is-dialogue .lim-chat-name {
+  margin-left: 4px;
+  font-size: 0.72em;
+}
+
+.lim-chat.is-dialogue .lim-chat-bubble {
+  max-width: 84%;
+  padding: 14px 20px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* 地の文は中央の小さな一行（システムの知らせ） */
+.lim-chat-note {
+  flex: none;
+  align-self: center;
+  max-width: 88%;
+  padding: 2px 8px;
+  font-size: 0.74em;
+  line-height: 1.55;
+  text-align: center;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--chat-note, #5d6470);
+}
+
+/* クリック待ちの印は、吹き出しの地に見える色で */
+.lim-chat-row.is-me {
+  --glyph-fg: var(--chat-me-fg, #fff);
+}
+
+/* 本文のルビ（枠のものと同じ。style.css の .message .text .ruby） */
+.lim-chat-bubble .ruby,
+.lim-chat-note .ruby {
+  display: inline-block;
+  position: relative;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lim-chat-bubble .ruby .rt,
+.lim-chat-note .ruby .rt {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--ruby-gap, 0) / var(--ruby-size, 0.45) * 1em);
+  transform: translateX(-50%);
+  font-size: calc(var(--ruby-size, 0.45) * 1em);
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* 用語集の用語は押せる（画面は押しても下へ通す） */
+.lim-chat .lm-term {
+  pointer-events: auto;
+}
+
+/* 選択肢は返信の候補のように、画面の下の帯に並べる（文字のボタンのときだけ。絵のボタン・押せる範囲は自分の位置） */
+.stage.lm-chat-dialogue > .choices:has(> button:not(.choice-image, .choice-area)) {
+  justify-content: flex-end;
+  padding: 0 24px 72px;
+  box-sizing: border-box;
+}
+
+.stage.lm-chat-dialogue > .choices:has(> button:not(.choice-image, .choice-area))::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--chat-reply-h, 0);
+  background: var(--chat-reply-bg, transparent);
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.07);
+  pointer-events: none;
+}
+
+.stage.lm-chat-dialogue > .choices > button {
+  flex: none;
+}
+
+/* 高コントラスト（設定画面）。枠と同じに、不透明な黒と白で */
+.lm-high-contrast .lim-chat.is-dialogue,
+.lm-high-contrast .lim-chat.is-dialogue .lim-chat-head {
+  color: #fff;
+  background: #000;
+}
+
+.lm-high-contrast .lim-chat.is-dialogue .lim-chat-note,
+.lm-high-contrast .lim-chat.is-dialogue .lim-chat-name {
+  color: #fff !important;
+}
+
+.lm-high-contrast .lim-chat.is-dialogue .lim-chat-bubble {
+  color: #fff;
+  background: #000;
+  border: 2px solid #fff;
+}
+
+.lm-high-contrast .lim-chat-row.is-me {
+  --glyph-fg: #fff;
+}

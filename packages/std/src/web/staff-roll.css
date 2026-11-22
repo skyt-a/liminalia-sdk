@@ -1,0 +1,41 @@
+/* スタッフロール（@staff-roll）。作品の CSS で文字の大きさや色を変えられる */
+.lim-staffroll {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--message-fg, #fff);
+  font-family: var(--player-font, var(--font));
+}
+
+.lim-staffroll-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(100vh);
+}
+
+.lim-staffroll-heading {
+  margin-top: 0.6em;
+  font-size: 22px;
+  opacity: 0.75;
+}
+
+.lim-staffroll-line {
+  font-size: 30px;
+  line-height: 1.6;
+}
+
+.lim-staffroll-gap {
+  height: 80px;
+}
+
+.lim-staffroll-image {
+  height: 120px;
+  margin: 16px 0;
+}

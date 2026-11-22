@@ -1,6 +1,6 @@
 import { parseExpr, type DataDeclaration } from "@liminalia/lang";
 import { EvalError, truthy, type Args, type CommandContext, type PickOutcome, type Value } from "@liminalia/runtime";
-import { d, t, type CommandDefinition } from "@liminalia/sdk";
+import { d, t, type CommandDefinition } from "@liminalia/plugin-host";
 
 /**
  * 調べる場所（@investigate）。背景の上に矩形の場所を置いて選ばせ、選んだ場所の場面を呼び出す。

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HeadlessHost, Runtime, type Value } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 
 /** 章の扉と章末（@chapter-card・@chapter-end）と、演出の終わりに暗転を残す leave=mask の命令の側。 */

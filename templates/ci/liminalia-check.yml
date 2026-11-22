@@ -1,0 +1,64 @@
+# 作品のリポジトリに置く GitHub Actions のひな形（.github/workflows/liminalia-check.yml として写す）。
+# 台本を push したときと PR のたびに lim check（警告も失敗にする）、網羅、台本のテスト（lim test）を流し、問題の行に注釈を付ける。
+# 説明は https://liminalia.skyta.dev/docs/ci/
+name: 台本の検査
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # 使うエンジンの版（エンジンのリポジトリの版のタグ）。lim new --ci は、そのときの lim の版を書く。
+  # エンジンの変更で急に落ちないように固定する。新しくするときは、ここを書き換えて通るかを確かめる
+  LIMINALIA_ENGINE_REF: v0.9.0
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # 書き出し（Electron）はここではしないので、Electron 本体は落とさない
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 制作画面で Git LFS に入れた素材も取る（取らないとポインタのファイルのまま検査と書き出しに渡る。LFS を使わない作品では何もしない）
+          lfs: true
+      # エンジン（lim）。npm に出ていないあいだはリポジトリから取る。非公開なら読める token を secrets に置いて渡す
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: skyt-a/liminalia # エンジンのリポジトリ（写したエンジンを使うなら、その名前に書き換える）
+          ref: ${{ env.LIMINALIA_ENGINE_REF }}
+          path: .liminalia-engine
+          # token: ${{ secrets.LIMINALIA_ENGINE_TOKEN }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.23.4
+          cache: npm
+          cache-dependency-path: .liminalia-engine/package-lock.json
+      - name: エンジンを入れる
+        run: npm ci
+        working-directory: .liminalia-engine
+      - name: 検査（エラーと警告を注釈にし、警告も失敗にする）
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs check . --github --strict
+      - name: 命令の行の書き方
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs fmt . --check
+      - name: 全分岐の網羅（はじめから流して、届いたエンディングも出す）
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs coverage . --runs 4
+      - name: 台本のテスト（tests/*.limtest の選び方と期待。テストが無ければ何もしない）
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs test . --github
+      # 書き出したブラウザ版を最後まで流す（Chromium が要る。要らなければ、ここから下を消す）
+      - name: Chromium を入れる
+        timeout-minutes: 10
+        run: npx playwright-core install --with-deps chromium-headless-shell
+        working-directory: .liminalia-engine
+      - name: ブラウザ版を書き出して、最後まで流す
+        run: node .liminalia-engine/packages/cli/bin/lim.mjs playtest . --rebuild --runs 2
+      - name: 止まったときの画面を残す
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: playtest
+          path: dist/playtest/
+          if-no-files-found: ignore

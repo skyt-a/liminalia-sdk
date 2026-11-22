@@ -24,7 +24,9 @@ VS Code の拡張機能、エンジン（書き出したゲームに入る実行
 - 不具合を調べるため、または自分で使うために、中身を読んだり解析したりしてもかまいません。
 - プラグインでコマンドや画面を追加することは改変に当たりません。作ったプラグインの権利は作った人のものです。
 - プラグインを書く部品 @liminalia/sdk（packages/sdk）は MIT ライセンスです（packages/sdk/LICENSE）。
-  ほかの公開している部品は、プラグインや拡張機能を作るために使えます。詳しくは全文の「公開している部品」の節にあります。
+  ほかの公開している部品（npm の lim とエンジンなど）は、ゲームを作って書き出すため、またプラグインや拡張機能を
+  作るために使えます。npm の lim で作ったゲームも、作った人のもので、同じ条件で配れます。
+  詳しくは全文の「公開している部品」の節にあります。
 - Liminalia は現状のまま提供し、提供者は保証しません。責任の範囲は全文のとおりです。
 
 サンプル素材
@@ -78,7 +80,9 @@ if a translation differs from the Japanese version, the Japanese version takes p
 - Adding commands or screens with plugins is not a modification. The rights to plugins you make
   belong to you.
 - @liminalia/sdk (packages/sdk), the component for writing plugins, is under the MIT License
-  (packages/sdk/LICENSE). The other published components may be used to make plugins and extensions.
+  (packages/sdk/LICENSE). The other published components (such as lim and the engine on npm) may be
+  used to make and export games, and to make plugins and extensions. Games made with lim from npm
+  also belong to the people who made them and can be distributed under the same terms.
   See "Published components" in the full terms for details.
 - Liminalia is provided as is, without warranty. The limits of liability are as in the full terms.
 

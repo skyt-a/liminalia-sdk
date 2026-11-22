@@ -1,0 +1,40 @@
+{
+  "name": "@liminalia/studio",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "制作画面（Liminalia Studio）。lim studio が開発サーバーに載せる。書き出すゲームには入らない",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    "./protocol": "./src/protocol.ts",
+    "./server": "./src/server/index.ts",
+    "./sweep": "./src/sweep.ts",
+    "./package.json": "./package.json",
+    "./plugin": "./src/plugin.ts",
+    "./catalog": "./src/server/catalog.ts",
+    "./server-plugin": "./src/server-plugin.ts",
+    "./browser": "./src/server/browser.ts",
+    "./profile": "./src/server/profile.ts",
+    "./target": "./src/server/target.ts",
+    "./running": "./src/server/running.ts",
+    "./asset-rename": "./src/server/asset-rename.ts",
+    "./line-edits": "./src/model/line-edits.ts",
+    "./project-look": "./src/project-look.ts"
+  },
+  "dependencies": {
+    "@liminalia/editor": "0.9.0",
+    "@liminalia/lang": "0.9.0",
+    "@liminalia/plugin-host": "0.9.0",
+    "@liminalia/project": "0.9.0",
+    "@liminalia/runtime": "0.9.0",
+    "@liminalia/sdk": "0.9.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyt-a/liminalia-sdk.git",
+    "directory": "packages/studio"
+  }
+}

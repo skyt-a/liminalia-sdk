@@ -7,7 +7,7 @@ import { assetNameResolver, CORE_COMMANDS, createRegistry, LFS_HEAD_BYTES, withC
 import { listPackSources, listScenarioFiles as listProjectScenarioFiles, scenarioFileEncoding } from "@liminalia/project/scenario-files";
 import { pluginScreens } from "@liminalia/project/screen-templates";
 import { screenTemplateRules } from "@liminalia/screens/rules";
-import { combinePlugins, dataDeclarations, type CommandPlugin } from "@liminalia/sdk";
+import { combinePlugins, dataDeclarations, type CommandPlugin } from "@liminalia/plugin-host";
 import std from "@liminalia/std/commands";
 import type { CommandImpl } from "@liminalia/runtime";
 import { URI } from "vscode-uri";

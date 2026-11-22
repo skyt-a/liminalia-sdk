@@ -1,0 +1,29 @@
+{
+  "plugins": [
+    {
+      "id": "ai",
+      "name": "AI 相談",
+      "nameEn": "AI consultation",
+      "description": "シナリオ執筆のタブに「AI 相談」の欄を足します。続きの提案、表現の推敲、整合性チェックなどを、このコンピューターの Codex か Gemini（agy）に頼みます（それぞれの CLI を入れてログインしておく必要があります）",
+      "descriptionEn": "Adds an \"AI consultation\" pane to the Scenario tab. Ask Codex or Gemini (agy) on this computer to suggest what comes next, polish wording, check consistency and more (install and sign in to their CLIs first)",
+      "folder": "../../liminalia-ai",
+      "folderEnv": "LIMINALIA_AI_DIR"
+    },
+    {
+      "id": "live2d",
+      "name": "Live2D",
+      "nameEn": "Live2D",
+      "description": "Live2D Cubism のモデルを立ち絵にします（キャラクターの「立ち絵の動き」）。差分の名前で表情とモーションを替え、口パクとまばたきもします。Cubism Core は入っていないので、Live2D の使用許諾に同意して入手し、assets/others/live2d/ に置いてください",
+      "descriptionEn": "Shows Live2D Cubism models as character sprites (Sprite motion on the Characters tab). Variant names switch expressions and motions, with lip sync and blinking. The Cubism Core isn't included: accept the Live2D license agreements, download it, and put it in assets/others/live2d/",
+      "folder": "../plugins/live2d"
+    },
+    {
+      "id": "spine",
+      "name": "Spine",
+      "nameEn": "Spine",
+      "description": "Spine の骨格を立ち絵にします（キャラクターの「立ち絵の動き」）。差分の名前で動きとスキンを替え、口パクとまばたきもします。Spine のランタイムは入っていないので、Spine のライセンスを持つ人が入手し、assets/others/spine/ に置いてください",
+      "descriptionEn": "Shows Spine skeletons as character sprites (Sprite motion on the Characters tab). Variant names switch animations and skins, with lip sync and blinking. The Spine runtime isn't included: a Spine licensee gets it and puts it in assets/others/spine/",
+      "folder": "../plugins/spine"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+/* エンジンの CSS はカスケードレイヤー liminalia に入れる（作品の CSS が上書きできる）。 */
+@layer liminalia {
+/*
+ * テストプレイの開発用の道具（play-dev.ts。開発サーバーだけ）。システム画面を差し替えた作品でも出すので、作品の色に頼らない。
+ * 右上の入口は開発時の位置表示（.status）と立ち絵の位置調整の入口（.dev-link）と同じ控えめな字で、システム画面（z-index 10）の下に置く。
+ */
+.lm-play-dev {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font: 12px ui-monospace, monospace;
+}
+
+/* 位置表示と立ち絵の位置調整の入口の下 */
+.lm-play-dev.is-below {
+  top: 64px;
+}
+
+.lm-play-dev button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lm-play-dev-entry {
+  padding: 2px 8px;
+  color: rgba(255, 255, 255, 0.45);
+  background: transparent;
+  border: 0.5px solid transparent;
+}
+
+.lm-play-dev-entry:hover,
+.lm-play-dev-entry:focus-visible,
+.lm-play-dev-entry[aria-expanded="true"] {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.lm-play-dev-entry.is-warning {
+  color: #f0c674;
+  background: rgba(10, 12, 18, 0.75);
+  border-color: rgba(240, 198, 116, 0.6);
+}
+
+.lm-play-dev-entry.is-error {
+  color: #f28b82;
+  background: rgba(10, 12, 18, 0.75);
+  border-color: rgba(242, 139, 130, 0.6);
+}
+
+.lm-play-dev-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 520px;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 4px;
+  color: #ecebe6;
+  background: rgba(10, 12, 18, 0.94);
+  border: 0.5px solid rgba(255, 255, 255, 0.24);
+}
+
+.lm-play-dev-menu > button,
+.lm-play-dev-problems button {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  text-align: left;
+  line-height: 1.5;
+  background: transparent;
+  border: 0;
+}
+
+.lm-play-dev-menu button:hover,
+.lm-play-dev-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.lm-play-dev-problems {
+  margin: 4px 0 0;
+  padding: 4px 0 0;
+  list-style: none;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.24);
+}
+
+.lm-play-dev-where {
+  flex: none;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.lm-play-dev-problems .is-error .lm-play-dev-where {
+  color: #f28b82;
+}
+
+.lm-play-dev-problems .is-warning .lm-play-dev-where {
+  color: #f0c674;
+}
+
+/* シナリオが変わった・制作画面が開いていない（舞台の上の真ん中。新しいバージョンの知らせ .lm-update と同じ置き方） */
+.lm-play-dev-banner {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 20px;
+  font: 16px var(--lm-ui-font, sans-serif);
+  line-height: 1.5;
+  white-space: nowrap;
+  color: #ecebe6;
+  background: rgba(10, 12, 18, 0.92);
+  border: 0.5px solid rgba(255, 255, 255, 0.24);
+}
+
+.lm-play-dev-banner button {
+  padding: 4px 14px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0.5px solid rgba(255, 255, 255, 0.24);
+  cursor: pointer;
+}
+
+.lm-play-dev-banner button.is-primary {
+  border-color: #a9bfd2;
+}
+}

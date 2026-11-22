@@ -1,4 +1,4 @@
-import { defineCommandPlugin, withEnglish } from "@liminalia/sdk";
+import { defineCommandPlugin, withEnglish } from "@liminalia/plugin-host";
 import { COMMANDS as anim } from "./anim.ts";
 import { COMMANDS as chapter } from "./chapter.ts";
 import { COMMANDS as chat } from "./chat.ts";
@@ -53,3 +53,8 @@ export * as codex from "./codex.ts";
 export * as hudState from "./hud.ts";
 export * as emoteState from "./emote.ts";
 export { leaveParam, presentLeaving } from "./chapter.ts";
+
+// プラグインの約束（@liminalia/sdk/std の presentLeaving）が呼ぶ実装を登録する
+import { provide as provideToSdk } from "@liminalia/sdk/host";
+import { presentLeaving as presentLeavingForSdk } from "./chapter.ts";
+provideToSdk("std", { presentLeaving: presentLeavingForSdk });

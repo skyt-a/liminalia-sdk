@@ -123,30 +123,9 @@ const soundFilterParams = (what: string): Record<string, ParamSpec> => ({
 /** 画像の出し入れの動き（@liminalia/web の transitions.ts と同じ並び）。 */
 const TRANSITION_METHODS = ["crossfade", "fadeIn", "fadeInLeft", "fadeInRight", "fadeInUp", "fadeInDown", "slideInLeft", "slideInRight", "slideInUp", "slideInDown", "puffIn", "vanishIn"];
 
-/**
- * 組み込みのルール（ルール画像を描かなくても使える切り替えの型。@liminalia/web の ruleFromPattern）。
- * wipe-* はその向きへ拭う、circle-in は外から中へ・circle-out は中から外へ、blinds は横の帯・blinds-vertical は縦の帯、
- * diamond はひし形が広がる、noise はばらばらのます目。
- */
-export const RULE_PATTERNS = ["wipe-left", "wipe-right", "wipe-up", "wipe-down", "circle-in", "circle-out", "blinds", "blinds-vertical", "diamond", "noise"] as const;
-
-/** ルール画像の切り替え（ユニバーサルトランジション）の引数。書けば method より優先する。 */
-export const RULE_PARAMS: Readonly<Record<string, ParamSpec>> = {
-  rule: { type: { kind: "asset", folder: "image" }, doc: "ルール画像（白黒）。暗いところから先に切り替わる。method より優先する", docEn: SHARED_PARAMS_EN.rule },
-  pattern: { type: { kind: "enum", values: [...RULE_PATTERNS] }, doc: "組み込みのルール（rule を書かないとき。wipe-left、circle-out、blinds、noise など）", docEn: SHARED_PARAMS_EN.pattern },
-  vague: { type: { kind: "int", min: 0, max: 255 }, default: "64", doc: "ルールの境目のぼかし（0〜255。大きいほど柔らかい）", docEn: SHARED_PARAMS_EN.vague },
-};
-
-/**
- * 時間のかかる演出をクリック（決定キー・タップ）で終わりまで飛ばせるか。演出に時間をかける命令が持つ。
- * 作品全体で飛ばさないなら liminalia.json の ui.input.skipEffects を false にする。
- */
-export const SKIP_PARAM: ParamSpec = {
-  type: { kind: "bool" },
-  default: "true",
-  doc: "クリック、決定キー、タップで演出を終わりまで飛ばせる。false なら飛ばせない（スキップ中は書かなくてもすぐ終わる）",
-  docEn: SHARED_PARAMS_EN.skip,
-};
+// 組み込みのルール、ルール画像の切り替えの引数、演出を飛ばせるかの引数の正本は @liminalia/sdk（プラグインとの約束）
+export { RULE_PARAMS, RULE_PATTERNS, SKIP_PARAM } from "@liminalia/sdk";
+import { RULE_PARAMS, SKIP_PARAM } from "@liminalia/sdk";
 
 const number = (doc: string, def?: string): ParamSpec => (def === undefined ? { type: { kind: "number" }, doc } : { type: { kind: "number" }, default: def, doc });
 
@@ -878,7 +857,7 @@ export const READ_KEY = "@read";
 export const CORE_FUNCTIONS: ReadonlySet<string> = new Set(Object.keys(FUNCTION_ARITY));
 
 /**
- * プラグインの命令と描画の口の版（@liminalia/sdk の CommandPlugin・@liminalia/web の WebPlugin の apiVersion と、プラグインの package.json の
+ * プラグインの命令と描画の口の版（@liminalia/sdk の CommandPlugin・@liminalia/sdk/web の WebPlugin の apiVersion と、プラグインの package.json の
  * liminalia.api・engines.liminalia が指すもの）。口を足したら上げる。
  * テーマの theme.json と、作品とひな形の liminalia.json の engines.liminalia もこの版で比べるので、テーマが書ける ui の項目や、
  * ひな形が使う設定の項目を足したときも上げる（前のエンジンで開くと、lim check が theme-engine-version・engine-version で知らせる）。
@@ -897,8 +876,11 @@ export const CORE_FUNCTIONS: ReadonlySet<string> = new Set(Object.keys(FUNCTION_
  * - 6: 作品の CSS（ui.css）、標準の画面のテンプレート（ui.templates、PlayerProject.templates）、画面の JS の口（ScreenScriptApi）、
  *      @liminalia/web の loadScreenTemplates と DomHost.templateSource
  * - 7: 引数の型の cast の shown（@liminalia/sdk の t.cast の shown。表示中の立ち絵の人物に効く引数。制作画面の補完が表示中の人物を上に並べる）
+ * - 8: プラグインとの約束の入口 @liminalia/sdk/std・/web・/studio・/studio-server・/import と、@liminalia/sdk の argOrigin・textOrigins と描画の型
+ *      （前のエンジンはこの入口を持たないので、入口を読むプラグインは 8 を書く）
  */
-export const PLUGIN_API_VERSION = 7;
+// 正本は @liminalia/sdk（プラグインとの約束）
+export { PLUGIN_API_VERSION } from "@liminalia/sdk";
 
 /** プラグインが足した式の関数（プラグインの名前 → 関数の名前 → 引数の数）。@liminalia/sdk の combinePlugins が入れる。組み込みと同じ名前は入れない。 */
 const pluginFunctionArity = new Map<string, Map<string, readonly [min: number, max: number]>>();

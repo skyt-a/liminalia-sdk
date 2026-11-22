@@ -1,0 +1,359 @@
+/* 図鑑（@codex・メニュー・おまけ）。枠と部品は標準のシステム画面（lm-screen・lm-tab・lm-button）なので、テーマの色と形が効く */
+@layer liminalia {
+  /* 作品の画面として開くので、標準の画面の文字の色を受け継がない。テーマの文字の色をここで当てる */
+  .lm-codex {
+    color: var(--lm-fg);
+  }
+
+  .lm-codex-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(200px, 30%) 1fr;
+    gap: 24px;
+  }
+
+  .lm-codex-list,
+  .lm-codex-detail {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lm-border) transparent;
+  }
+
+  .lm-codex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 8px;
+    border-right: 0.5px solid var(--lm-border);
+  }
+
+  .lm-codex-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    text-align: left;
+    color: inherit;
+    background: transparent;
+    border: 0.5px solid transparent;
+    border-radius: var(--lm-radius);
+    cursor: pointer;
+  }
+
+  .lm-codex-item:hover,
+  .lm-codex-item:focus-visible {
+    background: var(--lm-control-hover);
+    outline: none;
+  }
+
+  .lm-codex-item[aria-pressed="true"] {
+    background: var(--lm-control-active);
+    border-color: var(--lm-accent);
+  }
+
+  .lm-codex-item-title {
+    flex: 1;
+  }
+
+  /* 新しく開いたもの（読むまで） */
+  .lm-codex-fresh {
+    padding: 0 6px;
+    font-size: calc(12px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    color: var(--lm-accent);
+    border: 0.5px solid var(--lm-accent);
+    border-radius: var(--lm-radius);
+  }
+
+  .lm-codex-section[data-fresh="true"] {
+    padding-left: 12px;
+    border-left: 2px solid var(--lm-accent);
+  }
+
+  .lm-codex-detail {
+    padding-right: 8px;
+  }
+
+  .lm-codex-image {
+    float: right;
+    max-width: 36%;
+    max-height: 360px;
+    margin: 0 0 12px 16px;
+    object-fit: contain;
+  }
+
+  .lm-codex-title {
+    margin: 0 0 4px;
+    font: 400 calc(24px * var(--lm-text-scale, 1) * var(--lm-touch, 1)) var(--lm-text-font);
+    letter-spacing: 0.06em;
+  }
+
+  .lm-codex-reading,
+  .lm-codex-related-label {
+    margin: 0 0 12px;
+    font-size: calc(13px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    color: var(--lm-fg-muted);
+  }
+
+  .lm-codex-summary,
+  .lm-codex-text {
+    margin: 0 0 10px;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    line-height: 1.8;
+  }
+
+  .lm-codex-section {
+    margin-bottom: 14px;
+  }
+
+  .lm-codex-section-title {
+    margin: 0 0 6px;
+    font-size: calc(15px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    color: var(--lm-fg-muted);
+  }
+
+  .lm-codex-related {
+    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 0.5px solid var(--lm-border-faint, var(--lm-border));
+  }
+
+  .lm-codex-related-label {
+    margin: 0;
+  }
+
+  .lm-codex-link {
+    padding: 4px 12px;
+    font-size: calc(14px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+  }
+
+  .lm-codex-empty {
+    color: var(--lm-fg-muted);
+    font-size: calc(15px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+  }
+
+  /* 年表: 日付と題を縦の線に並べる */
+  .lm-codex-body[data-type="timeline"] .lm-codex-list {
+    gap: 0;
+  }
+
+  .lm-codex-event {
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-left: 12px;
+    padding-left: 20px;
+    border-left: 0.5px solid var(--lm-border);
+    border-radius: 0 var(--lm-radius) var(--lm-radius) 0;
+  }
+
+  .lm-codex-event::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 14px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--lm-accent);
+  }
+
+  .lm-codex-event-date {
+    font-size: calc(13px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    color: var(--lm-fg-muted);
+  }
+
+  .lm-codex-event .lm-codex-item-title {
+    flex: none;
+  }
+
+  /* 相関図と地図: 左の欄を広げ、図の上に項目を置く */
+  .lm-codex-body[data-type="relations"],
+  .lm-codex-body[data-type="map"] {
+    grid-template-columns: minmax(0, 62%) 1fr;
+  }
+
+  .lm-codex-body[data-type="relations"] .lm-codex-list,
+  .lm-codex-body[data-type="map"] .lm-codex-list {
+    overflow: hidden;
+    padding-right: 0;
+  }
+
+  .lm-codex-board {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    container-type: size;
+  }
+
+  .lm-codex-board-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 絵のある図は、絵の縦横の比の枠にする（項目の位置は絵の割合） */
+  .lm-codex-board-inner[data-image="true"] {
+    width: min(100cqw, calc(100cqh * var(--lm-codex-ratio, 1.7778)));
+    height: auto;
+    aspect-ratio: var(--lm-codex-ratio, 1.7778);
+  }
+
+  .lm-codex-board-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lm-codex-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .lm-codex-line {
+    stroke: var(--lm-fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .lm-codex-line--positive {
+    stroke: var(--lm-accent);
+  }
+
+  /* 対立は破線（色だけに頼らない） */
+  .lm-codex-line--negative {
+    stroke: var(--lm-fg);
+    stroke-dasharray: 4 3;
+  }
+
+  .lm-codex-line-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    padding: 1px 6px;
+    font-size: calc(12px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    white-space: nowrap;
+    color: var(--lm-fg-muted);
+    background: var(--lm-screen-bg);
+    border-radius: var(--lm-radius);
+    pointer-events: none;
+  }
+
+  .lm-codex-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    color: inherit;
+    background: transparent;
+    border: 0.5px solid transparent;
+    border-radius: var(--lm-radius);
+    cursor: pointer;
+  }
+
+  .lm-codex-node:hover,
+  .lm-codex-node:focus-visible,
+  .lm-codex-node[aria-pressed="true"] {
+    border-color: var(--lm-accent);
+    background: var(--lm-control-hover);
+    outline: none;
+  }
+
+  .lm-codex-node-image {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 0.5px solid var(--lm-border);
+    background: var(--lm-screen-bg);
+  }
+
+  .lm-codex-node-title {
+    padding: 0 6px;
+    font-size: calc(14px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    white-space: nowrap;
+    background: var(--lm-screen-bg);
+    border-radius: var(--lm-radius);
+  }
+
+  /* 「新」の印は名前の外（右上の外側）に置き、名前の字を隠さない */
+  .lm-codex-node .lm-codex-fresh {
+    position: absolute;
+    bottom: 100%;
+    left: 100%;
+    margin: 0 0 -4px -4px;
+    background: var(--lm-screen-bg);
+  }
+
+  .lm-codex-marker {
+    flex-direction: row;
+  }
+
+  .lm-codex-marker-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--lm-accent);
+    border: 0.5px solid var(--lm-screen-bg);
+  }
+
+  .stage.lm-portrait .lm-codex-body,
+  .stage.lm-portrait .lm-codex-body[data-type] {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(120px, 35%) 1fr;
+  }
+
+  .stage.lm-portrait .lm-codex-list {
+    border-right: none;
+    border-bottom: 0.5px solid var(--lm-border);
+  }
+
+  /*
+   * 指で触る端末と縦長の作品（舞台の lm-touch。web の style.css の --lm-touch、--lm-touch-target）: 見出し、札、ボタンも大きくし、
+   * 押す所を指の大きさにする。指でない横長の作品では、標準の部品の大きさのまま
+   */
+  .lm-touch .lm-codex .lm-screen-title {
+    font-size: calc(30px * var(--lm-text-scale, 1) * var(--lm-touch));
+  }
+
+  .lm-touch .lm-codex .lm-tab {
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch));
+  }
+
+  .lm-touch .lm-codex .lm-button {
+    font-size: calc(17px * var(--lm-text-scale, 1) * var(--lm-touch));
+  }
+
+  .lm-touch .lm-codex :is(.lm-tab, .lm-button, .lm-codex-item, .lm-codex-node) {
+    min-height: var(--lm-touch-target);
+  }
+
+  .lm-touch .lm-codex .lm-tabs {
+    flex-wrap: wrap;
+  }
+
+  .lm-touch .lm-codex-node-image {
+    width: calc(56px * var(--lm-touch));
+    height: calc(56px * var(--lm-touch));
+  }
+
+  .lm-touch .lm-codex-marker-dot {
+    width: calc(12px * var(--lm-touch));
+    height: calc(12px * var(--lm-touch));
+  }
+}

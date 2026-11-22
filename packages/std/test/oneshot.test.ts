@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { check, CORE_COMMANDS, createRegistry, parse } from "@liminalia/lang";
 import { HeadlessHost, Runtime } from "@liminalia/runtime";
-import { combinePlugins, runPluginChecks } from "@liminalia/sdk";
+import { combinePlugins, runPluginChecks } from "@liminalia/plugin-host";
 import std, { effectState, oneshotState as O } from "../src/commands/index.ts";
 
 /** 一回きりの演出（@notify・@flipbook・@flash・@blink・@cutin・@effect time=）の命令の側。 */

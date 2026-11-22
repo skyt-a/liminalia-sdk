@@ -1,0 +1,15 @@
+{
+  "name": "liminalia-spine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Spine の立ち絵を cast.json の model（type \"spine\"）で出す公式のプラグイン。Spine のランタイムは同梱しない（作者が入手して assets/others/spine/ に置く。docs/live2d-spine.md）",
+  "license": "SEE LICENSE IN LICENSE",
+  "liminalia": {
+    "api": 8
+  },
+  "exports": {
+    "./commands": "./src/commands.ts",
+    "./web": "./src/web.ts"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "speakers": [
+    "Akari",
+    "Sou",
+    "Radio"
+  ],
+  "cast": {
+    "Akari": {
+      "defaultAppearance": "default",
+      "appearances": {
+        "default": {
+          "variants": {
+            "normal": {
+              "image": "akari/normal.webp",
+              "frame": {
+                "width": 467,
+                "height": 700,
+                "positions": {
+                  "left": {
+                    "left": 60,
+                    "top": 30
+                  },
+                  "center": {
+                    "left": 407,
+                    "top": 30
+                  },
+                  "right": {
+                    "left": 753,
+                    "top": 30
+                  }
+                }
+              }
+            },
+            "smile": {
+              "image": "akari/smile.webp",
+              "frame": {
+                "width": 467,
+                "height": 700,
+                "positions": {
+                  "left": {
+                    "left": 60,
+                    "top": 30
+                  },
+                  "center": {
+                    "left": 407,
+                    "top": 30
+                  },
+                  "right": {
+                    "left": 753,
+                    "top": 30
+                  }
+                }
+              }
+            },
+            "surprised": {
+              "image": "akari/surprised.webp",
+              "frame": {
+                "width": 467,
+                "height": 700,
+                "positions": {
+                  "left": {
+                    "left": 60,
+                    "top": 30
+                  },
+                  "center": {
+                    "left": 407,
+                    "top": 30
+                  },
+                  "right": {
+                    "left": 753,
+                    "top": 30
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Sou": {
+      "defaultAppearance": "default",
+      "appearances": {
+        "default": {
+          "variants": {
+            "normal": {
+              "image": "sou/normal.webp",
+              "frame": {
+                "width": 507,
+                "height": 760,
+                "positions": {
+                  "left": {
+                    "left": 40,
+                    "top": 6
+                  },
+                  "center": {
+                    "left": 387,
+                    "top": 6
+                  },
+                  "right": {
+                    "left": 733,
+                    "top": 6
+                  }
+                }
+              }
+            },
+            "smile": {
+              "image": "sou/smile.webp",
+              "frame": {
+                "width": 507,
+                "height": 760,
+                "positions": {
+                  "left": {
+                    "left": 40,
+                    "top": 6
+                  },
+                  "center": {
+                    "left": 387,
+                    "top": 6
+                  },
+                  "right": {
+                    "left": 733,
+                    "top": 6
+                  }
+                }
+              }
+            },
+            "surprised": {
+              "image": "sou/surprised.webp",
+              "frame": {
+                "width": 507,
+                "height": 760,
+                "positions": {
+                  "left": {
+                    "left": 40,
+                    "top": 6
+                  },
+                  "center": {
+                    "left": 387,
+                    "top": 6
+                  },
+                  "right": {
+                    "left": 733,
+                    "top": 6
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

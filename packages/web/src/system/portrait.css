@@ -1,0 +1,398 @@
+/*
+ * エンジンの CSS はカスケードレイヤー liminalia に入れる。作品の CSS（レイヤーの外）は、セレクタの強さを競わずに上書きできる。
+ */
+@layer liminalia {
+/*
+ * 縦長の作品の既定の並べ方（dom-host.ts が舞台に class の lm-portrait を付ける）と、基準の大きさと違う作品の拡大・縮小（lm-ui-scaled）。
+ * 横長の作品（lm-portrait の無い舞台）には何も効かない。
+ * 色や絵は横長と同じ変数（--lm-*）のまま、大きさと並びだけを替える。ui に書いた値は舞台や枠の style に載るので、下の変数より優先する。
+ */
+
+/* ---- 基準の大きさと違う作品（1920×1080・1024×768・1080×1920 など） ---- */
+
+/* 文字と枠は基準の大きさの座標で決めてあるので、同じ割合で拡大・縮小する。背景・立ち絵・画像は舞台の座標のまま */
+.stage.lm-ui-scaled > :is(.message, .choices, .lm-sys, .lm-captions),
+.stage.lm-ui-scaled > .overlay > .lm-panel {
+  zoom: var(--lm-ui-scale);
+}
+
+/* ---- メッセージ枠・本文・選択肢 ---- */
+
+.stage.lm-portrait {
+  --text-size: 28px;
+  --text-line: 1.7;
+  --text-letter-spacing: 0.02em;
+  --name-size: 24px;
+  --nvl-padding: 88px 44px 110px;
+  --vertical-width: 480px;
+  --choice-width: 600px;
+  --choice-size: 26px;
+  --choice-gap: 22px;
+  --choice-padding: 20px 28px;
+}
+
+/* 枠は下に横いっぱい。立ち絵の胸から下にかかる高さで、帯の分だけ下を空ける（ui-style.ts の PORTRAIT_MESSAGE_* と同じ）。NVL・吹き出しは自分の置き方 */
+.stage.lm-portrait .message:not(.nvl, .balloon, .vertical) {
+  left: var(--message-left, 24px);
+  right: var(--message-right, 24px);
+  bottom: var(--message-bottom, 64px);
+  min-height: var(--message-min-height, 250px);
+  padding: var(--message-padding, 30px 32px);
+}
+
+.stage.lm-portrait .message.vertical:not(.balloon):not(.nvl) {
+  right: var(--message-right, 24px);
+  bottom: var(--message-bottom, 64px);
+}
+
+/* 枠の幅を超える設定（横長のまま持ってきた ui.choice.width など）でも舞台に収める。文字は折り返す */
+.stage.lm-portrait .choices {
+  padding-inline: 24px;
+  box-sizing: border-box;
+}
+
+.stage.lm-portrait .choices > button {
+  max-width: 100%;
+  min-width: min(var(--choice-fixed-width, var(--choice-width)), 100%);
+  box-sizing: border-box;
+}
+
+.stage.lm-portrait .choices .choice-timer {
+  max-width: 100%;
+}
+
+/* 吹き出しは舞台の幅に収める（dom-host.ts が幅を決める） */
+.stage.lm-portrait .message.balloon {
+  max-width: calc(100% - 32px);
+}
+
+.stage.lm-portrait .lm-panel-box {
+  min-width: 0;
+  max-width: calc(100% - 48px);
+  box-sizing: border-box;
+}
+
+/* ---- 開始・タイトル ---- */
+
+.stage.lm-portrait .lm-title {
+  gap: 72px;
+  padding-inline: 48px;
+}
+
+.stage.lm-portrait .lm-title-name {
+  font-size: 54px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.stage.lm-portrait .lm-title-logo {
+  max-width: 88%;
+  max-height: 34%;
+}
+
+/* 横に並べる設定（ui.title.menu.direction）でも、舞台の幅に収まらなければ折り返す */
+.stage.lm-portrait .lm-title-menu {
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+}
+
+/* 624px は舞台の幅から .lm-title の左右の余白を除いた幅。割合は中身に合わせて縮む箱の中では効かないので、数で書く */
+.stage.lm-portrait .lm-title-button {
+  min-width: min(var(--lm-title-button-width, 400px), 624px);
+  padding: 18px 24px;
+  font-size: calc(26px * var(--lm-text-scale, 1));
+}
+
+/* ---- 画面の共通 ---- */
+
+.stage.lm-portrait .lm-screen:not(.lm-menu) {
+  padding: 44px 28px 40px;
+}
+
+.stage.lm-portrait .lm-screen-header {
+  flex-wrap: wrap;
+  gap: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.stage.lm-portrait .lm-screen-title {
+  min-width: 0;
+  font-size: calc(34px * var(--lm-text-scale, 1));
+}
+
+/* 押しやすい大きさ（縮めて遊ぶので、横長より大きくする） */
+.stage.lm-portrait .lm-button,
+.stage.lm-portrait .lm-toggle {
+  padding: 12px 20px;
+  font-size: calc(22px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-tab {
+  min-width: 56px;
+  padding: 10px 10px;
+  font-size: calc(20px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-tabs {
+  flex-wrap: wrap;
+  order: 3;
+  flex-basis: 100%;
+}
+
+/* ---- セーブ・ロード: 一列に 8 枠 ---- */
+
+.stage.lm-portrait .lm-slots {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stage.lm-portrait .lm-slot {
+  gap: 14px;
+  padding: 8px;
+}
+
+/* 枠の高さが足りないので、絵は舞台の縦横比ではなく切り抜いて見せる（焦点は上寄り。顔が入るように） */
+.stage.lm-portrait .lm-slot-thumb {
+  aspect-ratio: 4 / 3;
+}
+
+.stage.lm-portrait .lm-slot-thumb img {
+  object-position: 50% 30%;
+}
+
+.stage.lm-portrait .lm-slot-meta {
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.stage.lm-portrait .lm-slot-head {
+  font-size: calc(17px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-slot-text {
+  font-size: calc(19px * var(--lm-text-scale, 1));
+  line-height: 1.4;
+}
+
+.stage.lm-portrait .lm-slot-tool {
+  padding: 4px 10px;
+  font-size: calc(15px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-slot-tools,
+.stage.lm-portrait .lm-slot-delete {
+  right: 8px;
+  bottom: 8px;
+}
+
+/* ---- 履歴: 話者を本文の上に ---- */
+
+.stage.lm-portrait .lm-log-entry {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  padding: 16px 0;
+}
+
+.stage.lm-portrait .lm-log-speaker {
+  grid-column: 1 / -1;
+  text-align: left;
+  font-size: calc(21px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-log-text {
+  font-size: calc(24px * var(--lm-text-scale, 1));
+  line-height: 1.7;
+}
+
+.stage.lm-portrait .lm-log-find {
+  order: 3;
+  flex-basis: 100%;
+  margin-left: 0;
+}
+
+.stage.lm-portrait .lm-log-search {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  font-size: calc(20px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-log-count {
+  font-size: calc(18px * var(--lm-text-scale, 1));
+}
+
+/* ---- 設定: 項目名を操作の上に ---- */
+
+/* 行の高さは中身のまま（枠に収まらなければ縮めず、中で送る） */
+.stage.lm-portrait .lm-config-rows {
+  grid-auto-rows: max-content;
+}
+
+.stage.lm-portrait .lm-config-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.stage.lm-portrait .lm-config-label {
+  font-size: calc(22px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-config-control {
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stage.lm-portrait .lm-range {
+  min-width: 0;
+}
+
+.stage.lm-portrait .lm-config-value {
+  font-size: calc(20px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-config-end {
+  font-size: calc(18px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.stage.lm-portrait .lm-config-footer {
+  flex-wrap: wrap;
+}
+
+.stage.lm-portrait .lm-config-footer .lm-button {
+  flex: 1 1 auto;
+  padding-inline: 12px;
+  font-size: calc(19px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-preview {
+  margin-top: 22px;
+  padding: 24px 24px 20px;
+  min-height: 0;
+}
+
+.stage.lm-portrait .lm-preview-text {
+  font-size: calc(24px * var(--text-scale, 1));
+}
+
+/* ---- メニューと確認: 一列に、押しやすい高さで ---- */
+
+.stage.lm-portrait .lm-menu-panel {
+  width: min(600px, calc(100% - 48px));
+  padding: 32px 32px 36px;
+  /* 枠の絵（ui.system.images.frame）。default.css は border の前に書いていて消えるので、ここで書き直す。後ろの本文に重なって読みにくいため */
+  border-image: var(--lm-frame-border-image, none);
+}
+
+.stage.lm-portrait .lm-menu-list {
+  gap: 12px;
+}
+
+.stage.lm-portrait .lm-menu-button,
+.stage.lm-portrait .lm-menu-resume {
+  min-height: 72px;
+}
+
+.stage.lm-portrait .lm-dialog {
+  border-image: var(--lm-frame-border-image, none);
+  min-width: 0;
+  width: calc(100% - 64px);
+  max-width: 620px;
+  padding: 32px 32px 30px;
+}
+
+.stage.lm-portrait .lm-dialog-message {
+  font-size: calc(24px * var(--lm-text-scale, 1));
+}
+
+.stage.lm-portrait .lm-dialog-buttons .lm-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* ---- 操作の帯 ---- */
+
+.stage.lm-portrait .lm-menubar {
+  right: 16px;
+  bottom: 14px;
+}
+
+.stage.lm-portrait .lm-menubar-at-bottom-left {
+  left: 16px;
+  right: auto;
+}
+
+.stage.lm-portrait .lm-menubar-at-bottom-center {
+  left: 50%;
+  right: auto;
+}
+
+.stage.lm-portrait .lm-menubar-at-top-left {
+  left: 16px;
+  right: auto;
+}
+
+.stage.lm-portrait .lm-menubar-at-top-left,
+.stage.lm-portrait .lm-menubar-at-top-right {
+  bottom: auto;
+}
+
+.stage.lm-portrait .lm-menubar-button {
+  padding: calc(6px * var(--lm-menubar-fit, 1)) calc(8px * var(--lm-menubar-fit, 1));
+  font-size: calc(18px * var(--lm-menubar-fit, 1));
+}
+
+/* ---- おまけ ---- */
+
+.stage.lm-portrait .lm-extra-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stage.lm-portrait .lm-extra-chapter-thumb {
+  width: 72px;
+}
+
+.stage.lm-portrait .lm-term-pop {
+  width: min(420px, calc(100% - 32px));
+}
+
+.stage.lm-portrait .lm-warning-panel {
+  max-width: 100%;
+}
+
+/* ---- 字幕 ---- */
+
+.stage.lm-portrait .lm-captions {
+  max-width: calc(100% - 48px);
+}
+}
+
+/* default.css の後ろの部分はレイヤーの外にあるので、ここも外に書く */
+
+.stage.lm-portrait .lm-items-body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 18px;
+}
+
+.stage.lm-portrait .lm-chars {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.stage.lm-portrait .lm-chars-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.stage.lm-portrait .lm-chars-main {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}

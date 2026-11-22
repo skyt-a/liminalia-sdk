@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HeadlessHost, Runtime, type StageState } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std, { emoteState as E } from "../src/commands/index.ts";
 
 /** 立ち絵に付いて動く漫符（@emote）の命令の側。 */

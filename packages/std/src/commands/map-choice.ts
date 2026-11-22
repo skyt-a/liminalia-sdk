@@ -1,5 +1,5 @@
 import { truthy, type Args, type CommandContext, type PickOutcome, type Value } from "@liminalia/runtime";
-import { t, type CommandDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition } from "@liminalia/plugin-host";
 import { exprEvaluator, INVESTIGATION_FILE, sceneTarget, type InvestigationRect } from "./investigate.ts";
 
 /**

@@ -1,0 +1,65 @@
+/* 一回きりの演出（@flipbook・@flash・@blink・@cutin）。作品の CSS で上書きできるよう、エンジンのレイヤーに入れる */
+@layer liminalia {
+  .lim-flipbook {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    object-fit: fill;
+  }
+
+  .lim-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* 画面の色の反転（下にあるものを反転して見せる） */
+  .lim-flash--invert {
+    background: transparent;
+    -webkit-backdrop-filter: invert(1);
+    backdrop-filter: invert(1);
+  }
+
+  .lim-blink {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .lim-blink-lid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: calc(50% + var(--lim-blink-soft, 0px));
+    background: var(--lim-blink-color, #000);
+    transform: scaleY(0);
+  }
+
+  .lim-blink-top {
+    top: 0;
+    transform-origin: top;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--lim-blink-soft, 0px)), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - var(--lim-blink-soft, 0px)), transparent);
+  }
+
+  .lim-blink-bottom {
+    bottom: 0;
+    transform-origin: bottom;
+    -webkit-mask-image: linear-gradient(to top, #000 calc(100% - var(--lim-blink-soft, 0px)), transparent);
+    mask-image: linear-gradient(to top, #000 calc(100% - var(--lim-blink-soft, 0px)), transparent);
+  }
+
+  .lim-cutin-frame {
+    position: absolute;
+    border-style: solid;
+    line-height: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .lim-cutin-image {
+    display: block;
+  }
+}

@@ -1,0 +1,12 @@
+Liminalia sample assets
+
+These assets (backgrounds, sprites, BGM and sound effects) are provided under CC0 1.0.
+You can use them in your own games, change them, distribute them on their own or sell them, with no conditions.
+https://creativecommons.org/publicdomain/zero/1.0/
+
+- The pictures (backgrounds and sprites) were made with OpenAI's image generation (Codex). The sounds were synthesized with a Liminalia script.
+- The icon (icon.png) is a placeholder drawn with a Liminalia script. Replace it with your game's icon (a 1024px PNG) before distributing.
+- If you distribute a game that uses these pictures as they are, declare that it uses AI-generated assets, following the rules of the stores you sell on.
+- AI-generated pictures can't be fully ruled out as resembling other works. For games you publish, we recommend replacing them with assets of your own.
+
+More details: https://liminalia.skyta.dev/en/license/#samples

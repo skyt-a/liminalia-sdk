@@ -1,0 +1,102 @@
+/*
+ * 章の扉と章末（@chapter-card・@chapter-end）。色、大きさ、書体は liminalia.json の ui.chapter（--lim-chapter-*。web の ui-style.ts）、
+ * 書いていなければテーマの変数（ui.system の titleBg、fg、accent と本文の書体）から取る。罫を引かない（ui.chapter.rule が none）ときは舞台に lm-chapter-no-rule。
+ * 作品の CSS で .lim-chapter（扉は --card、章末は --end）と中の行を上書きできるよう、エンジンのレイヤーに入れる。
+ */
+@layer liminalia {
+  .lim-chapter {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 地に敷く絵（ui.chapter.image）は地の上。命令の image= は中の <img> で、さらに上に出す */
+    background: var(--lim-chapter-image, none) center / cover no-repeat, var(--lim-chapter-bg, var(--lm-title-bg, #0b0c10));
+    color: var(--lim-chapter-fg, var(--lm-fg, #ecebe6));
+    font-family: var(--lim-chapter-font, var(--lm-text-font, serif));
+    pointer-events: auto;
+    z-index: 100;
+  }
+
+  .lim-chapter-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 絵の上でも文字が読めるように、絵があるときだけ下に薄い影の地を敷く */
+  .lim-chapter-image + .lim-chapter-body {
+    padding: 1.2em 2.4em;
+    background: color-mix(in srgb, var(--lim-chapter-bg-solid, #000) 45%, transparent);
+  }
+
+  .lim-chapter-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6em;
+    text-align: center;
+  }
+
+  .lim-chapter-number {
+    font-size: var(--lim-chapter-number-size, 22px);
+    letter-spacing: 0.4em;
+    text-indent: 0.4em;
+    color: var(--lim-chapter-accent, var(--lm-accent, #a9bfd2));
+  }
+
+  .lim-chapter-title {
+    font-size: var(--lim-chapter-size, 52px);
+    letter-spacing: var(--lim-chapter-letter-spacing, 0.12em);
+    text-indent: var(--lim-chapter-letter-spacing, 0.12em);
+    line-height: 1.3;
+  }
+
+  .lim-chapter-rule {
+    width: 96px;
+    border-top: 0.5px solid var(--lim-chapter-rule, var(--lim-chapter-accent, var(--lm-accent, #a9bfd2)));
+  }
+
+  /* 罫を引かない（ui.chapter.rule が none） */
+  .lm-chapter-no-rule .lim-chapter-rule {
+    display: none;
+  }
+
+  .lim-chapter-subtitle {
+    font-size: var(--lim-chapter-subtitle-size, 18px);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: var(--lim-chapter-subtitle-fg, var(--lm-fg-muted, rgba(236, 235, 230, 0.6)));
+  }
+
+  /* 章末は題を小さく（扉の題の 8/13）、終わりの表記を大きく */
+  .lim-chapter--end .lim-chapter-title {
+    font-size: calc(var(--lim-chapter-size, 52px) * 8 / 13);
+  }
+
+  .lim-chapter-end {
+    margin-top: 0.6em;
+    color: var(--lim-chapter-end-fg, inherit);
+    font-size: var(--lim-chapter-end-size, 44px);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+  }
+
+  /* leave=mask のときに黒へ溶かす幕 */
+  .lim-chapter-veil {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* 縦長の作品は扉の題を少し小さく（扉の題の 10/13） */
+  .lm-portrait .lim-chapter--card .lim-chapter-title {
+    font-size: calc(var(--lim-chapter-size, 52px) * 10 / 13);
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "skeleton": { "x": -200, "y": 0, "width": 400, "height": 600 },
+  "animations": {
+    "idle": { "duration": 2, "color": [1, 0, 0] },
+    "smile": { "duration": 1, "color": [0, 1, 0] },
+    "mouth": { "duration": 1, "color": [0, 0, 0] },
+    "blink": { "duration": 0.2, "color": [0, 0, 0] }
+  },
+  "skins": ["default", "winter"]
+}

@@ -1,0 +1,5 @@
+;// TyranoBuilder の設定（取り込みの見本）
+;System.title = 雨の日の部屋
+;projectID = rainy_room
+;scWidth = 1024
+;scHeight = 768

@@ -1,5 +1,5 @@
 import type { Value } from "@liminalia/runtime";
-import { t, type CommandDefinition, type PluginCheckProject, type PluginDiagnostic } from "@liminalia/sdk";
+import { t, type CommandDefinition, type PluginCheckProject, type PluginDiagnostic } from "@liminalia/plugin-host";
 import type { Statement } from "@liminalia/lang";
 
 /**

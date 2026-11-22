@@ -1,21 +1,43 @@
-# Liminalia SDK
+# Liminalia (lim, engine and SDK)
 
 [日本語](README.md) | **English**
 
 [Liminalia](https://liminalia.skyta.dev/en/) is a visual novel engine and editor designed to work with AI.
-This repository publishes the packages for writing plugins and the source code for the VS Code extension.
-It does not include the Liminalia Studio editor app, the browser renderer, or the `lim` CLI.
+This repository publishes the source code of the `lim` command and the engine, the packages for writing plugins, and the VS Code extension.
+It does not include the screens of the Liminalia Studio editor app.
+Two packages are published on npm, `@liminalia/sdk` and `@liminalia/cli`; the other engine parts are inside `@liminalia/cli`.
 
 | Path | Package | Contents |
 |---|---|---|
-| `packages/sdk` | `@liminalia/sdk` | SDK for writing plugins (command definitions, state, and data declarations). MIT License |
+| `packages/sdk` | `@liminalia/sdk` (npm) | The plugin contract (types, command definitions, state and data declarations, and the rendering and Studio interfaces). MIT License |
+| `packages/cli` | `@liminalia/cli` (npm) | The `lim` command (new projects, dev server, checks, tests, export, MCP and more). Bundles the engine parts below and has the test entry point `@liminalia/cli/testing` |
 | `packages/lang` | `@liminalia/lang` | `.lim` parser, expressions, command registry, and static checks |
 | `packages/runtime` | `@liminalia/runtime` | Script runtime (rendering, audio, and input are plugged in via `Host`; includes `HeadlessHost` for headless execution) |
 | `packages/project` | `@liminalia/project` | Loading `liminalia.json` and resolving plugins |
-| `packages/std` | `@liminalia/std` | Standard command specifications (excluding rendering) |
+| `packages/plugin-host` | `@liminalia/plugin-host` | Loading and checking plugins (the implementation side of the sdk contract) |
+| `packages/std` | `@liminalia/std` | Standard command specifications and rendering |
+| `packages/web` | `@liminalia/web` | The game renderer and player that run in the browser, and the dev server settings |
 | `packages/screens` | `@liminalia/screens` | Standard system screen templates, validation rules, and default strings |
 | `packages/editor` | `@liminalia/editor` | UI-free logic shared between Liminalia Studio and the VS Code extension |
+| `packages/studio` | `@liminalia/studio` | The dev server's authoring endpoints (writing scripts, renaming and more). Does not include the Studio screens (`src/client`) |
+| `packages/ks-import` | `@liminalia/ks-import` | Importing from TyranoScript (.ks) |
+| `packages/story-import` | `@liminalia/story-import` | Importing from Twine, Ink, Ren'Py and others |
 | `packages/vscode` | Liminalia (VS Code extension) | Syntax highlighting, completion, checks, renaming, Play from Here, and more |
+
+## Making games with lim
+
+```sh
+npm install -g @liminalia/cli
+lim new my-game --title "My Story" --lang en
+cd my-game
+lim dev        # open the URL it shows in your browser
+lim check      # check syntax and references
+lim build      # export (browser, desktop and more)
+```
+
+Node.js 22 or later is required. Screenshots (`lim shot`) and checking exports also need Chromium (`npx playwright install chromium-headless-shell`).
+Write scripts in VS Code with the extension (`packages/vscode` in this repository; search for "Liminalia" in the Marketplace) for highlighting, completion and checks.
+To make games on screen, use the [Liminalia Studio](https://liminalia.skyta.dev/en/download/) app.
 
 ## Writing plugins
 
@@ -28,7 +50,8 @@ import { defineCommandPlugin, t } from "@liminalia/sdk";
 ```
 
 For a walkthrough, see [Make your first command](https://liminalia.skyta.dev/en/howto/plugin-command/). For the full specification, see [Writing plugins](https://liminalia.skyta.dev/en/docs/plugins/).
-At runtime, plugins use the packages bundled with Liminalia Studio and `lim`. Install the npm package in `devDependencies` for editor completion, type checking, and tests.
+Plugins import only `@liminalia/sdk` and its entry points (`/std`, `/web`, `/studio`, `/studio-server`, `/import`). At runtime they use the implementation in `lim` and Liminalia Studio, so install the sdk in `devDependencies` for editor completion and type checking.
+To parse, check and run scenarios without a screen in tests, also install `@liminalia/cli` in `devDependencies` and import from `@liminalia/cli/testing`.
 
 ## Checking this repository
 
@@ -41,7 +64,7 @@ npm test
 ## License
 
 - `packages/sdk` is under the MIT License ([packages/sdk/LICENSE](packages/sdk/LICENSE)).
-- Everything else is governed by the [Liminalia license and terms of use](https://liminalia.skyta.dev/en/license/) (summary in [LICENSE](LICENSE)). Being able to read the source does not make it open source; you may use it to build Liminalia plugins, editor extensions, and tools used together with Liminalia.
+- Everything else is governed by the [Liminalia license and terms of use](https://liminalia.skyta.dev/en/license/) (summary in [LICENSE](LICENSE)). Being able to read the source does not make it open source; you may use it to make and export games with `lim`, and to build Liminalia plugins, editor extensions, and tools used together with Liminalia. The games you make belong to you, and you may distribute or sell them.
 
 ## Bug reports and pull requests
 
@@ -49,4 +72,4 @@ Issues and pull requests are welcome. Because this repository is a public mirror
 
 ---
 
-Version 0.8.4 (upstream `aa59cd58`). The files in this repository are generated by `scripts/public-mirror.mjs` in the upstream repository.
+Version 0.9.0 (upstream `b43337a4`). The files in this repository are generated by `scripts/public-mirror.mjs` in the upstream repository.

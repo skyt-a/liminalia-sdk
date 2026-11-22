@@ -1,5 +1,5 @@
 import type { Args, CommandContext } from "@liminalia/runtime";
-import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk";
+import { t, type CommandDefinition, } from "@liminalia/plugin-host";
 
 /**
  * 章の扉と章末の演出（@chapter-card・@chapter-end）。番号と題と副題は、省くと今の章（liminalia.json の chapters）から補う。
@@ -7,9 +7,9 @@ import { t, type CommandDefinition, type ParamDefinition } from "@liminalia/sdk"
  * 一回きりの演出で状態には残さないが、leave=mask なら終わったところで暗転（stage.mask）を残し、次の @mask-off で開く。
  */
 
-/** 演出の終わりに暗転を残すか（演出の命令に共通の引数）。mask は黒で覆ったまま次へ進み、次の @mask-off で開く。 */
-export const leaveParam = (def: "none" | "mask"): ParamDefinition =>
-  t.enum(["none", "mask"], "終わったあと（mask は黒で覆ったまま次へ進み、次の @mask-off で開く。none は元の画面に戻す）", def);
+/** 演出の終わりに暗転を残すか（演出の命令に共通の引数）。正本はプラグインとの約束（@liminalia/sdk/std）。 */
+export { leaveParam } from "@liminalia/sdk/std";
+import { leaveParam } from "@liminalia/sdk/std";
 
 /** 暗転を残すときの色。 */
 export const LEAVE_COLOR = "#000000";

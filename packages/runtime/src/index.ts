@@ -14,3 +14,8 @@ export { observeVoiceNumbers } from "./voice-observe.ts";
 export { projectRuntimeOptions, RUNTIME_OPTION_OWNERS, type ProjectRuntimeConfig, type ProjectRuntimeOptions, type ProjectRuntimeSource } from "./project-options.ts";
 export { DEFAULT_TEST_LIMIT, runScenarioTest, type ScenarioTestOptions, type ScenarioTestResult, type TestFailure } from "./scenario-test.ts";
 export { migrateSave, migrateWith, saveProblem, SAVE_VERSION, SaveVersionError, type SaveProblem } from "./save.ts";
+
+// プラグインの約束（@liminalia/sdk の argOrigin、textOrigins）が呼ぶ実装を登録する
+import { provide as provideToSdk } from "@liminalia/sdk/host";
+import { argOrigin as argOriginForSdk, textOrigins as textOriginsForSdk } from "./retranslate.ts";
+provideToSdk("runtime", { argOrigin: argOriginForSdk, textOrigins: textOriginsForSdk });

@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/screens",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "標準のシステム画面（タイトル、メニュー、セーブとロード、バックログ、コンフィグなど）のテンプレート、作品のテンプレートを確かめる決まり、標準の文言。DOM を使わない",
@@ -21,7 +21,7 @@
     "./strings-en": "./src/strings-en.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.8.4"
+    "@liminalia/lang": "0.9.0"
   },
   "repository": {
     "type": "git",

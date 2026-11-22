@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { check, CORE_COMMANDS, createRegistry, parse } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type SaveData, type TraceEntry } from "@liminalia/runtime";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 
 /** @notify when=scene-break（場面の切れ目まで待って出す）。待っている間のセーブとロードで消えず、二度も出ない。 */

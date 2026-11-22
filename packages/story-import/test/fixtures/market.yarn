@@ -1,0 +1,34 @@
+title: Start
+tags: intro
+position: 0,0
+---
+<<declare $coins = 0>>
+<<declare $name = "旅人">>
+<<bg market.png>>
+// 市場の入口
+店主: いらっしゃい、{$name}さん。 #line:a01
+-> りんごを買う
+    <<set $coins to $coins + 1>>
+    店主: [b]まいどあり[/b]。
+-> 値段を聞く <<if $coins == 0>>
+    店主: ひとつ百円だよ。
+    <<jump Price>>
+-> 立ち去る
+    <<stop>>
+<<if $coins > 0>>
+    店主: また来てね。
+<<elseif visited("Price")>>
+    店主: 値段は覚えたかい。
+<<else>>
+    店主: またおいで。
+<<endif>>
+<<wait 1>>
+<<sparkle gold>>
+<<jump Ending>>
+===
+title: Price
+---
+店主: 今日は特別に[wave]半額[/wave]だ。
+<<set $coins += 2>>
+<<jump Start>>
+===

@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/editor",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "制作画面（Liminalia Studio）と VS Code の拡張機能が共有する、画面を持たない部品。名前の付け替えとその追従、ここからテストプレイ、開発サーバーとのやり取りの形、動いている制作画面の見つけ方",
@@ -21,9 +21,9 @@
     "./rewrite": "./src/rewrite.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.8.4",
-    "@liminalia/project": "0.8.4",
-    "@liminalia/runtime": "0.8.4"
+    "@liminalia/lang": "0.9.0",
+    "@liminalia/project": "0.9.0",
+    "@liminalia/runtime": "0.9.0"
   },
   "repository": {
     "type": "git",

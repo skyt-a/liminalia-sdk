@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>立ち絵の位置調整 — Liminalia</title>
+    <link rel="stylesheet" href="/src/caster/caster.css" />
+  </head>
+  <body>
+    <div class="caster">
+      <header class="bar">
+        <h1 data-en="Sprite positions">立ち絵の位置調整</h1>
+        <span id="title" class="muted"></span>
+        <span id="scale" class="muted" title="表示の縮小率（座標はゲーム画面の座標）" data-en-title="Display scale (coordinates are in game-screen pixels)"></span>
+        <span id="dirty" class="dirty" hidden data-en="Unsaved">未保存</span>
+        <span class="spacer"></span>
+        <button type="button" id="undo" title="Ctrl / ⌘ + Z" data-en="Undo">元に戻す</button>
+        <button type="button" id="redo" title="Ctrl / ⌘ + Shift + Z" data-en="Redo">やり直す</button>
+        <button type="button" id="save" class="primary" title="Ctrl / ⌘ + S" data-en="Save">保存</button>
+        <a href="/" target="_blank" class="link" data-en="Test play">テストプレイ</a>
+      </header>
+      <div id="writeback" class="writeback" hidden></div>
+
+      <aside class="panel">
+        <h2 data-en="Editing">編集対象</h2>
+        <div class="row"><label for="who" data-en="Character">キャラクター</label><select id="who"></select><button type="button" id="add-who" title="キャラクターを追加" data-en-title="Add a character">＋</button></div>
+        <div class="row">
+          <label for="appearance" data-en="Sprite set">立ち絵セット</label><select id="appearance"></select>
+          <span class="buttons"><button type="button" id="add-appearance" title="立ち絵セットを追加" data-en-title="Add a sprite set">＋</button><button type="button" id="remove-appearance" title="立ち絵セットを削除" data-en-title="Delete the sprite set">－</button></span>
+        </div>
+        <div class="row"><label for="variant" data-en="Variant">差分</label><select id="variant"></select><button type="button" id="add-variant" title="画像から差分を追加" data-en-title="Add a variant from an image">＋</button></div>
+        <div class="row"><label for="position" data-en="Position">立ち位置</label><select id="position"></select><button type="button" id="add-position" title="立ち位置を追加" data-en-title="Add a position">＋</button></div>
+        <p id="frameless" class="note" hidden data-en="This variant has no position or size yet. Moving it sets them.">位置とサイズが未設定の差分です。動かすと設定されます。</p>
+        <label class="row"><span data-en="Opacity">不透明度</span><span class="range"><input type="range" id="target-opacity" min="0" max="1" step="0.01" value="1" /><input type="number" id="target-opacity-number" min="0" max="1" step="0.05" value="1" /></span></label>
+        <div class="numbers">
+          <label><span data-en="Left">左</span><input type="number" id="left" step="1" /></label>
+          <label><span data-en="Top">上</span><input type="number" id="top" step="1" /></label>
+          <label><span data-en="Width">幅</span><input type="number" id="width" step="1" min="1" /></label>
+          <label><span data-en="Height">高さ</span><input type="number" id="height" step="1" min="1" /></label>
+        </div>
+        <label class="check"><input type="checkbox" id="keep-ratio" checked /> <span data-en="Keep aspect ratio">縦横比を固定</span></label>
+        <label class="check"><input type="checkbox" id="show-all" /> <span data-en="Show all positions">すべての立ち位置を表示</span></label>
+        <label class="check" id="sync-center-row"><input type="checkbox" id="sync-center" checked /> <span data-en="When saving center, match the size and vertical position of the other positions">center を保存するとき、サイズと縦位置をほかの立ち位置にも合わせる</span></label>
+        <button type="button" id="sync-all" class="wide" title="今の差分のサイズと縦位置を、同じ立ち絵セットのすべての差分に合わせる" data-en-title="Match every variant in this sprite set to the size and vertical position of the current one" data-en="Match all variants">すべての差分に合わせる</button>
+        <button type="button" id="reset" class="wide" title="今の差分の位置とサイズを、開いた時点か最後に保存した時点に戻す" data-en-title="Reset the position and size of the current variant to when it was opened or last saved" data-en="Reset">リセット</button>
+      </aside>
+
+      <main class="viewport" id="viewport" title="ドラッグで移動、ハンドルでサイズ変更、ホイールで拡大縮小（Shift で縦だけ）、矢印キーで 1px 移動（Shift で 10px）" data-en-title="Drag to move, drag a handle to resize, scroll to zoom (Shift for height only), arrow keys move 1px (Shift for 10px)">
+        <div class="stage-frame" id="stage-frame">
+          <div class="stage" id="stage">
+            <img class="bg" id="bg" alt="" hidden />
+            <div class="grid"></div>
+            <div class="layer" id="ghosts"></div>
+            <div class="layer" id="positions"></div>
+            <div class="target" id="target" tabindex="0" hidden>
+              <img alt="" draggable="false" />
+              <span class="label"></span>
+            </div>
+            <iframe class="game-overlay" id="game-overlay" title="ゲーム画面の見本" data-en-title="Game screen preview" tabindex="-1" hidden></iframe>
+            <div class="outside"></div>
+            <div class="empty" id="empty" hidden></div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="panel">
+        <h2 data-en="View">表示</h2>
+        <label class="row"><span data-en="Background">背景</span><select id="background"></select></label>
+        <label class="check"><input type="checkbox" id="show-game-ui" /> <span data-en="Show game screen">ゲーム画面を重ねる</span></label>
+        <label class="check" id="clip-game-row" hidden><input type="checkbox" id="clip-game" /> <span data-en="Hide outside the game screen">ゲーム画面の外を隠す</span></label>
+        <h2 data-en="Compare with">比較対象</h2>
+        <label class="row"><span data-en="Character">キャラクター</span><select id="cmp-who"></select></label>
+        <label class="row"><span data-en="Sprite set">立ち絵セット</span><select id="cmp-appearance"></select></label>
+        <label class="row"><span data-en="Position">立ち位置</span><select id="cmp-position"></select></label>
+        <label class="row"><span data-en="Variant">差分</span><select id="cmp-variant"></select></label>
+        <label class="row"><span data-en="Opacity">不透明度</span><span class="range"><input type="range" id="cmp-opacity" min="0" max="1" step="0.01" value="0.22" /><input type="number" id="cmp-opacity-number" min="0" max="1" step="0.05" value="0.22" /></span></label>
+        <label class="row">
+          <span data-en="Color">色</span>
+          <select id="cmp-filter">
+            <option value="none" data-en="None">なし</option>
+            <option value="red" data-en="Red">赤</option>
+            <option value="blue" data-en="Blue">青</option>
+            <option value="green" data-en="Green">緑</option>
+            <option value="magenta" data-en="Magenta">マゼンタ</option>
+            <option value="cyan" data-en="Cyan">シアン</option>
+            <option value="yellow" data-en="Yellow">黄</option>
+            <option value="mono" data-en="Monochrome">モノクロ</option>
+          </select>
+        </label>
+      </aside>
+
+      <footer class="status" id="status"></footer>
+    </div>
+
+    <dialog id="add-dialog" class="dialog">
+      <form method="dialog">
+        <h2 data-en="Add a variant from an image">画像から差分を追加</h2>
+        <div class="drop" id="drop">
+          <p data-en="Drop an image (png, jpg, gif, webp) here">画像（png、jpg、gif、webp）をここにドロップ</p>
+          <input type="file" id="file" accept=".png,.jpg,.jpeg,.gif,.webp" />
+          <img id="preview" alt="" hidden />
+        </div>
+        <label class="row"><span data-en="Save to">保存先</span><span class="path"><span class="muted">assets/fgimage/</span><input type="text" id="add-folder" /></span></label>
+        <label class="row"><span data-en="File name">ファイル名</span><input type="text" id="add-name" /></label>
+        <label class="row"><span data-en="Variant name">差分名</span><input type="text" id="add-key" /></label>
+        <p class="note" id="add-status"></p>
+        <div class="actions">
+          <button type="button" id="add-cancel" data-en="Cancel">キャンセル</button>
+          <button type="button" id="add-ok" class="primary" disabled data-en="Add">追加</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/caster/main.ts"></script>
+  </body>
+</html>

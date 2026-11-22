@@ -1,5 +1,6 @@
-import { SKIP_PARAM, type CommandSpec, type Diagnostic, type ParamSpec, type ParamType } from "@liminalia/lang";
-import type { Args, CommandContext, CommandImpl, Value } from "@liminalia/runtime";
+import type { Diagnostic, ParamType } from "@liminalia/lang";
+import { SKIP_PARAM } from "./lang.ts";
+import type { Args, CommandContext, Value } from "@liminalia/runtime";
 
 /**
  * プラグインの命令の定義。この一つの表から
@@ -108,31 +109,6 @@ export interface CommandValidateContext {
 
 /** 命令の一行ごとの検査が返す診断（file・line を省くとその行。code・message・severity は必ず書く）。 */
 export type CommandDiagnostic = Pick<Diagnostic, "severity" | "code" | "message"> & Partial<Pick<Diagnostic, "messageEn" | "file" | "line" | "column" | "hint" | "hintEn" | "fix" | "fixes">>;
-
-export function toSpec(c: CommandDefinition): CommandSpec {
-  const params: Record<string, ParamSpec> = {};
-  for (const [name, p] of Object.entries(c.params)) {
-    const spec: ParamSpec = { type: p.type, doc: p.doc };
-    if (p.docEn !== undefined) spec.docEn = p.docEn;
-    if (p.default !== undefined) spec.default = p.default;
-    if (p.required) spec.required = true;
-    params[name] = spec;
-  }
-  const waits = c.waits ?? c.params.wait?.default === "true";
-  return { name: c.name, summary: c.summary, ...(c.summaryEn ? { summaryEn: c.summaryEn } : {}), positional: c.positional ?? [], ...(c.bare ? { bare: c.bare } : {}), params, example: c.example, ...(c.exampleEn ? { exampleEn: c.exampleEn } : {}), ...(waits ? { waits } : {}), ...(c.ends ? { ends: true } : {}), ...(c.category ? { category: c.category } : {}), ...(c.keywords?.length ? { keywords: c.keywords } : {}), ...(c.keywordsEn?.length ? { keywordsEn: c.keywordsEn } : {}) };
-}
-
-export function toImplementation(c: CommandDefinition): CommandImpl {
-  return {
-    spec: toSpec(c),
-    run: async (args, ctx) => {
-      if (c.run) return c.run(args, ctx);
-      c.apply?.(args, ctx.state.stage.extra);
-      await ctx.present(args, typeof args.wait === "boolean" ? args.wait : (c.waits ?? false));
-    },
-    ...(c.autoplay ? { autoplay: c.autoplay } : {}),
-  };
-}
 
 const withDefault = (p: ParamDefinition, def: string | undefined): ParamDefinition => (def === undefined ? p : { ...p, default: def });
 

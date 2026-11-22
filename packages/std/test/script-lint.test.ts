@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkProject, CORE_COMMANDS, createRegistry, englishDiagnostic, FILTER_ONLY_EFFECTS, parse, type Diagnostic } from "@liminalia/lang";
-import { combinePlugins } from "@liminalia/sdk";
+import { combinePlugins } from "@liminalia/plugin-host";
 import std from "../src/commands/index.ts";
 import { FILTER_EFFECTS } from "../src/commands/effect.ts";
 

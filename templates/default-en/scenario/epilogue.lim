@@ -1,0 +1,25 @@
+// Dawn. Every choice leads here in the end. When it's over, the game goes back to the title screen.
+
+# dawn
+@chara-hide-all time=500ms
+@mask time=1s
+@bg hill_morning.webp
+@wait 800ms
+@mask-off time=1500ms
+@window show time=300ms
+Before I knew it, the edge of the sky had begun to turn pale.
+The countless stars faded one by one, and a morning mist settled over the hill.
+@chara Akari normal at=center time=400ms
+Akari "So the night really does end."
+@chara Akari normal at=left time=300ms
+@chara Sou smile at=right time=400ms
+Sou "It does. Every single night. {br}That's why waiting isn't so bad."
+@chara Akari smile at=left
+Akari "I'll come again. Earlier next time."
+@se chime.wav
+As I started down the slope, the bell on the door rang behind me, just once more.
+@chara-hide-all time=1s
+Waiting for Stars: The End
+@window hide time=300ms
+@mask time=2s
+@wait 1s

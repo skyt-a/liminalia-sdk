@@ -1,0 +1,189 @@
+/* @map-choice（地図で行き先を選ぶ）。色と形は標準のシステム画面の変数（--lm-*）から取るので、テーマに合わせて変わる */
+@layer liminalia {
+  .lm-map-choice {
+    position: absolute;
+    inset: 0;
+    color: var(--lm-fg);
+    font-family: var(--lm-ui-font, inherit);
+  }
+
+  .lm-map-choice-stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lm-map-choice-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lm-map-choice-spot {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+    border: 0.5px solid transparent;
+    border-radius: var(--lm-radius, 4px);
+    color: var(--lm-fg);
+    cursor: pointer;
+  }
+
+  .lm-map-choice-mark {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--lm-accent);
+    border: 0.5px solid var(--lm-screen-bg);
+  }
+
+  .lm-map-choice-label {
+    padding: 2px 8px;
+    font-size: calc(14px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    white-space: nowrap;
+    background: var(--lm-screen-bg);
+    border-radius: var(--lm-radius, 4px);
+  }
+
+  .lm-map-choice-spot:hover,
+  .lm-map-choice-spot:focus-visible,
+  .lm-map-choice-spot[aria-pressed="true"] {
+    border-color: var(--lm-accent);
+    background: color-mix(in srgb, var(--lm-accent) 14%, transparent);
+    outline: none;
+  }
+
+  .lm-map-choice-spot[data-locked="true"] {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  .lm-map-choice-panel {
+    position: absolute;
+    /* 指で触る端末では、右上のメニューのボタンを避ける（--lm-menu-room-y。web の input.css） */
+    top: max(24px, var(--lm-menu-room-y, 0px));
+    bottom: 24px;
+    right: 24px;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    overflow: hidden;
+    background: var(--lm-screen-bg);
+    border: 0.5px solid var(--lm-border);
+    border-radius: var(--lm-radius, 4px);
+  }
+
+  .lm-map-choice[data-panel="left"] .lm-map-choice-panel {
+    top: 24px;
+    right: auto;
+    left: 24px;
+  }
+
+  .lm-map-choice[data-panel="bottom"] .lm-map-choice-panel {
+    top: auto;
+    left: 24px;
+    width: auto;
+    max-height: 36%;
+  }
+
+  .lm-map-choice-title {
+    margin: 0;
+  }
+
+  .lm-map-choice-prompt,
+  .lm-map-choice-desc {
+    margin: 0;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    line-height: 1.7;
+  }
+
+  /* 押せない理由（lockedDesc） */
+  .lm-map-choice-locked {
+    margin: 0;
+    font-size: calc(16px * var(--lm-text-scale, 1) * var(--lm-touch, 1));
+    line-height: 1.7;
+    color: var(--lm-accent);
+  }
+
+  .lm-map-choice-prompt {
+    color: var(--lm-fg-muted, var(--lm-fg));
+  }
+
+  .lm-map-choice-detail {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lm-border) transparent;
+  }
+
+  .lm-map-choice-name {
+    margin: 0;
+    font: 400 calc(22px * var(--lm-text-scale, 1) * var(--lm-touch, 1)) var(--lm-text-font, inherit);
+    letter-spacing: 0.06em;
+  }
+
+  .lm-map-choice-image {
+    flex: none;
+    align-self: flex-start;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 220px;
+  }
+
+  .lm-map-choice-go {
+    flex: none;
+    align-self: stretch;
+  }
+
+  .lm-map-choice-go:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /*
+   * 指で触る端末と縦長の作品（舞台の lm-touch。web の style.css の --lm-touch、--lm-touch-target）: 見出し、札、ボタンも大きくし、
+   * 押す所を指の大きさにする。指でない横長の作品では、標準の部品の大きさのまま
+   */
+  .lm-touch .lm-map-choice .lm-screen-title {
+    font-size: calc(30px * var(--lm-text-scale, 1) * var(--lm-touch));
+  }
+
+  .lm-touch .lm-map-choice .lm-button {
+    font-size: calc(17px * var(--lm-text-scale, 1) * var(--lm-touch));
+    min-height: var(--lm-touch-target);
+  }
+
+  .lm-touch .lm-map-choice-mark {
+    width: calc(12px * var(--lm-touch));
+    height: calc(12px * var(--lm-touch));
+  }
+
+  /* 小さい場所も指で押せる広さで当てる（見えない広がり。--lm-touch-target に満たない向きだけ広げる） */
+  .lm-touch .lm-map-choice-spot::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, calc((100% - var(--lm-touch-target)) / 2));
+  }
+
+  /* 縦長の作品は、説明の欄を下に横いっぱいに置く（右や左の 30% の幅では文字が収まらない） */
+  .stage.lm-portrait .lm-map-choice[data-panel] .lm-map-choice-panel {
+    top: auto;
+    right: 24px;
+    bottom: 24px;
+    left: 24px;
+    width: auto;
+    max-height: 40%;
+  }
+}

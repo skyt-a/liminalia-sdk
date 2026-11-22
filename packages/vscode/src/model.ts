@@ -12,7 +12,7 @@ import {
   type Script,
   type Statement,
 } from "@liminalia/lang";
-import { projectDiagnostics, type CommandPlugin, type ProjectCheckConfig, type ProjectCheckInput } from "@liminalia/sdk";
+import { projectDiagnostics, type CommandPlugin, type ProjectCheckConfig, type ProjectCheckInput } from "@liminalia/plugin-host";
 
 /**
  * 拡張機能が見る一つのプロジェクト（シナリオの本文・命令の仕様・話者・キャスト）。
@@ -46,7 +46,7 @@ export interface ProjectInput {
   /** 読み込めなかったプラグイン（理由つき）。あれば命令がないという指摘を警告にする。 */
   pluginFailures?: readonly string[];
   /**
-   * lim check と同じ検査に使う作品の中身（@liminalia/sdk の projectDiagnostics に渡す。project.ts の buildInput が作る）。
+   * lim check と同じ検査に使う作品の中身（@liminalia/plugin-host の projectDiagnostics に渡す。project.ts の buildInput が作る）。
    * 無ければ台本、キャスト、上の config だけで検査する（プロジェクトの外のファイル）。
    */
   work?: ProjectWork;
@@ -79,7 +79,7 @@ export interface ProjectWork {
   langSchema: JsonSchema | null;
   /** UTF-8 で読めない台本（名前 → 文字コードの名前）。そのファイルは bad-encoding だけにする。 */
   encodings?: ReadonlyMap<string, string>;
-  /** 作品の画面のテンプレート（ui.templates）の検査に使うもの（@liminalia/sdk の ProjectCheckInput の screenTemplates）。 */
+  /** 作品の画面のテンプレート（ui.templates）の検査に使うもの（@liminalia/plugin-host の ProjectCheckInput の screenTemplates）。 */
   screenTemplates?: ProjectCheckInput["screenTemplates"];
 }
 
@@ -184,7 +184,7 @@ export class LimProject {
   }
 
   /**
-   * lim check と同じ検査（@liminalia/sdk の projectDiagnostics。lim check、制作画面、MCP と同じ一覧）。
+   * lim check と同じ検査（@liminalia/plugin-host の projectDiagnostics。lim check、制作画面、MCP と同じ一覧）。
    * file は診断の file（シナリオ名、cast.json、liminalia.json、lang/<言語>.json）。
    */
   diagnostics(): Diagnostic[] {
