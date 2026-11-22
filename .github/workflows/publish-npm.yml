@@ -36,6 +36,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # 既定の bash -e には pipefail が無く、| tee の前で止めても成功に見えるので、bash（-eo pipefail）にする
+    defaults:
+      run:
+        shell: bash
     env:
       TAG: ${{ github.event_name == 'push' && github.ref_name || format('v{0}', inputs.version) }}
       RELEASES_REPO: skyt-a/liminalia-releases
