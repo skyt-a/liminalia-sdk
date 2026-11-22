@@ -152,4 +152,16 @@ describe("三方向のマージ", () => {
     expect(r.value).toEqual({ list: [{ id: "y", note: 1 }] });
     expect(r.conflicts).toEqual([]);
   });
+
+  it("片方が消してもう片方が変えた項目は、どちらの向きでも残して争いに挙げる", () => {
+    const base = { list: [{ id: "a", v: 1 }, { id: "b", v: 2 }] };
+    // ours が b を消し、theirs が b を変えた
+    const r1 = mergeJson(base, { list: [{ id: "a", v: 1 }] }, { list: [{ id: "a", v: 1 }, { id: "b", v: 9 }] });
+    expect(r1.value).toEqual({ list: [{ id: "a", v: 1 }, { id: "b", v: 9 }] });
+    expect(r1.conflicts).toEqual([["list", "b"]]);
+    // theirs が b を消し、ours が b を変えた
+    const r2 = mergeJson(base, { list: [{ id: "a", v: 1 }, { id: "b", v: 9 }] }, { list: [{ id: "a", v: 1 }] });
+    expect(r2.value).toEqual({ list: [{ id: "a", v: 1 }, { id: "b", v: 9 }] });
+    expect(r2.conflicts).toEqual([["list", "b"]]);
+  });
 });

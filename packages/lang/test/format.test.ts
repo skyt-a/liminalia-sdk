@@ -121,6 +121,13 @@ describe("lim fmt", () => {
     expect(format(src).split("\n")[2]).toBe("    @if game.b");
   });
 
+  it("@for の中も一段深く字下げする", () => {
+    const src = ["@for item in game.items", "@wait 1s", "地の文", "@end"].join("\n");
+    const r = formatLim(src, "a", { registry, speakers, indent: 2 });
+    expect(r.ok && r.text.split("\n")).toEqual(["@for item in game.items", "  @wait 1s", "  地の文", "@end"]);
+    expect(r.ok && shape(r.text)).toEqual(shape(src));
+  });
+
   it("外すと意味が変わる引用符は残す", () => {
     const src = ['@chara-config ユイ name="ユイ さん"', '@bg "300"', '@bg "true"', '@bg "a=b"', '@bg "#abc"', '@bg ""', '@bg "{r 漢|かん}"'].join("\n");
     expect(format(src)).toBe(src);

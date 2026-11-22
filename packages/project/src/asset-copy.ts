@@ -135,7 +135,7 @@ export function assetCopySummary(r: AssetCopyResult, language: "ja" | "en" = "ja
     if (r.outside.length > 0) en.push(`${r.outside.length} pointing outside the source folder`);
     return en.join(", ");
   }
-  const parts = [`素材 ${r.copied.length} 件を写しました（${mb} MB）`];
+  const parts = [`素材 ${r.copied.length} 件をコピーしました（${mb} MB）`];
   if (r.same > 0) parts.push(`同じものがあった ${r.same} 件`);
   if (r.kept.length > 0) parts.push(`中身の違うものがあったので上書きしなかった ${r.kept.length} 件`);
   if (r.missing.length > 0) parts.push(`取り込み元に無かった ${r.missing.length} 件`);

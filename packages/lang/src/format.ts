@@ -30,7 +30,7 @@ export function indentUnit(indent: unknown): string | null {
 }
 
 /** 中の行を一段深くするブロックの命令（@end で閉じる）。 */
-const BLOCKS = new Set(["if", "while", "with", "choice", "define"]);
+const BLOCKS = new Set(["if", "while", "for", "with", "choice", "define"]);
 
 export type FormatResult = { ok: true; text: string; changed: boolean } | { ok: false; reason: string };
 

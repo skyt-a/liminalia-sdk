@@ -55,7 +55,7 @@ describe("写し出し", () => {
     expect(r.parts).toEqual(["screen", "slot"]);
     expect(r.registered).toBe(true);
     const html = read("ui/screens/saves/saves.html");
-    expect(html.startsWith("<!-- 標準の画面 saves のテンプレート（Liminalia 0.4.0）から写した")).toBe(true);
+    expect(html.startsWith("<!-- 標準の画面 saves のテンプレート（Liminalia 0.4.0）からコピーしました")).toBe(true);
     expect(html).toContain("<style>\n</style>");
     expect(html).toContain(SAVES_V1);
     // ほかの設定と並びは残る

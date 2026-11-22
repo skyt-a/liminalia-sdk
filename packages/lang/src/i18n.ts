@@ -46,7 +46,7 @@ export interface UiTranslation {
   source: string;
   /** 訳。空なら英語の文言を出す。 */
   text: string;
-  /** 訳したときの英語の原文（エンジンの版が上がって英語が変わったあいだだけ。訳は使われ続ける。訳し直したら消す）。 */
+  /** 訳したときの英語の原文（エンジンのバージョンが上がって英語が変わったあいだだけ。訳は使われ続ける。訳し直したら消す）。 */
   translatedFrom?: string;
 }
 
@@ -602,7 +602,7 @@ export function checkTranslation(file: unknown, path: string, scripts: ReadonlyM
   const out: Diagnostic[] = [];
   const at = (severity: Diagnostic["severity"], code: string, message: string, hint?: string) => out.push({ severity, code, message, file: path, line: 1, ...(hint ? { hint } : {}) });
   if (!file || typeof file !== "object") {
-    at("error", "bad-translation", "訳のファイルが JSON のオブジェクトではありません");
+    at("error", "bad-translation", "翻訳ファイルが JSON オブジェクトではありません");
     return out;
   }
   const f = file as TranslationFile;

@@ -13,6 +13,14 @@ describe("game. と system. の変数の綴り違い", () => {
     expect(applyFix("@if game.socre > 0", d[0]!.fix!)).toMatchObject({ text: "@if game.score > 0" });
   });
 
+  it("@choice のパラメータや @set の添字の式の中の変数も読む所として数える", () => {
+    const a = ["@choice timeout=(game.limit)", "- あ -> #a", "@end", "# a", "あ", "@set game.limits = 10", "@set game.a[game.ide] = 1", "@set game.id = 1"].join("\n");
+    expect(variableDiagnostics({ a }).map((x) => [x.line, x.code, x.hint])).toEqual([
+      [1, "unset-variable", "game.limits のことですか？"],
+      [7, "unset-variable", "game.id のことですか？"],
+    ]);
+  });
+
   it("値を入れる所（@set、命令の結果、variables、プラグインの宣言、データのフラグ、エンジン）を集めて判断する", () => {
     const files = {
       a: [

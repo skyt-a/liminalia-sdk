@@ -84,12 +84,42 @@ describe("二人の同時のボイス", () => {
     expect(host.voices[2]).toMatchObject({ file: "y4.ogg", also: [{ file: "bg.ogg", channel: 3, volume: 50 }] });
   });
 
-  it("同時のボイスにも話者ごとのフィルターを掛ける", async () => {
-    const src = ["@voice-filter phone who=ミカ", "@voice y1.ogg", "@voice m1.ogg who=ミカ", "ユイ「電話の向こうと」"].join("\n");
+  it("同じ話者の @voice を書き直しても、ほかの話者の @voice は残る", async () => {
+    const src = [
+      "@voice y1.ogg",
+      "@voice m1.ogg who=ミカ",
+      "@voice y2.ogg",
+      "ユイ「せーの」",
+      // 話者を書いた @voice が先にあっても、台詞の話者（who を省いたもの）の @voice は別に鳴らす。書き直しは省いたものの所へ入る
+      "@voice m2.ogg who=ミカ",
+      "@voice y3.ogg",
+      "@voice y4.ogg",
+      "ユイ「二回目」",
+    ].join("\n");
+    const { host, runtime } = setup(src);
+    await runtime.start("a");
+    expect(host.voices[0]).toMatchObject({ file: "y2.ogg", also: [{ file: "m1.ogg", who: "ミカ", channel: 2 }] });
+    expect(host.voices[1]).toMatchObject({ file: "m2.ogg", who: "ミカ", also: [{ file: "y4.ogg", channel: 2 }] });
+  });
+
+  it("同時のボイスにも話者ごとのフィルターを掛ける（who を省いたものは台詞の話者のもの）", async () => {
+    const src = [
+      "@voice-filter phone who=ミカ",
+      "@voice y1.ogg",
+      "@voice m1.ogg who=ミカ",
+      "ユイ「電話の向こうと」",
+      "@voice-filter radio who=ユイ",
+      "@voice m2.ogg who=ミカ",
+      "@voice y2.ogg",
+      "ユイ「無線の向こうと」",
+    ].join("\n");
     const { host, runtime } = setup(src);
     await runtime.start("a");
     expect(host.voices[0]!.filter).toBeUndefined();
     expect(host.voices[0]!.also![0]!.filter).toEqual({ type: "phone", strength: 100 });
+    // who を省いた also のボイスは台詞の話者（ユイ）のフィルターを掛ける
+    expect(host.voices[1]!.filter).toEqual({ type: "phone", strength: 100 });
+    expect(host.voices[1]!.also![0]!.filter).toEqual({ type: "radio", strength: 100 });
   });
 
   it("ページに同時に話すほかの話者を載せる（名前欄の名前は @name を通す。話者と同じ人と who の無いものは入れない）", async () => {

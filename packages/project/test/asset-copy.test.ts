@@ -61,6 +61,6 @@ describe("ほかのエンジンの作品から素材を写す", () => {
     const r = copyAssets(source, assets, [{ from: "data/bgimage/room.jpg", to: "bgimage/bg room.jpg" }]);
     const md = assetCopyReport(r, [{ name: "bg room", to: "bgimage/bg room.jpg" }]);
     expect(md).toContain("| bg room | bgimage/bg room.jpg |");
-    expect(md).toContain("素材 1 件を写しました");
+    expect(md).toContain("素材 1 件をコピーしました");
   });
 });

@@ -267,6 +267,19 @@ describe("制御", () => {
     expect(formatted.ok ? formatted.text : formatted.reason).toBe("@staff-roll time=30s\n  # 制作\n@end\n@while game.n < 3\n@set game.n += 1\n@end\n@define f(a: string)\n@content\n@end\n@with f a=x\n本文\n@end\n");
   });
 
+  it("@staff-roll の文字列や式の中の file= は中身を持つかどうかに効かない", () => {
+    // 文字列の中の ` file=` は引数ではないので、@end までを中身として持つ（そのまま読むと中身を台本と読み違える）
+    const [roll, after] = body('@staff-roll title="私の file=1"\n# 制作\n@end\n本文');
+    expect(roll).toMatchObject({ kind: "command", name: "staff-roll", body: { text: "# 制作" } });
+    expect(after).toMatchObject({ kind: "prose" });
+    // 式の中の file= も同じ（(式) の引数）
+    const [roll2] = body('@staff-roll note=(x ? " file=a" : "")\n# 制作\n@end');
+    expect(roll2).toMatchObject({ kind: "command", name: "staff-roll", body: { text: "# 制作" } });
+    // 本物の file= 引数は今までどおり中身を持たない
+    const [data] = body('@staff-roll title="x" file=credits\n本文');
+    expect(data).toMatchObject({ kind: "command", name: "staff-roll", args: [{ key: "title" }, { key: "file" }] });
+  });
+
   it("@with・@content・@return (式) の検査", () => {
     const define = "@define frame(title: string)\n【{= title}】\n@content\n@end\n";
     expect(codes(`${define}@with frame title=x\n本文\n@end\n@frame title=y`)).toEqual([]);
@@ -496,6 +509,14 @@ describe("見えない空白", () => {
     expect(warn('@chara a smile\n@wait 1s'.replace("smile", 'smile') + '\n@bg "a　b.png"')).toEqual([]);
     expect(warn("@choice\n  - 北へ　行く -> #x\n@end\n# x")).toEqual([]);
   });
+  it("書き逃しの \\\\ の直後の \" は本物の引用符（\"…\" の外の \" も同じ）", () => {
+    // `"a\\"` のあと（\" は書き逃しのバックスラッシュで、閉じる " は本物）の全角スペースは文字列の外
+    expect(warn('@bg "a\\\\"　b.png"')).toEqual(["1:10 見えない文字（全角スペース）があります"]);
+    // "…" の外の \ はそのままの文字なので、\" の " は文字列を開く（中の全角スペースは知らせない）
+    expect(warn('@bg x=\\"a　b\\"')).toEqual([]);
+    // "…" の中の \" は書き逃し（閉じない）ので、中の全角スペースは知らせない（これまでどおり）
+    expect(warn('@bg "a\\"　b"')).toEqual([]);
+  });
 });
 
 describe("飛び先の式と @if の中のラベル", () => {
@@ -513,6 +534,26 @@ describe("飛び先の式と @if の中のラベル", () => {
     const s = parse("@if (game.a)\n# inner\n　x\n@if (game.b)\n# deeper\n@end\n@end", "a");
     const codes = check(s).filter((d) => d.code === "label-in-if").map((d) => d.line);
     expect(codes.sort()).toEqual([2, 5]);
+  });
+
+  it("@define の中だけにあるラベルへのジャンプはエラー（@jump・@call・選択肢。実行単位が別なので実行時に止まる）", () => {
+    const s = parse("@define f()\n# inner\nx\n@end\n@jump #inner\n@call #inner\n@choice\n- 行く -> #inner\n@end", "a");
+    expect(check(s).map((d) => d.code)).toEqual(["label-in-define", "label-in-define", "label-in-define"]);
+  });
+
+  it("@define の中から同じ @define のラベルへもジャンプできない（実行器のジャンプは本体のラベルだけを見る）", () => {
+    const s = parse("@define f()\n# inner\n@jump #inner\n@end", "a");
+    expect(check(s).map((d) => d.code)).toEqual(["label-in-define"]);
+  });
+
+  it("@define の中と外に同じ名前のラベルがあるときは外のラベルへ飛べる（label-in-define は出ない）", () => {
+    const s = parse("@define f()\n# inner\nx\n@end\n# inner\n@jump #inner", "a");
+    expect(check(s).filter((d) => d.code === "label-in-define")).toEqual([]);
+  });
+
+  it("作品の検査で label-in-define を二つに数えない（同じファイルの字面はファイル単位の検査が知らせ、式の候補は作品側が知らせる）", () => {
+    const d = checkProject(new Map([["a", parse("@define f()\n# inner\nx\n@end\n@jump #inner\n@jump (game.n) to=#inner\n# outer\n@jump other#inner", "a")], ["other", parse("@define g()\n# inner\n@end", "other")]]));
+    expect(d.filter((x) => x.code === "label-in-define").map((x) => `${x.file}:${x.line}`)).toEqual(["a:5", "a:6", "a:8"]);
   });
 });
 

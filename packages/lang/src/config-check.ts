@@ -207,22 +207,32 @@ export function unknownConfigKeys(value: unknown, schema: JsonSchema, file: stri
   return out;
 }
 
+/**
+ * 作品の ID（liminalia.json の id）の形。@liminalia/project の project-id.ts の PROJECT_ID_PATTERN と PROJECT_ID_MAX（40）を合わせたもの
+ * （lang は project を読めないので持つ。同じであることはテストが確かめる）。
+ */
+export const PROJECT_ID_SHAPE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/;
+
 /** liminalia.json の variables に書ける変数の名前（game. か system. の後ろに名前）。 */
 export const VARIABLE_KEY = /^(game|system)\.[\p{ID_Start}_][\p{ID_Continue}_]*$/u;
 
 /**
- * liminalia.json の項目の値の誤り（その項目を使わずに続けるもの。variables の形と名前、saves.location）。
+ * liminalia.json の項目の値の誤り（その項目を使わずに続けるもの。variables の形と名前、saves.location）と、id の形の警告（id は使い続ける）。
  * config は読み解いた liminalia.json、text はその字面（項目の行を求める）。loadProject はここで知らせた項目を使わない。
  */
 export function configValueProblems(config: unknown, text: string, file = "liminalia.json"): Diagnostic[] {
   if (!config || typeof config !== "object" || Array.isArray(config)) return [];
-  const c = config as { variables?: unknown; saves?: { location?: unknown } | null };
+  const c = config as { id?: unknown; variables?: unknown; saves?: { location?: unknown } | null };
   let lines: Map<string, number> | null = null;
   const out: Diagnostic[] = [];
-  const problem = (pointer: string, message: string) => {
+  const problem = (pointer: string, message: string, severity: Diagnostic["severity"] = "error") => {
     lines ??= jsonLines(text);
-    out.push({ severity: "error", code: "bad-config", message, file, line: lines.get(pointer) ?? 1 });
+    out.push({ severity, code: "bad-config", message, file, line: lines.get(pointer) ?? 1 });
   };
+  // id は使い続ける（作品は開く）。パスとして危ない id は loadProject が止める
+  if (typeof c.id === "string" && c.id !== "" && !PROJECT_ID_SHAPE.test(c.id)) {
+    problem("/id", `${file} の id ${JSON.stringify(c.id)} は英数字、_、- で書き、英数字で始めて 40 文字までにします（書き出したフォルダとセーブデータの名前になります）`, "warning");
+  }
   if (c.variables !== undefined) {
     if (typeof c.variables !== "object" || c.variables === null || Array.isArray(c.variables)) problem("/variables", `${file} の variables は "game.名前" → 値 の形で書きます`);
     else {

@@ -37,5 +37,26 @@ export function parseCredits(lines: readonly string[]): CreditLine[] {
  * rest はコマンド名の後ろ（パラメータ）。構文木を作るところ、整形、色分け、ブロック表示が同じ決まりで見る。
  */
 export function opensBody(name: string, rest: string): boolean {
-  return name === "html" || (name === "staff-roll" && !/(^|\s)file=/.test(rest));
+  if (name === "html") return true;
+  if (name !== "staff-roll") return false;
+  // file= を引数として書いたときだけ中身を持たない。文字列や (式) の中に ` file=` があっても引数ではない
+  // （`@staff-roll title="私の file=1"` の書き方で、中身の行を台本と読み違えないように）
+  let quoted = false;
+  let depth = 0;
+  for (let i = 0; i < rest.length; i++) {
+    const c = rest[i]!;
+    if (quoted && c === "\\") {
+      i++;
+      continue;
+    }
+    if (c === '"') {
+      quoted = !quoted;
+      continue;
+    }
+    if (quoted) continue;
+    if (c === "(") depth++;
+    else if (c === ")") depth = Math.max(0, depth - 1);
+    else if (depth === 0 && (i === 0 || /\s/.test(rest[i - 1]!)) && rest.startsWith("file=", i)) return false;
+  }
+  return true;
 }

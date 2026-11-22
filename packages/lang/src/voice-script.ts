@@ -101,10 +101,11 @@ export function voiceScript(input: VoiceScriptInput): VoiceScriptRow[] {
             who: who?.value.kind === "string" && who.value.value !== "" ? who.value.value : null,
             channel: channel?.value.kind === "number" ? channel.value.value : 1,
           };
-          const first = explicit[0];
-          // ほかのチャンネルか、ほかの話者（who=）なら同時に鳴らす。同じ話者とチャンネルの二つ目は前のものを置き換える
-          if (first && (cue.channel !== first.channel || (cue.who !== null && cue.who !== first.who))) explicit = [...explicit.filter((x, i) => i === 0 || x.who !== cue.who || x.channel !== cue.channel), cue];
-          else explicit = [cue];
+          // 実行器（stage.voice.next と also）と同じ決まり: 話者とチャンネルの同じものは書き直し、違うものは残して同時に鳴らす
+          const slot = (x: ExplicitVoice) => `${x.channel} ${x.who ?? ""}`;
+          const at = explicit.findIndex((x) => slot(x) === slot(cue));
+          if (at >= 0) explicit[at] = cue;
+          else explicit.push(cue);
         } else if (s.kind === "say") {
           const key = input.keyAt(file, s.line);
           const locked = key ? input.lock?.lines[key] : undefined;
@@ -149,6 +150,14 @@ export function voiceScript(input: VoiceScriptInput): VoiceScriptRow[] {
           previous = readable(s.content);
           explicit = [];
         } else if (s.kind === "if") for (const b of s.branches) visit(b.body);
+        // @define の中の台詞も @with で呼べば鳴る（鍵は voiceLines が同じ行から作る。収録は行ごとに一回）。
+        // 中身は書かれた所ではなく @with で呼んだ所で動くので、外の @voice は中の台詞に付かず、中で鳴らし残した @voice も外の台詞に付かない
+        else if (s.kind === "define") {
+          const outer = explicit;
+          explicit = [];
+          visit(s.body);
+          explicit = outer;
+        }
       }
     };
     visit(script.body);

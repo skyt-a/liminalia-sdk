@@ -226,7 +226,7 @@ export function checkFormat(format: unknown): Diagnostic[] {
     return [{ severity: "error", code: "bad-config", message: `format は 1 以上の整数で書きます: ${JSON.stringify(format)}`, file: "liminalia.json", line: 1, hint }];
   }
   if (format > SCRIPT_FORMAT) {
-    return [{ severity: "warning", code: "newer-format", message: `台本の書式の版（format: ${format}）が、このエンジンの書式の版（${SCRIPT_FORMAT}）より新しくなっています`, file: "liminalia.json", line: 1, hint: "新しい版のエンジン（lim）で検査します" }];
+    return [{ severity: "warning", code: "newer-format", message: `シナリオのフォーマットバージョン（format: ${format}）が、このエンジンの対応バージョン（${SCRIPT_FORMAT}）より新しくなっています`, file: "liminalia.json", line: 1, hint: "新しいバージョンのエンジン（lim）でチェックしてください" }];
   }
   return [];
 }

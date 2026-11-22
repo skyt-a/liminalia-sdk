@@ -29,7 +29,7 @@ describe("診断を黙らせる（// lim-ignore と check.severity）", () => {
 
   it("// lim-ignore-file はファイル全体に効く。何も黙らせなければ unused-ignore（全体を見るときだけ）", () => {
     const a = ["// lim-ignore-file unreachable-line", "@jump b", "届かない", "// lim-ignore unused-label", "地の文"].join("\n");
-    const scripts = project({ a, b: "x" });
+    const scripts = project({ a, b: "@scene-change\nx" });
     const shown = suppressDiagnostics(checkProject(scripts, { registry }), { scripts, reportUnused: true });
     expect(short(shown)).toEqual(["a:4 info unused-ignore"]);
     expect(short(suppressDiagnostics(checkProject(scripts, { registry }), { scripts }))).toEqual([]);

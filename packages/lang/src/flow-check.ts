@@ -13,6 +13,7 @@ import { expressionsIn } from "./story.ts";
  * - unused-label（情報）: どこからも飛ばれず、前の行から続けても着かないラベル（その場面に届かない）
  * - unused-define（情報）: どこからも呼ばれないマクロ
  * - unused-speaker（情報）: どの台詞にも使われない話者（cast.json の speakers。liminalia.json の check.unusedSpeakers に書いた話者は除く）
+ * 場面の初めの背景（scene-start-no-bg）は checkSceneStarts が見る。
  */
 export interface FlowCheckInput {
   scripts: ReadonlyMap<string, Script>;
@@ -121,8 +122,9 @@ export function checkFlow(input: FlowCheckInput): Diagnostic[] {
   }
 
   // ---- 届かない行と、使われないラベル ----
+  // 時間切れの無い @choice は選んだ選択肢が必ず飛ぶので、後には続かない。timeout= があると時間切れで @end の後へ続く場合がある
   const leaves = (s: Statement): boolean =>
-    s.kind === "jump" || s.kind === "return" || (s.kind === "command" && (s.name === "stop" || registry.get(s.name)?.ends === true) && !input.macros?.has(s.name));
+    s.kind === "jump" || s.kind === "return" || (s.kind === "command" && (s.name === "stop" || registry.get(s.name)?.ends === true) && !input.macros?.has(s.name)) || (s.kind === "choice" && s.options.length > 0 && !s.args?.some((a) => a.key === "timeout"));
   for (const [file, script] of scripts) {
     // 下書き（// lim: draft）は遊ぶ人に届かないファイルなので、届かない行と使われないラベルを見ない
     if (script.draft) continue;
@@ -339,6 +341,115 @@ export function checkDraftStarts(config: { entry?: unknown; afterLoad?: unknown;
   for (const c of list(extra?.chapters)) {
     const file = draftOf(c?.target);
     if (file !== null) push(file, `extra.chapters ${String(c?.id ?? "")} の target のファイル ${file} が下書きです（下書きは書き出しに入らないので、書き出したゲームではこの章から始められません）`);
+  }
+  return out;
+}
+
+/**
+ * scene-start-no-bg（情報）: ほかのファイルから @jump か選択肢で飛んでくるシーン（ラベルかファイルの先頭）の初めに、
+ * 最初の本文までに背景を決める命令が無い。前のファイルの画面のまま始まり、途中から再生したときと画面が変わる。
+ * 背景を決める命令に数えるのは、背景の画像（bgimage の素材）を書いた命令と、単色の背景（@bg color=、@scene-change bg-color=）。
+ * 画像を書かない @scene-change（暗転して立ち絵を消すだけ。制作画面で作ったシーンの雛形）は数えない。
+ * 次のときは知らせない（誤って知らせないため）:
+ * - @call と call=true の選択肢（戻ってくる呼び出しで、場面は替わらない）、式の飛び先、同じファイルの中の飛び先
+ * - 飛んでくる所がすべて、飛ぶ前（直前の本文より後。@if の中から飛ぶなら @if の前も見る）に背景を決めている
+ * - 初めに @if、@call、マクロとプラグインの命令（中身を見ない）、ほかへ飛ぶ行やプレイを終える命令がある
+ * - 作品のどこにも背景を決める命令が無い（文字だけの作品）、飛び先が下書き（// lim: draft）
+ */
+export function checkSceneStarts(scripts: ReadonlyMap<string, Script>, registry: Registry, macros?: ReadonlyMap<string, CommandSpec>): Diagnostic[] {
+  const specOf = (name: string) => (macros?.has(name) ? undefined : registry.get(name));
+  const setsScreen = (s: Statement) => {
+    if (s.kind !== "command") return false;
+    const spec = specOf(s.name);
+    if (!spec) return false;
+    let position = 0;
+    for (const a of normalizeBooleanArgs(spec, s.args)) {
+      const key = a.key ?? spec.positional[position++];
+      const type = key === undefined ? undefined : spec.params[key]?.type;
+      if (type?.kind === "asset" && type.folder === "bgimage") return true;
+      if ((s.name === "bg" && key === "color") || (s.name === "scene-change" && key === "bg-color")) return true;
+    }
+    return false;
+  };
+  let uses = false;
+  const look = (body: readonly Statement[]) => {
+    for (const s of body) {
+      if (setsScreen(s)) uses = true;
+      if (s.kind === "if") for (const b of s.branches) look(b.body);
+      if (s.kind === "define") look(s.body);
+    }
+  };
+  for (const script of scripts.values()) look(script.body);
+  if (!uses) return [];
+  /** 飛ぶ行の前を、直前の本文まで遡って、背景を決めているか（@if の中なら、その外へも遡る）。 */
+  type Place = { body: readonly Statement[]; at: number };
+  const decided = (path: readonly Place[]) => {
+    for (let k = path.length - 1; k >= 0; k--) {
+      const { body, at } = path[k]!;
+      for (let i = at - 1; i >= 0; i--) {
+        const s = body[i]!;
+        if (s.kind === "prose" || s.kind === "say" || s.kind === "choice" || s.kind === "label") return false;
+        if (setsScreen(s)) return true;
+      }
+    }
+    return false;
+  };
+  /** 飛び先 → 背景を決めずに飛んでくるファイル（決めてから飛ぶ所だけなら空）。 */
+  const entries = new Map<string, Set<string>>();
+  for (const [file, script] of scripts) {
+    const add = (target: Target, path: readonly Place[]) => {
+      if (target.expr || target.file === null || target.file === file) return;
+      // ファイルの先頭がラベルなら、そのラベルへ飛ぶのと同じ所（一つにまとめて知らせる）
+      const first = scripts.get(target.file)?.body[0];
+      const label = target.label ?? (first?.kind === "label" ? first.name : null);
+      const key = label === null ? target.file : `${target.file}#${label}`;
+      const from = entries.get(key) ?? entries.set(key, new Set()).get(key)!;
+      if (!decided(path)) from.add(file);
+    };
+    const visit = (body: readonly Statement[], outer: readonly Place[]) => {
+      body.forEach((s, i) => {
+        const path = [...outer, { body, at: i }];
+        if (s.kind === "jump") add(s.target, path);
+        if (s.kind === "choice") for (const o of s.options) if (!o.args.some((a) => a.key === "call" && a.value.kind === "bool" && a.value.value)) add(o.target, path);
+        if (s.kind === "if") for (const b of s.branches) visit(b.body, path);
+      });
+    };
+    visit(script.body, []);
+  }
+  const out: Diagnostic[] = [];
+  for (const [key, from] of entries) {
+    if (from.size === 0) continue;
+    const t = parseTargetText(key);
+    const script = t?.file ? scripts.get(t.file) : undefined;
+    if (!t || !script || script.draft) continue;
+    let i = 0;
+    if (t.label !== null) {
+      i = script.body.findIndex((s) => s.kind === "label" && s.name === t.label) + 1;
+      if (i === 0) continue;
+    }
+    const head = t.label !== null ? script.body[i - 1]! : undefined;
+    let missing = false;
+    for (; i < script.body.length; i++) {
+      const s = script.body[i]!;
+      if (s.kind === "prose" || s.kind === "say" || s.kind === "choice") { missing = true; break; }
+      if (s.kind === "label" || s.kind === "set" || s.kind === "let" || s.kind === "use" || s.kind === "define" || s.kind === "function") continue;
+      if (s.kind !== "command" || setsScreen(s)) break;
+      const spec = specOf(s.name);
+      if (!spec || spec.ends || s.name === "stop" || s.name === "title-screen") break;
+    }
+    if (!missing) continue;
+    const files = [...from].sort().join("、");
+    out.push({
+      severity: "info",
+      code: "scene-start-no-bg",
+      message:
+        t.label === null
+          ? `ファイル ${t.file} の初めに背景を決める命令がありません（ほかのファイル ${files} から飛んできます）。前のファイルの画面のまま始まり、途中から再生したときと画面が変わります`
+          : `シーン ${t.label} の初めに背景を決める命令がありません（ほかのファイル ${files} から飛んできます）。前のファイルの画面のまま始まり、途中から再生したときと画面が変わります`,
+      file: t.file!,
+      line: head?.line ?? script.body[0]?.line ?? 1,
+      hint: "最初の本文の前で背景を決めます（@scene-change 背景の画像、または @bg）",
+    });
   }
   return out;
 }

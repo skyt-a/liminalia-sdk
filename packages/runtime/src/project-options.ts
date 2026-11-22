@@ -32,6 +32,8 @@ export const RUNTIME_OPTION_OWNERS = {
   voiceLock: "project",
   cg: "project",
   chatDialogue: "project",
+  // 選択肢を本文の流れに出す（ui.choice.position: inline。@nvl の間、選んだものを本文の一部として残す）
+  inlineChoices: "project",
   stripQuotes: "project",
   language: "project",
   translator: "project",
@@ -115,6 +117,8 @@ export function projectRuntimeOptions(src: ProjectRuntimeSource): ProjectRuntime
     voiceLock: src.voiceLock ?? null,
     ...(cg ? { cg } : {}),
     ...(chatDialogue ? { chatDialogue } : {}),
+    // 選択肢を本文の流れに出す（ui.choice.position: inline。@nvl の間、選んだものを本文の一部として残す。遊ぶ言語の ui.languages を重ねたもの）
+    ...(uiForLanguage(ui, language)?.choice?.position === "inline" ? { inlineChoices: true } : {}),
     // 台詞の外側の括弧（ui.text.quotes。遊ぶ言語の ui.languages を重ねたもの）
     stripQuotes: () => strip,
     language,

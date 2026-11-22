@@ -1,4 +1,5 @@
 import type { TextStyle } from "./host.ts";
+import type { TextOrigin } from "./retranslate.ts";
 import type { Scope, Value } from "./value.ts";
 import { SAVE_VERSION } from "./save.ts";
 export { voiceFile } from "@liminalia/lang";
@@ -104,6 +105,11 @@ export interface NvlPage {
    * （Runtime.retranslate）。前の版のセーブには無く、そのページは書いたときの言語のまま出す。
    */
   origin?: { file: string; source: string; context?: string; name?: string; id?: string };
+  /**
+   * 本文の流れに出して選んだ選択肢（ui.choice.position が inline のとき。options は出した文、picked は選んだ番号）。
+   * @nvl の間は段落と同じく本文の一部として積まれるので、ロードで出し直す。
+   */
+  choice?: { options: { text: string; origin?: TextOrigin }[]; picked: number };
 }
 
 export interface StageState {

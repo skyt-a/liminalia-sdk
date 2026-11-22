@@ -216,7 +216,13 @@ export function mergeVariantDictionaries(...dicts: (VariantDictionary | undefine
   const out: Required<VariantDictionary> = { add: [], ignore: [], off: [] };
   for (const d of dicts) {
     if (!d) continue;
-    if (Array.isArray(d.add)) out.add.push(...d.add.filter((g) => Array.isArray(g) && g.every((x) => typeof x === "string") && g.length >= 2));
+    if (Array.isArray(d.add))
+      for (const g of d.add) {
+        if (!Array.isArray(g) || !g.every((x) => typeof x === "string")) continue;
+        // 空の書き方はどこにも当たり、探す側の読み進めが進まないので除く
+        const forms = g.filter((x) => x !== "");
+        if (forms.length >= 2) out.add.push(forms);
+      }
     if (Array.isArray(d.ignore)) out.ignore.push(...d.ignore.filter((x) => typeof x === "string"));
     if (Array.isArray(d.off)) out.off.push(...d.off.filter((x) => typeof x === "string"));
   }
@@ -240,7 +246,7 @@ export function findVariants(units: readonly TextUnit[], o: { speakers?: readonl
   for (const g of groups) {
     const forms: (VariantForm & { def: Form })[] = g.forms.map((f) => ({ label: f.label, count: 0, occurrences: [], def: f }));
     // 書き方ごとの探し方は、ページの外で一度だけ作る（長い書き方から探す並びと、g を付けた正規表現）
-    const finders = g.forms.map((f) => (f.match instanceof RegExp ? new RegExp(f.match.source, `${f.match.flags.replace("g", "")}g`) : [...f.match].sort((a, b) => b.length - a.length)));
+    const finders = g.forms.map((f) => (f.match instanceof RegExp ? new RegExp(f.match.source, `${f.match.flags.replace("g", "")}g`) : [...f.match].filter((x) => x !== "").sort((a, b) => b.length - a.length)));
     for (const u of units) {
       g.forms.forEach((f, i) => {
         const found: { at: number; text: string }[] = [];

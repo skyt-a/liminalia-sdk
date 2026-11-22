@@ -34,6 +34,7 @@ const full: Required<RuntimeOptions> = {
   afterLoad: "",
   cg: () => false,
   chatDialogue: {},
+  inlineChoices: true,
   stripQuotes: () => false,
   gameVersion: "",
   programCache: new Map(),
@@ -58,7 +59,7 @@ const source: ProjectRuntimeSource = {
     },
     endingKinds: { special: "特別" },
     autoLayout: { enter: "start" },
-    ui: { chat: { dialogue: true, me: "わたし" }, text: { quotes: "strip" }, languages: { en: { text: { quotes: "keep" } } } },
+    ui: { chat: { dialogue: true, me: "わたし" }, text: { quotes: "strip" }, choice: { position: "inline" }, languages: { en: { text: { quotes: "keep" } } } },
     languages: ["ja", "en"],
   },
   speakers: ["アカリ"],
@@ -96,6 +97,7 @@ describe("作品の設定から作る実行器の設定", () => {
       autoLayout: { enter: "start" },
       voiceLock: { lines: {} },
       chatDialogue: { me: "わたし" },
+      inlineChoices: true,
       language: "ja",
     });
     expect(o.translator).toBe(translator);

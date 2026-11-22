@@ -18,9 +18,9 @@ export const PROJECT_FILE_KINDS = {
   /** 章のシナリオファイル（ワイルドカードの名前は書き換えられないので知らせる）。 */
   "config-chapters": "liminalia.json の chapters の files",
   /** おまけの回想と章の位置、フローチャートの題。 */
-  "config-extra": "liminalia.json の extra.replay と extra.chapters の target、extra.flowchart.titles の鍵",
+  "config-extra": "liminalia.json の extra.replay と extra.chapters の target、extra.flowchart.titles のキー",
   /** 場面ごとの情報と、わざと無音にした場面。 */
-  "config-scenes": "liminalia.json の scenes の鍵、check.sound.quiet",
+  "config-scenes": "liminalia.json の scenes のキー、check.sound.quiet",
   /** 変数の初期値（名前と、ジャンプ先に使う変数の値）。 */
   "config-variables": "liminalia.json の variables",
   /** 台本の書式の版と整形の設定（0.1.17 までは format の中に整形の設定を書いた）。 */

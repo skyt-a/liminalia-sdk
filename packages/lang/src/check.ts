@@ -97,7 +97,7 @@ export function check(script: Script, context: CheckContext = {}): Diagnostic[] 
     }
     if (s.kind === "define" && s.name !== "") {
       // 書き方の言葉（@if・@jump など）は構文として読むので、同じ名前のマクロは呼べない
-      if (FLOW_KEYWORDS.has(s.name)) report("error", "define-shadows-command", s.line, `@${s.name} は書き方の決まりの言葉なので、マクロの名前にできません`, { hint: "別の名前にします" });
+      if (FLOW_KEYWORDS.has(s.name)) report("error", "define-shadows-command", s.line, `@${s.name} は予約語なので、マクロの名前にできません`, { hint: "別の名前にします" });
       else if (defines.has(s.name)) report("error", "duplicate-define", s.line, `@define ${s.name} が重複しています`);
       else {
         // 組み込みのコマンドと同じ名前なら、作品のマクロを使う（実行器もマクロを先に探す）。新しい版で同じ名前のコマンドが増えても止めない
@@ -106,6 +106,22 @@ export function check(script: Script, context: CheckContext = {}): Diagnostic[] 
       }
     }
   });
+
+  // @define の中のラベルは別の実行単位にある（場面の名前に使う）ので、@jump の先にはなれない。
+  // ラベルそのものは場面の名前として使えるので、宣言ではなく飛ぶ側を知らせる（実行時もジャンプできずに止まる）
+  const defineLabels = new Map<string, string>();
+  const outerLabels = new Set<string>();
+  const collectOuter = (body: readonly Statement[]) => {
+    for (const s of body) {
+      if (s.kind === "label") outerLabels.add(s.name);
+      else if (s.kind === "if") for (const b of s.branches) collectOuter(b.body);
+      else if (s.kind === "define")
+        walk(s.body, (inner) => {
+          if (inner.kind === "label") defineLabels.set(inner.name, s.name);
+        });
+    }
+  };
+  collectOuter(script.body);
 
   // 式の関数（@function）。組み込みの関数と同じ名前は作れない
   const own = new Map<string, number>();
@@ -120,12 +136,17 @@ export function check(script: Script, context: CheckContext = {}): Diagnostic[] 
   const checkTarget = (target: Target, line: number, locals: ReadonlySet<string>) => {
     if (target.expr) return checkExpr(target.expr, line, locals);
     if (target.file === null && target.label !== null && !labels.has(target.label)) {
-      const near = nearName(target.label, labels.keys(), (n) => `#${n}`);
+      // 近い名前の案には、飛べない @define の中のラベルは出さない（当てると label-in-define になる）
+      const near = nearName(target.label, [...labels.keys()].filter((n) => !defineLabels.has(n) || outerLabels.has(n)), (n) => `#${n}`);
       const create: ProjectFix = { kind: "add-label", file: script.file, label: target.label };
       report("error", "unknown-label", line, `ラベル #${target.label} がこのファイルにありません`, {
         ...(near.hint ? { hint: `${near.hint}（シーンを作るなら、ファイルの終わりに # ${target.label} の行を足します）` } : { hint: `シーンを作るなら、ファイルの終わりに # ${target.label} の行を足します` }),
         ...(near.fix ? { fix: near.fix } : {}),
         fixes: [create, ...(near.fix ? [near.fix] : [])],
+      });
+    } else if (target.file === null && target.label !== null && defineLabels.has(target.label) && !outerLabels.has(target.label)) {
+      report("error", "label-in-define", line, `ラベル #${target.label} は @define ${defineLabels.get(target.label)} の中にあるため、ジャンプできません`, {
+        hint: "ラベルは @define の外に置きます",
       });
     }
   };

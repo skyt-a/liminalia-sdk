@@ -287,10 +287,14 @@ export function checkExtra(extra: unknown, scripts: ReadonlyMap<string, Script>,
 
   // シナリオの解放の命令が、一覧に無い名前を指していないか
   const cgImages = new Set(cg.flatMap((c) => (Array.isArray(c?.images) ? c.images : [])));
+  // 解放するものを指す引数の名前（位置引数でも `id=`・`image=` と書ける。unlockOf と同じ読み方）
+  const ID_ARG: Readonly<Record<string, string>> = { "glossary-unlock": "id", achieve: "id", "achieve-progress": "id", "replay-unlock": "id", "cg-unlock": "image" };
   for (const [name, script] of scripts) {
     for (const s of commands(script.body)) {
-      const first = s.args[0];
-      const value = first && first.key === null && first.value.kind === "string" ? first.value.value : null;
+      const idArg = ID_ARG[s.name];
+      if (idArg === undefined) continue;
+      const arg = s.args.find((a) => a.key === idArg) ?? s.args.find((a) => a.key === null);
+      const value = arg?.value.kind === "string" ? arg.value.value : null;
       if (value === null) continue;
       const warn = (message: string) => out.push({ severity: "warning", code: "not-in-extra", message, file: name, line: s.line });
       if (s.name === "glossary-unlock" && e.glossary !== undefined && !glossaryIds.has(value)) warn(`用語 ${value} が liminalia.json の extra.glossary にありません（おまけに表示されません）`);

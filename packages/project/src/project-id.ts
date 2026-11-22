@@ -16,6 +16,14 @@ export const PROJECT_ID_MAX = 40;
 /** 作品の ID に使える形（英数字、_、- で、英数字で始める）。 */
 export const PROJECT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
+/**
+ * パスの部品として危ない ID か（区切りの / と \、制御文字、. だけと空白だけのもの）。書き出しは <書き出し先>/browser/<ID> を消して置き直すので、
+ * loadProject はこれを止める。PROJECT_ID_PATTERN に合わないだけの ID（手で書いた my.game など）は止めず、検査が知らせる。
+ */
+export function unsafeProjectId(id: string): boolean {
+  return /[/\\\p{Cc}]/u.test(id) || /^[.\s]*$/u.test(id);
+}
+
 /** ひらがな一文字のローマ字（カタカナはひらがなにしてから引く）。小さい「ゃ」などは前の文字と合わせる。 */
 const KANA: Record<string, string> = {
   あ: "a", い: "i", う: "u", え: "e", お: "o",

@@ -27,8 +27,8 @@ describe("ゲームの設定（liminalia.json の ui）", () => {
   });
 
   it("選択肢の置き方（choice.position）", () => {
-    for (const position of ["center", "top", "bottom", "avoid-faces"]) expect(checkUi({ choice: { position } }), position).toEqual([]);
-    expect(checkUi({ choice: { position: "auto" } }).map((d) => d.message)).toEqual(["ui.choice.position は center、top、bottom、avoid-faces のどれかを指定します"]);
+    for (const position of ["center", "top", "bottom", "avoid-faces", "inline"]) expect(checkUi({ choice: { position } }), position).toEqual([]);
+    expect(checkUi({ choice: { position: "auto" } }).map((d) => d.message)).toEqual(["ui.choice.position は center、top、bottom、avoid-faces、inline のどれかを指定します"]);
   });
 
   it("オートセーブ・オート中の表示・横になぞる操作", () => {

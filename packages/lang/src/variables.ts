@@ -111,11 +111,13 @@ export function variableUses(script: Script, registry: Registry): VariableUse[] 
           inline(s.content, s.line);
           break;
         case "set": {
-          const [path] = variablePaths(s.target);
+          const [path, ...rest] = variablePaths(s.target);
           const compound = s.op !== "=" ? ({ compound: true, ...(s.value.kind === "literal" && typeof s.value.value === "string" ? { text: true } : {}) } as const) : {};
           if (path) out.push({ path, line: s.line, write: true, ...compound });
           // += などは前の値も読む
           if (path && s.op !== "=") out.push({ path, line: s.line, write: false, ...compound });
+          // 添字の式の中の変数も読む（@set game.a[game.i] = … の game.i）
+          for (const p of rest) out.push({ path: p, line: s.line, write: false });
           reads(s.value, s.line);
           break;
         }
@@ -144,6 +146,8 @@ export function variableUses(script: Script, registry: Registry): VariableUse[] 
           reads(s.body, s.line);
           break;
         case "choice":
+          // @choice の行のパラメータ（timeout=(…) など）の中の変数も読む
+          args(s.args ?? [], s.line, null);
           for (const o of s.options) {
             inline(o.content, o.line);
             args(o.args, o.line, null);

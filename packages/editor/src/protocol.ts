@@ -33,7 +33,7 @@ export const STUDIO_PLUGIN_HEADER = "x-liminalia-studio";
 /** デスクトップ版の制作画面のウィンドウに置く口の名前。ブラウザで開いた制作画面（lim studio）には無い。 */
 export const STUDIO_DESKTOP_GLOBAL = "liminaliaDesktop";
 /** 口の呼び名（invoke のチャンネルは studio:<名前>）。 */
-export const STUDIO_DESKTOP_CHANNELS = ["pickPluginFolder", "pickAssetFiles", "showFile", "focusStagePopup", "tourSeen", "markTourSeen", "setTheme"] as const;
+export const STUDIO_DESKTOP_CHANNELS = ["pickPluginFolder", "pickAssetFiles", "showFile", "focusStagePopup", "tourSeen", "markTourSeen", "setTheme", "askLoadPlugins"] as const;
 
 /**
  * 素材のファイルを選ぶ画面（pickAssetFiles）に渡すもの。kind は素材の種類（fgimage など）、folder はその中のフォルダ（キャラクターの画像の
@@ -71,6 +71,11 @@ export interface StudioDesktopApi {
   markTourSeen(): Promise<void>;
   /** 制作画面の配色の選び（自動・ライト・ダーク）をアプリに知らせる。アプリは書き出しのウィンドウの配色をこれに合わせる。 */
   setTheme(theme: "auto" | "light" | "dark"): Promise<void>;
+  /**
+   * 制限付きで開いた作品のプラグインを読み込むよう頼む（上の帯のボタン）。頼むだけで、決めるのはアプリが出す確認のダイアログ。
+   * 読み込むと選ばれたら、アプリが開発サーバーを起動し直して制作画面を開き直す。
+   */
+  askLoadPlugins(): Promise<void>;
   /** テストプレイのウィンドウからの知らせ（このページをシナリオで開く・実行時の警告）を受ける。アプリは制作画面のウィンドウを前に出してから渡す。 */
   onTestPlay?(listener: (message: TestPlayMessage) => void): void;
 }

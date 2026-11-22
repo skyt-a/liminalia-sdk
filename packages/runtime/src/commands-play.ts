@@ -137,19 +137,17 @@ export const PLAY_HANDLERS: Record<string, (args: Args, ctx: CommandContext) => 
       const filter = cue.filter !== undefined ? cue.filter : voiceFilterFor(ctx.state.stage, who);
       return ctx.present({ ...a, ...(filter ? { filter: filter.type, "filter-strength": filter.strength } : { filter: "none" }) }, false);
     }
-    // 本文の外なら、次の台詞で鳴らす。二つ目の @voice（ほかの話者か、ほかのチャンネル）は同時に鳴らす
+    // 本文の外なら、次の台詞で鳴らす。話者やチャンネルの違う @voice は同時に鳴らし（channel が重なれば鳴らすときに空きへ回す）、
+    // 同じ話者とチャンネルのものは書き直す
     const voice = (ctx.state.stage.voice ??= {});
-    const next = voice.next;
-    if (next && ((cue.channel ?? 1) !== (next.channel ?? 1) || (cue.who !== undefined && cue.who !== next.who))) {
-      const used = new Set([next.channel ?? 1, ...(next.also ?? []).map((x) => x.channel ?? 1)]);
-      // 同じチャンネルなら空いているチャンネルへ（同時に鳴らす）
-      let channel = cue.channel ?? 1;
-      while (used.has(channel)) channel++;
-      const also = (next.also ?? []).filter((x) => (x.channel ?? 1) !== channel);
-      next.also = [...also, { ...cue, channel }];
-      return;
-    }
-    voice.next = cue;
+    const slots = voice.next ? [voice.next, ...(voice.next.also ?? [])] : [];
+    // who を省いた @voice はその台詞の話者のもの（省いたものどうしは同じところに入れ、話者を書いたものとは別にする）
+    const slot = (c: VoiceCue) => `${c.channel ?? 1} ${c.who ?? ""}`;
+    const at = slots.findIndex((x) => slot(x) === slot(cue));
+    if (at >= 0) slots[at] = cue;
+    else slots.push(cue);
+    const [main, ...also] = slots;
+    voice.next = also.length > 0 ? { ...main!, also } : main!;
   },
   "voice-filter": (a, ctx) => {
     const filters = (ctx.state.stage.voiceFilter ??= {});

@@ -56,7 +56,7 @@ export const FLOW_KEYWORDS: ReadonlySet<string> = new Set(["if", "elif", "else",
 /** マクロの名前に使えない名前なら、その理由（使えれば null）。commands は組み込みとプラグインの命令。 */
 export function macroNameProblem(name: string, commands: { has(name: string): boolean }): string | null {
   if (!MACRO_NAME.test(name)) return `マクロの名前に使えるのは英小文字、数字、- だけです（英小文字で始めます）: ${name}`;
-  if (FLOW_KEYWORDS.has(name)) return `@${name} は書き方の決まりの言葉なので、マクロの名前にできません`;
+  if (FLOW_KEYWORDS.has(name)) return `@${name} は予約語なので、マクロの名前にできません`;
   if (commands.has(name)) return `@${name} は組み込みかプラグインのコマンドと同じ名前です`;
   return null;
 }

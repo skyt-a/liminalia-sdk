@@ -175,8 +175,30 @@ export function readScreenTemplate(html: string): ParsedTemplate {
 
 const BLOCKED = new Set(["script", "iframe", "frame", "frameset", "object", "embed", "applet", "link", "meta", "base", "portal", "noscript"]);
 const URL_ATTRS = new Set(["href", "xlink:href", "src", "srcset", "action", "formaction", "poster", "background", "ping", "data", "lowsrc", "dynsrc"]);
-const SAFE_URL = /^(?!\s*\/\/)(?![\s\w+.-]*:)|^\s*data:image\/(?!svg)|^\s*blob:/i;
+const LINK_ATTRS = new Set(["href", "xlink:href"]);
 const DROPPED_ATTRS = new Set(["srcdoc", "target", "formtarget", "action", "formaction"]);
+
+/** URL を、ブラウザが解くときと同じ形にする（先頭と末尾の制御文字と空白、途中のタブと改行を捨てる。web の urlForm と同じ）。 */
+function urlForm(value: string): string {
+  return value.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, "").replace(/[\t\n\r]/g, "");
+}
+
+/** 許す URL（web の safeUrl と同じ）: 相対のパスと #、data: の絵（SVG を除く）と blob:。スキームつき、// や \\ で始まるものは外れる。 */
+function safeUrl(value: string): boolean {
+  const url = urlForm(value);
+  if (/^[^/?#]*:/.test(url)) return /^data:image\/(?!svg)/i.test(url) || /^blob:/i.test(url);
+  return !/^[/\\]{2}/.test(url);
+}
+
+/** 属性の値の文字参照を解く（数値と、URL を組むのに使える名前つき。名前の大文字と小文字はブラウザと同じに区別する）。遊ぶ側はブラウザが解いた値で判定するので、そろえる。 */
+const NAMED: Readonly<Record<string, string>> = { Tab: "\t", NewLine: "\n", colon: ":", sol: "/", bsol: "\\", num: "#", quest: "?", period: ".", amp: "&", AMP: "&", quot: '"', QUOT: '"', apos: "'", lt: "<", LT: "<", gt: ">", GT: ">", nbsp: "\u00a0" };
+function decodeRefs(value: string): string {
+  return value.replace(/&(?:#[xX]([0-9a-fA-F]+)|#(\d+)|([a-zA-Z]+));?/g, (whole, hex: string | undefined, dec: string | undefined, name: string | undefined) => {
+    if (name !== undefined) return whole.endsWith(";") ? (NAMED[name] ?? whole) : whole;
+    const code = hex !== undefined ? Number.parseInt(hex, 16) : Number(dec);
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : "\ufffd";
+  });
+}
 
 /** CSS の中で外すもの（@import、外の URL の url()、expression と -moz-binding）と、CSS の中の行（0 始まり）。 */
 function unsafeCss(css: string): { what: string; line: number }[] {
@@ -188,7 +210,7 @@ function unsafeCss(css: string): { what: string; line: number }[] {
   }
   for (const m of css.matchAll(/url\(\s*(['"]?)([^)'"]*)\1\s*\)/gi)) {
     // @import の中の url() は @import と一緒に外れる
-    if (!SAFE_URL.test(m[2]!) && !imports.some(([a, b]) => m.index >= a && m.index < b)) out.push({ what: `url(${m[2]!.trim()})`, index: m.index });
+    if (!safeUrl(m[2]!) && !imports.some(([a, b]) => m.index >= a && m.index < b)) out.push({ what: `url(${m[2]!.trim()})`, index: m.index });
   }
   for (const m of css.matchAll(/expression\s*\(|-moz-binding/gi)) out.push({ what: /binding/i.test(m[0]) ? "-moz-binding" : "expression()", index: m.index });
   return out.sort((a, b) => a.index - b.index).map(({ what, index }) => ({ what, line: (css.slice(0, index).match(/\n/g) ?? []).length }));
@@ -200,9 +222,10 @@ function unsafeOf(tag: Tag): string[] {
   const out: string[] = [];
   for (const { name, value } of tag.attrs) {
     if (name.startsWith("on") || DROPPED_ATTRS.has(name)) out.push(`${tag.name} の ${name} 属性`);
-    else if (name === "href" && tag.name === "a") {
-      if (!value.trim().startsWith("#")) out.push(`${tag.name} の href 属性（${value.trim()}）`);
-    } else if (URL_ATTRS.has(name) && !(name === "srcset" ? value.split(",").every((s) => SAFE_URL.test(s.trim())) : SAFE_URL.test(value))) out.push(`${tag.name} の ${name} 属性（${value.trim()}）`);
+    else if (LINK_ATTRS.has(name)) {
+      // リンクはどの要素でもページの中の # だけ
+      if (!urlForm(decodeRefs(value)).startsWith("#")) out.push(`${tag.name} の ${name} 属性（${value.trim()}）`);
+    } else if (URL_ATTRS.has(name) && !(name === "srcset" ? decodeRefs(value).split(",").every((s) => safeUrl(s.trim())) : safeUrl(decodeRefs(value)))) out.push(`${tag.name} の ${name} 属性（${value.trim()}）`);
     else if (name === "style") for (const u of unsafeCss(value)) out.push(`${tag.name} の style 属性の ${u.what}`);
   }
   if (/^(animate|set)$/i.test(tag.name) && /href/i.test(tag.attrs.find((a) => a.name === "attributename")?.value ?? "")) out.push(`<${tag.name}>`);
@@ -268,7 +291,7 @@ function checkScriptFile(screen: string, file: string, js: string, std: Standard
     const name = m[1]!;
     if (known.includes(name)) continue;
     const near = nearest(name, known);
-    out.push({ severity: "warning", code: "template-script-unknown", message: `api.${name} は画面の api にありません`, file, line: lineOf(m.index), hint: near ? `${near} のことですか？` : `api の口: ${known.join("、")}` });
+    out.push({ severity: "warning", code: "template-script-unknown", message: `api.${name} は画面の api にありません`, file, line: lineOf(m.index), hint: near ? `${near} のことですか？` : `利用可能な api: ${known.join("、")}` });
   }
   for (const m of code.matchAll(/\bapi\s*\.\s*press\s*\(\s*(["'`])([^"'`]*)\1/g)) {
     const role = m[2]!;
@@ -359,8 +382,8 @@ function checkTemplateFile(screen: string, file: string, html: string, std: Stan
         part.line,
         "template-outdated",
         "warning",
-        part.version === undefined ? `部品 ${part.name} に data-version がありません（標準の今の版は ${known.version} です）` : `部品 ${part.name} は標準の版 ${part.version} から写したもので、標準の今の版は ${known.version} です`,
-        `lim screens diff ${screen} で標準のテンプレートの変わったところを見て写し直し、data-version を今の版にします`,
+        part.version === undefined ? `部品 ${part.name} に data-version がありません（標準の現在のバージョンは ${known.version} です）` : `部品 ${part.name} は標準のバージョン ${part.version} からコピーしたもので、標準の現在のバージョンは ${known.version} です`,
+        `lim screens diff ${screen} で標準テンプレートの変更点を確認して反映し、data-version を現在のバージョンにします`,
       );
     }
     for (const tag of part.tags) {
@@ -398,7 +421,7 @@ function checkTemplateFile(screen: string, file: string, html: string, std: Stan
 
   function unknown(line: number, attr: string, value: string, names: readonly string[]): void {
     const near = nearest(value, names);
-    at(line, "template-unknown-value", "warning", `${attr}="${value}" は画面 ${screen} では働きません`, near ? `${near} のことですか？` : attr === "data-text" ? "標準の文言の鍵（confirm.yes など）を書きます" : `使える値: ${names.join("、")}`);
+    at(line, "template-unknown-value", "warning", `${attr}="${value}" は画面 ${screen} では働きません`, near ? `${near} のことですか？` : attr === "data-text" ? "標準の文言キー（confirm.yes など）を書きます" : `使える値: ${names.join("、")}`);
   }
 }
 

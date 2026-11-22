@@ -213,3 +213,11 @@ describe("本文の出し分け", () => {
     expect(pages(host.trace)).toEqual(["星が3つ"]);
   });
 });
+
+describe("@define の中のラベルへのジャンプ", () => {
+  it("「ありません」ではなく @define の中にあると知らせて止まる", async () => {
+    const { host, runtime } = setup({ a: "@define f()\n# inner\nx\n@end\n@jump #inner" });
+    await runtime.start("a");
+    expect(errors(host.trace).join("\n")).toMatch(/#inner は @define f の中にあるため、ジャンプできません/);
+  });
+});

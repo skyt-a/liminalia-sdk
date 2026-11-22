@@ -227,6 +227,11 @@ export interface RuntimeOptions {
    */
   chatDialogue?: ChatDialogue;
   /**
+   * 選択肢を本文の流れに出す（ui.choice.position が inline のとき）。@nvl の間、選んだ選択肢を本文の一部として stage.nvlPages に残し、
+   * ロードで描画側が出し直せるようにする。描画の出し方は描画側（dom-host）が決める。
+   */
+  inlineChoices?: boolean;
+  /**
    * 台詞の外側の括弧と引用符を外すか（ui.text.quotes が strip。遊んでいる言語の ui.languages を重ねたもの）。台詞のページを出すたびに呼ぶ。
    * true なら本文（訳があれば訳）の外側の一組の「…」『…』“…”"…" を外してから描画側へ送る（メッセージ枠・NVL・履歴・吹き出しに同じく効く）。
    */
@@ -866,6 +871,20 @@ export class Runtime {
         }
         const option = shown[selected];
         if (!option) return this.fail(`選択肢 ${selected} はありません`, unit, ins.line);
+        // 本文の流れに出す選択肢（ui.choice.position: inline）は、@nvl の間、選んだものを本文の一部として残す（ロードで出し直す）
+        if (this.options.inlineChoices === true && this.state.stage.nvl === true) {
+          (this.state.stage.nvlPages ??= []).push({
+            speaker: null,
+            parts: [],
+            choice: {
+              options: shown.map((o, i) => ({
+                text: texts[i] ?? "",
+                origin: { kind: "option", file: unit.file, source: printInline(o.content), ...(context ? { context } : {}), ...(o.id ? { id: o.id } : {}) },
+              })),
+              picked: selected,
+            },
+          });
+        }
         const calls = this.optionFlag(option.args, "call", false, unit, option.line);
         this.noteChosen(option);
         if (!calls) this.host.chosen?.({ text: texts[selected] ?? "", index: selected });
@@ -1099,6 +1118,20 @@ export class Runtime {
 
   /** 読み終えた本文の一ページを、元（origin）から今の言語で作り直す。変わったら true。 */
   private retranslatePage(page: NvlPage): boolean {
+    // 本文の流れに出した選択肢（ui.choice.position: inline）は、一つずつの文を訳し直す
+    if (page.choice) {
+      let changed = false;
+      for (const option of page.choice.options) {
+        const o = option.origin;
+        if (!o) continue;
+        const target: Record<string, Value> = { text: option.text };
+        if (this.retranslateField(target, "text", o) && typeof target.text === "string") {
+          option.text = target.text;
+          changed = true;
+        }
+      }
+      return changed;
+    }
     const o = page.origin;
     if (!o || typeof o.source !== "string" || typeof o.file !== "string") return false;
     const before = JSON.stringify([page.parts, page.label ?? null]);
@@ -1218,7 +1251,8 @@ export class Runtime {
       return filter ? { ...c, filter } : c;
     };
     const main = withFilter(cue, cue.who ?? speaker);
-    return cue.also ? { ...main, also: cue.also.map((c) => withFilter(c, c.who ?? null)) } : main;
+    // who を省いたボイスはその台詞の話者のもの（話者ごとのフィルターは台詞の話者のを掛ける）
+    return cue.also ? { ...main, also: cue.also.map((c) => withFilter(c, c.who ?? speaker)) } : main;
   }
 
   private nextVoice(speaker: string | null, file: string, line: number): VoiceCue | null {
@@ -1227,7 +1261,16 @@ export class Runtime {
     if (v.next) {
       const cue = v.next;
       v.next = null;
-      return cue;
+      if (!cue.also) return cue;
+      // 同じ channel のボイスが重なったら、空いている channel へ回す（同時に鳴らすため）
+      const used = new Set<number>();
+      const [first, ...rest] = [cue, ...cue.also].map((c) => {
+        let channel = c.channel ?? 1;
+        while (used.has(channel)) channel++;
+        used.add(channel);
+        return channel === (c.channel ?? 1) ? c : { ...c, channel };
+      });
+      return { ...first!, also: rest };
     }
     const auto = speaker === null ? undefined : v.auto?.[speaker];
     if (!auto || auto.off) return null;
@@ -1597,8 +1640,16 @@ export class Runtime {
       return;
     }
     if (index === undefined) {
+      // @define・@with の中のラベルは別の実行単位にある（場面の名前に使う）ので、そこへは飛べない
+      const inner = [...program.defines.entries()].find(([, u]) => target.label! in u.labels);
       // 知らせる場所は、ジャンプした行（ジャンプ先のファイルの頭ではなく）
-      this.fail(`ラベル #${target.label} が ${file} にありません`, await this.unit(this.state.position.unit), line);
+      this.fail(
+        inner
+          ? `ラベル #${target.label} は ${inner[0].startsWith("@with:") ? "@with" : `@define ${inner[0]}`} の中にあるため、ジャンプできません`
+          : `ラベル #${target.label} が ${file} にありません`,
+        await this.unit(this.state.position.unit),
+        line,
+      );
       return;
     }
     this.state.position = { unit: program.main.id, index };

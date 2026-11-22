@@ -105,7 +105,7 @@ export function projectCodeLine(c: ProjectCode, language: "ja" | "en" = "ja"): s
     case "wrap":
       return en ? `Command that wraps the Windows executable: ${c.name}` : `Windows 版の実行ファイルを包むコマンド: ${c.name}`;
     case "store":
-      return en ? `Desktop store module: ${c.name}` : `デスクトップ版の店の口: ${c.name}`;
+      return en ? `Desktop store module: ${c.name}` : `デスクトップ版のストア連携モジュール: ${c.name}`;
   }
 }
 

@@ -5,7 +5,7 @@ import { check, defineSpec, nearName, type CheckContext } from "./check.ts";
 import { htmlPosition, scanHtml } from "./html.ts";
 import { checkStoryCalls } from "./story.ts";
 import { checkVariableNames } from "./variables.ts";
-import { checkFlow } from "./flow-check.ts";
+import { checkFlow, checkSceneStarts } from "./flow-check.ts";
 import { checkCommandLints } from "./command-lint.ts";
 import { checkChapterUse } from "./chapters.ts";
 import { CORE_COMMANDS, createRegistry, type CommandSpec, type Registry } from "./registry.ts";
@@ -43,6 +43,9 @@ export function checkProject(
   const out: Diagnostic[] = [];
   const registry = context.registry ?? createRegistry(CORE_COMMANDS);
   const labels = new Map<string, Set<string>>();
+  /** ファイル → @define の中のラベル → @define の名前（別の実行単位にあるので、@jump の先にはなれない。ファイル単位の検査と同じ見方） */
+  const defineLabels = new Map<string, Map<string, string>>();
+  const outerLabels = new Map<string, Set<string>>();
   const definesByFile = new Map<string, Map<string, CommandSpec>>();
   const definedIn = new Map<string, string>();
   /** ファイル → そこの @function（名前 → 引数の数）。functionIn は名前 → 書いたファイル。 */
@@ -53,6 +56,8 @@ export function checkProject(
 
   for (const [file, script] of scripts) {
     const names = new Set<string>();
+    const inner = new Map<string, string>();
+    const outer = new Set<string>();
     const defines = new Map<string, CommandSpec>();
     walk(script.body, (s) => {
       if (s.kind === "label") names.add(s.name);
@@ -66,7 +71,20 @@ export function checkProject(
         if (spec) defines.set(s.name, spec);
       }
     });
+    const collectOuter = (body: readonly Statement[]) => {
+      for (const s of body) {
+        if (s.kind === "label") outer.add(s.name);
+        else if (s.kind === "if") for (const b of s.branches) collectOuter(b.body);
+        else if (s.kind === "define")
+          walk(s.body, (t) => {
+            if (t.kind === "label") inner.set(t.name, s.name);
+          });
+      }
+    };
+    collectOuter(script.body);
     labels.set(file, names);
+    defineLabels.set(file, inner);
+    outerLabels.set(file, outer);
     definesByFile.set(file, defines);
     const fns = new Map<string, number>();
     for (const s of script.body) {
@@ -92,7 +110,7 @@ export function checkProject(
   ]) : "";
   const candidatesOf = targetCandidates(scripts, { registry, ...(context.variables ? { variables: context.variables } : {}) });
   /** params は中を調べている @define のパラメータの名前（式の中の名前。- は _）。 */
-  const checkTarget = (target: Target, file: string, line: number, params?: ReadonlySet<string>) => {
+  const checkTarget = (target: Target, file: string, line: number, params?: ReadonlySet<string>, candidate = false) => {
     if (target.expr) {
       // マクロの中の @jump (to) は、パラメータの値（呼ぶ側が書く。型 target なら呼ぶ側で確かめる）へ飛ぶので、ここでは判断しない
       if (params && !target.candidates && target.expr.kind === "name" && params.has(target.expr.name)) return;
@@ -114,8 +132,8 @@ export function checkProject(
         const t = parseTargetText(c);
         if (!t) out.push({ severity: "error", code: "bad-target", message: `ジャンプ先の候補 ${JSON.stringify(c)} は \`#ラベル\`、\`ファイル\`、\`ファイル#ラベル\` のどの形でもありません`, file, line });
         else if (t.file === null && t.label !== null && !labels.get(file)?.has(t.label)) {
-          // ほかの飛び先と同じく、シーンを作る直し方と、綴りの近いラベルの案（候補の並びの中は書き換えない）
-          const near = nearName(t.label, labels.get(file) ?? [], (n) => `#${n}`);
+          // ほかの飛び先と同じく、シーンを作る直し方と、綴りの近いラベルの案（候補の並びの中は書き換えない）。飛べない @define の中のラベルは案に出さない
+          const near = nearName(t.label, [...(labels.get(file) ?? [])].filter((n) => !defineLabels.get(file)?.has(n) || outerLabels.get(file)?.has(n)), (n) => `#${n}`);
           out.push({
             severity: "error",
             code: "unknown-label",
@@ -125,11 +143,26 @@ export function checkProject(
             hint: near.hint ? `${near.hint}（シーンを作るなら、ファイルの終わりに # ${t.label} の行を足します）` : `シーンを作るなら、ファイルの終わりに # ${t.label} の行を足します`,
             fixes: [{ kind: "add-label", file, label: t.label }],
           });
-        } else checkTarget(t, file, line);
+        } else checkTarget(t, file, line, undefined, true);
       }
       return;
     }
-    if (target.file === null) return;
+    if (target.file === null) {
+      // 同じファイルの @define の中だけにあるラベルへは飛べない（実行単位が別）。飛び先の字面はファイル単位の検査が
+      // 知らせるので、式の候補（ファイル単位の検査は中を見ない）のときだけ知らせる
+      const inner = !candidate || target.label === null ? undefined : defineLabels.get(file)?.get(target.label);
+      if (inner !== undefined && !outerLabels.get(file)?.has(target.label!)) {
+        out.push({
+          severity: "error",
+          code: "label-in-define",
+          message: `ラベル #${target.label} は @define ${inner} の中にあるため、ジャンプできません`,
+          file,
+          line,
+          hint: "ラベルは @define の外に置きます",
+        });
+      }
+      return;
+    }
     const targetLabels = labels.get(target.file);
     if (!targetLabels) {
       // 綴りの近いファイル（ラベルはそのまま）
@@ -150,8 +183,8 @@ export function checkProject(
       });
     }
     if (target.label !== null && !targetLabels.has(target.label)) {
-      // シーンを作る直し方を先に、綴りの近いラベルへの置き換えを後に
-      const near = nearName(target.label, targetLabels, (n) => n);
+      // シーンを作る直し方を先に、綴りの近いラベルへの置き換えを後に（飛べない @define の中のラベルは案に出さない）
+      const near = nearName(target.label, [...targetLabels].filter((n) => !defineLabels.get(target.file!)?.has(n) || outerLabels.get(target.file!)?.has(n)), (n) => n);
       const fix = near.fix?.kind === "replace" ? { kind: "replace" as const, find: `${target.file}#${target.label}`, with: `${target.file}#${near.fix.with}` } : undefined;
       const create = { kind: "add-label" as const, file: target.file, label: target.label };
       out.push({
@@ -164,6 +197,19 @@ export function checkProject(
         ...(fix ? { fix } : {}),
         fixes: [create, ...(fix ? [fix] : [])],
       });
+    } else if (target.label !== null) {
+      // 飛び先のファイルの @define の中だけにあるラベルへは飛べない
+      const inner = defineLabels.get(target.file)?.get(target.label);
+      if (inner !== undefined && !outerLabels.get(target.file)?.has(target.label)) {
+        out.push({
+          severity: "error",
+          code: "label-in-define",
+          message: `ラベル #${target.label} は ${target.file} の @define ${inner} の中にあるため、ジャンプできません`,
+          file,
+          line,
+          hint: "ラベルは @define の外に置きます",
+        });
+      }
     }
   };
 
@@ -259,6 +305,8 @@ export function checkProject(
   );
   // 標準のコマンドの書き損じ（消す名前、範囲を決められない mask=、速い点滅）
   out.push(...checkCommandLints(scripts, registry, new Set(definedIn.keys())));
+  // ほかのファイルから飛んでくるシーンの初めに背景を決めていない
+  out.push(...checkSceneStarts(scripts, registry, macros));
   // 章の扉に出すものが無い、章に入っていないシナリオ
   out.push(...checkChapterUse({ scripts, chapters: context.chapters, registry, macros, starts: context.references ?? [], candidates: candidatesOf }));
   return out;

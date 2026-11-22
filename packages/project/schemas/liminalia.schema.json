@@ -13,11 +13,11 @@
       "type": "string"
     },
     "format": {
-      "description": "台本（.lim）の書式の版（@liminalia/lang の SCRIPT_FORMAT）。lim new と lim migrate が書く。省くと版を書く前の台本として扱う。\nエンジンの書式より新しければ、lim check が知らせる（新しいエンジンで書いた台本）。",
+      "description": "シナリオ（.lim）のフォーマットバージョン（@liminalia/lang の SCRIPT_FORMAT）。lim new と lim migrate が書く。省くとバージョン未記入のシナリオとして扱う。\nエンジンの対応バージョンより新しければ、lim check が知らせる（新しいエンジンで書いたシナリオ）。",
       "type": "number"
     },
     "engines": {
-      "description": "合うエンジンの宣言。liminalia はエンジンの口の版（@liminalia/sdk の PLUGIN_API_VERSION）の範囲（\">=2\"、\"^2\"、\"2 - 3\" など。\nプラグインの package.json、テーマの theme.json と同じ書き方）。合わなければ lim check が知らせ、ひな形なら lim new --template も知らせる。",
+      "description": "対応エンジンの宣言。liminalia はエンジン API バージョン（@liminalia/sdk の PLUGIN_API_VERSION）の範囲（\">=2\"、\"^2\"、\"2 - 3\" など。\nプラグインの package.json、テーマの theme.json と同じ書き方）。合わなければ lim check が知らせ、テンプレートなら lim new --template も知らせる。",
       "type": "object",
       "properties": {
         "liminalia": {
@@ -676,12 +676,13 @@
               "type": "number"
             },
             "position": {
-              "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。",
+              "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。\ninline はボタンの層を重ねず、今出ている本文の続きとして文字の行で書き込む（サウンドノベル式）。選ぶとそのまま本文の一部として残り、",
               "enum": [
                 "center",
                 "top",
                 "bottom",
-                "avoid-faces"
+                "avoid-faces",
+                "inline"
               ]
             },
             "backdrop": {
@@ -794,7 +795,7 @@
           "type": "object",
           "properties": {
             "preset": {
-              "description": "選んだテーマの名前（制作画面の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
+              "description": "選んだテーマの名前（Studio の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
               "type": "string"
             },
             "theme": {
@@ -1828,7 +1829,7 @@
               "type": "boolean"
             },
             "keepText": {
-              "description": "true なら、まだ出ていないキャラクターが出るのを待つ間（@chara の wait=true）も、前のページの話者の名前と本文を残す（前の版の動き）。\n既定（false）は、前の話者がそのキャラクターでなければ名前欄と本文を消してから出す。",
+              "description": "true なら、まだ出ていないキャラクターが出るのを待つ間（@chara の wait=true）も、前のページの話者の名前と本文を残す（旧バージョンの動作）。\n既定（false）は、前の話者がそのキャラクターでなければ名前欄と本文を消してから出す。",
               "type": "boolean"
             }
           },
@@ -2150,7 +2151,7 @@
           "additionalProperties": false
         },
         "sound": {
-          "description": "音。movie は動画の音に掛ける系統。streamBgm を false にすると、長い BGM（1MB より大きいもの）も展開して鳴らす\n（既定は流し読み。ループのつなぎ目は展開したものの方が正確）。\nui はシステム画面の効果音（sound からのパス。効果音の音量で鳴らす）。hover はボタンにマウスが乗ったときとキー・パッドで選んだとき、\nselect は押したとき、cancel は閉じるボタン・Esc・右クリック・B で戻ったとき、open と close は画面を開いた・閉じたとき、\npage はタブを替えたとき、choice は選択肢を選んだとき。既定の画面とプラグインの部品（ui.button など）の両方で鳴る。",
+          "description": "音。movie は動画の音に掛ける系統。streamBgm を false にすると、長い BGM（1MB より大きいもの）も展開して鳴らす\n（既定はストリーミング再生。ループのつなぎ目はデコードした方が正確）。\nui はシステム画面の効果音（sound からのパス。効果音の音量で鳴らす）。hover はボタンにマウスが乗ったときとキー・パッドで選んだとき、\nselect は押したとき、cancel は閉じるボタン・Esc・右クリック・B で戻ったとき、open と close は画面を開いた・閉じたとき、\npage はタブを替えたとき、choice は選択肢を選んだとき。既定の画面とプラグインの部品（ui.button など）の両方で鳴る。",
           "type": "object",
           "properties": {
             "movie": {
@@ -2410,12 +2411,13 @@
                     "type": "number"
                   },
                   "position": {
-                    "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。",
+                    "description": "選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。\navoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、\n無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。\ninline はボタンの層を重ねず、今出ている本文の続きとして文字の行で書き込む（サウンドノベル式）。選ぶとそのまま本文の一部として残り、",
                     "enum": [
                       "center",
                       "top",
                       "bottom",
-                      "avoid-faces"
+                      "avoid-faces",
+                      "inline"
                     ]
                   },
                   "backdrop": {
@@ -2808,7 +2810,7 @@
                 "type": "object",
                 "properties": {
                   "preset": {
-                    "description": "選んだテーマの名前（制作画面の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
+                    "description": "選んだテーマの名前（Studio の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。\n見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。",
                     "type": "string"
                   },
                   "theme": {
@@ -3513,7 +3515,7 @@
       }
     },
     "voiceScript": {
-      "description": "収録用の台本（lim voice-script と制作画面のボイスの画面）。notes は演技のメモにする行（既定は台詞のすぐ上の //! の行だけ。\n\"comments\" なら前のとおり、すぐ上のすべての // の行）。",
+      "description": "収録用の台本（lim voice-script と Studio のボイスの画面）。notes は演技のメモにする行（既定は台詞のすぐ上の //! の行だけ。\n\"comments\" なら前のとおり、すぐ上のすべての // の行）。",
       "type": "object",
       "properties": {
         "notes": {
@@ -3732,7 +3734,7 @@
       "additionalProperties": false
     },
     "fmt": {
-      "description": "整形（lim fmt と制作画面の「整える」）の設定（書式の版の format とは別）。indent は行頭の字下げ（ブロックの深さ一つにつき空白の数か \"tab\"。省くと字下げは変えない）。\nexpressions が false なら式の演算子の前後の空白を整えない（前の lim fmt の動き）。",
+      "description": "整形（lim fmt と Studio の「整える」）の設定（フォーマットバージョンの format とは別）。indent は行頭の字下げ（ブロックの深さ一つにつき空白の数か \"tab\"。省くと字下げは変えない）。\nexpressions が false なら式の演算子の前後の空白を整えない（以前の lim fmt の動作）。",
       "type": "object",
       "properties": {
         "indent": {

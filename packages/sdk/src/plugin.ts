@@ -236,11 +236,11 @@ function checkPluginApi(plugins: readonly CommandPlugin[], out: Diagnostic[]): v
       out.push({
         severity: "warning",
         code: "plugin-api-version",
-        message: `プラグイン ${p.name} はプラグインの口の版 ${p.apiVersion} 向けで、このエンジン（版 ${PLUGIN_API_VERSION}）より新しい口を使います`,
+        message: `プラグイン ${p.name} はプラグイン API バージョン ${p.apiVersion} 向けで、このエンジン（バージョン ${PLUGIN_API_VERSION}）より新しい API を使います`,
         messageEn: `The plugin ${p.name} targets plugin API version ${p.apiVersion}, newer than this engine's (${PLUGIN_API_VERSION})`,
         file: "liminalia.json",
         line: 1,
-        hint: "Liminalia を新しい版にするか、このエンジンに合う版のプラグインを入れます",
+        hint: "Liminalia を新しいバージョンに更新するか、このエンジンに対応するバージョンのプラグインを入れます",
         hintEn: "Update Liminalia, or install a version of the plugin made for this engine",
         plugin: p.name,
       });
@@ -277,11 +277,11 @@ export function checkPluginManifest(spec: string, manifest: unknown): Diagnostic
   return engineMismatches(manifest).map((need) => ({
     severity: "warning",
     code: "plugin-engine-version",
-    message: `プラグイン ${spec} はプラグインの口の版 ${need} 向けで、このエンジン（版 ${PLUGIN_API_VERSION}）では動かないことがあります`,
+    message: `プラグイン ${spec} はプラグイン API バージョン ${need} 向けのため、このエンジン（バージョン ${PLUGIN_API_VERSION}）では動かないことがあります`,
     messageEn: `The plugin ${spec} needs plugin API version ${need}, but this engine provides version ${PLUGIN_API_VERSION}; it may not work`,
     file: "liminalia.json",
     line: 1,
-    hint: "Liminalia を新しい版にするか、このエンジンに合う版のプラグインを入れます",
+    hint: "Liminalia を新しいバージョンに更新するか、このエンジンに対応するバージョンのプラグインを入れます",
     hintEn: "Update Liminalia, or install a version of the plugin made for this engine",
     plugin: spec,
   }));

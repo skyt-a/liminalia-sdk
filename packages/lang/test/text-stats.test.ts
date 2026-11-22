@@ -82,6 +82,13 @@ describe("表記ゆれ", () => {
     expect(v.map((g) => g.id)).toEqual(["custom:好き"]);
   });
 
+  it("辞書の空の書き方は組から除く（空の書き方だけになった組は出さない）", () => {
+    const u = units(["好きだ。", "すきだ。"]);
+    // 空の書き方はどこにも当たるので、探し始めると読み進めが止まる（止まらないことが確かめたい）
+    expect(findVariants(u, { dictionary: { add: [["", "好き", "すき"]] } }).map((g) => g.id)).toEqual(["custom:好き"]);
+    expect(findVariants(u, { dictionary: { add: [["", "好き"]] } })).toEqual([]);
+  });
+
   it("少ない書き方には、多い書き方にそろえる置換を付ける", () => {
     const u = units(["それなら出来る。", "わたしにもできる。", "もうできない。", "……え", "・・・え", "…", "私達は", "私たちは", "僕たち", "凄い", "すごい", "すごく", "有難う", "ありがとう", "ありがとう", "全角の数字は１", "半角は2と3"]);
     const byId = new Map(findVariants(u).map((g) => [g.id, g]));

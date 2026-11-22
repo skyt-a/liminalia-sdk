@@ -663,5 +663,14 @@ function mergeKeyed(base: readonly unknown[], ours: readonly unknown[], theirs: 
     const merged = mergeJson(b, o ?? t, t ?? o, [...path, k], conflicts).value;
     if (merged !== undefined) out.push(merged);
   }
+  // ours が消したもの（order に入らないので別に見る）。theirs が変えていれば消えずに残し、争いに挙げる
+  for (const [k, b] of byBase) {
+    if (byOurs.has(k)) continue;
+    const t = byTheirs.get(k);
+    if (t !== undefined && JSON.stringify(t) !== JSON.stringify(b)) {
+      conflicts.push([...path, k]);
+      out.push(t);
+    }
+  }
   return out;
 }

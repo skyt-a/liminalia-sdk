@@ -44,7 +44,7 @@ describe("式の関数", () => {
     expect(ev('version_before(v, "1.0.0")', { v: null })).toBe(true);
     expect(ev('version_before("", "")')).toBe(false);
     expect(ev('version_before("1.0.0", "")')).toBe(false);
-    expect(() => ev('version_before([1], "1.0.0")')).toThrow(/版の文字列/);
+    expect(() => ev('version_before([1], "1.0.0")')).toThrow(/バージョン文字列/);
   });
 
   it("配列とオブジェクト（元は変えない）", () => {

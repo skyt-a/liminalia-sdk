@@ -141,7 +141,7 @@ export interface CopyScreenResult {
 
 /** 写したファイルの頭のコメント（人が読むためのもの。エンジンは読まない）。 */
 function header(screen: string, engine: string | undefined): string {
-  return `<!-- 標準の画面 ${screen} のテンプレート${engine ? `（Liminalia ${engine}）` : ""}から写した。部品の data-version は写した元の版なので、直しても書き換えない。標準との違いは lim screens diff ${screen} で見る -->\n`;
+  return `<!-- 標準の画面 ${screen} のテンプレート${engine ? `（Liminalia ${engine}）` : ""}からコピーしました。部品の data-version はコピー元のバージョンなので、編集しても書き換えないでください。標準との違いは lim screens diff ${screen} で確認できます -->\n`;
 }
 
 /**
@@ -258,7 +258,7 @@ export interface ScreenDiff {
 export function diffScreen(root: string, screens: Readonly<Record<string, CopyableScreen>>, screen: string): ScreenDiff {
   const std = standardOf(screens, screen);
   const ui = readConfig(root).ui;
-  if (!screenRegistered(ui, screen)) throw new Error(`${screen} は標準のテンプレートのままです（ui.templates.${screen} がありません。写すなら lim screens copy ${screen}）`);
+  if (!screenRegistered(ui, screen)) throw new Error(`${screen} は標準のテンプレートのままです（ui.templates.${screen} がありません。コピーするなら lim screens copy ${screen}）`);
   const file = screenTemplatePath(ui, screen);
   const path = abs(root, file);
   if (!existsSync(path)) throw new Error(`ui.templates.${screen} のファイル ${file} がありません`);
@@ -267,13 +267,13 @@ export function diffScreen(root: string, screens: Readonly<Record<string, Copyab
   for (const mine of splitTemplateParts(readFileSync(path, "utf8"))) {
     if (mine.name === null) continue;
     const now = stdParts.find((p) => p.name === mine.name);
-    const authorDiff = now ? unifiedDiff(now.text, mine.text, `標準 ${mine.name}（版 ${now.version ?? "なし"}）`, `作品 ${mine.name}（版 ${mine.version ?? "なし"}）`) : "";
+    const authorDiff = now ? unifiedDiff(now.text, mine.text, `標準 ${mine.name}（バージョン ${now.version ?? "なし"}）`, `プロジェクト ${mine.name}（バージョン ${mine.version ?? "なし"}）`) : "";
     let standardChange: StandardChange | null = null;
     if (now?.version !== undefined && (mine.version === undefined || mine.version < now.version)) {
       const keep = join(root, ...SCREEN_ORIGINALS_DIR.split("/"), screen, `${mine.name}.${mine.version ?? 0}.html`);
       standardChange =
         mine.version !== undefined && existsSync(keep)
-          ? { from: mine.version, now: now.version, diff: unifiedDiff(readFileSync(keep, "utf8"), now.text, `標準 ${mine.name}（版 ${mine.version}）`, `標準 ${mine.name}（版 ${now.version}）`) }
+          ? { from: mine.version, now: now.version, diff: unifiedDiff(readFileSync(keep, "utf8"), now.text, `標準 ${mine.name}（バージョン ${mine.version}）`, `標準 ${mine.name}（バージョン ${now.version}）`) }
           : { from: mine.version, now: now.version, missingOriginal: true };
     }
     out.push({ part: mine.name, version: mine.version, standardVersion: now?.version, authorDiff, standardChange });

@@ -417,7 +417,7 @@ export function nextRandom(seed: number): { value: number; seed: number } {
 function versionText(v: Value | undefined): string {
   if (v === undefined || v === null) return "";
   if (typeof v === "string" || typeof v === "number") return String(v).trim();
-  throw new EvalError(`version_before() には版の文字列（"1.2.0" など）が必要です（${describe(v)}）`);
+  throw new EvalError(`version_before() にはバージョン文字列（"1.2.0" など）が必要です（${describe(v)}）`);
 }
 
 /**

@@ -61,7 +61,7 @@ export { checkCommandLints, FILTER_ONLY_EFFECTS, FLASH_LIMIT } from "./command-l
 export { checkSpriteFlicker, FLICKER_CHAIN, FLICKER_CHAIN_LINES, FLICKER_RESHOW_LINES } from "./sprite-flicker.ts";
 export { isSuggestion, SUGGESTION_CODES } from "./suggestions.ts";
 export { BOM, encodingDiagnostic, notUtf8StopMessage, scenarioEncoding, splitBom, stripBom } from "./encoding.ts";
-export { configValueProblems, jsonSyntaxError, lineColumn, placeConfigLines, readConfigJson, unknownConfigKeys, VARIABLE_KEY, type JsonSchema } from "./config-check.ts";
+export { configValueProblems, jsonSyntaxError, lineColumn, placeConfigLines, PROJECT_ID_SHAPE, readConfigJson, unknownConfigKeys, VARIABLE_KEY, type JsonSchema } from "./config-check.ts";
 export { assetNameResolver, dynamicAssetUses, isLfsPointer, LFS_HEAD_BYTES, missingAssets, referencedAssetKeys, unexportedAssets, type AssetSources, type MissingAssetSources, missingAssetHint, nearestAsset } from "./missing-assets.ts";
 export { extensionOf, MEDIA_EXTENSIONS, MEDIA_TYPES, mediaKindOf, type MediaKind } from "./media.ts";
 export { escapeHtml, fillHtml, htmlPosition, HTML_ATTRIBUTES, HTML_TAGS, HTML_VOID_TAGS, scanHtml, type HtmlIssue, type HtmlJump, type HtmlScan, type HtmlSource, type HtmlValue } from "./html.ts";

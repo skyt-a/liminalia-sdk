@@ -13,7 +13,8 @@ export { ASSET_TEXT_SOURCES, assetAlwaysUsed, assetNameKey, assetTextFiles, asse
 export { exportFileNames, fileNameProblems, hostPlatform, MAX_FILE_NAME, suggestFileName, type FilePlatform, type NamedFile, type NameProblem, type NameTarget } from "./file-names.ts";
 export { LOCAL_VARIANTS_FILE, projectTextReport, variantDictionary, type ProjectTextReport } from "./text-stats.ts";
 export { PROJECT_FILE_KINDS, type ProjectFileKind } from "./project-files.ts";
-export { chooseProjectId, PROJECT_ID_MAX, PROJECT_ID_PATTERN, projectIdFromName, type ProjectIdGuess } from "./project-id.ts";
+export { chooseProjectId, PROJECT_ID_MAX, PROJECT_ID_PATTERN, projectIdFromName, unsafeProjectId, type ProjectIdGuess } from "./project-id.ts";
+import { unsafeProjectId } from "./project-id.ts";
 export { assertProjectScenariosUtf8, assertScenariosUtf8, listPackScenarioFiles, listPackSources, listScenarioFiles, listScenarioTestFiles, loadScenarioSource, notUtf8Scenarios, PACKS_FOLDER, projectTestFiles, packScenarioPlace, readScenarioFile, SCENARIO_TESTS_FOLDER, ScenarioEncodingError, scenarioFileEncoding, type PackScenarioFile, type PackSource, type ScenarioFile, type ScenarioSource } from "./scenario-files.ts";
 export { projectCode, projectCodeLine, RESTRICTED_PLUGIN_MESSAGE, restrictedFromEnv, type ProjectCode } from "./trust.ts";
 export { stdWebFeaturesOf, type StdWebUsage } from "./std-features.ts";
@@ -44,13 +45,13 @@ export interface ProjectConfig {
   title: string;
   version?: string;
   /**
-   * 台本（.lim）の書式の版（@liminalia/lang の SCRIPT_FORMAT）。lim new と lim migrate が書く。省くと版を書く前の台本として扱う。
-   * エンジンの書式より新しければ、lim check が知らせる（新しいエンジンで書いた台本）。
+   * シナリオ（.lim）のフォーマットバージョン（@liminalia/lang の SCRIPT_FORMAT）。lim new と lim migrate が書く。省くとバージョン未記入のシナリオとして扱う。
+   * エンジンの対応バージョンより新しければ、lim check が知らせる（新しいエンジンで書いたシナリオ）。
    */
   format?: number;
   /**
-   * 合うエンジンの宣言。liminalia はエンジンの口の版（@liminalia/sdk の PLUGIN_API_VERSION）の範囲（">=2"、"^2"、"2 - 3" など。
-   * プラグインの package.json、テーマの theme.json と同じ書き方）。合わなければ lim check が知らせ、ひな形なら lim new --template も知らせる。
+   * 対応エンジンの宣言。liminalia はエンジン API バージョン（@liminalia/sdk の PLUGIN_API_VERSION）の範囲（">=2"、"^2"、"2 - 3" など。
+   * プラグインの package.json、テーマの theme.json と同じ書き方）。合わなければ lim check が知らせ、テンプレートなら lim new --template も知らせる。
    */
   engines?: { liminalia?: string };
   author?: string;
@@ -105,7 +106,7 @@ export interface ProjectConfig {
   /** 持ち物（名前 → 表示名・絵・説明）。@item-add で足し、式の item("名前") で数を読む。 */
   items?: ItemsConfig;
   /**
-   * 収録用の台本（lim voice-script と制作画面のボイスの画面）。notes は演技のメモにする行（既定は台詞のすぐ上の //! の行だけ。
+   * 収録用の台本（lim voice-script と Studio のボイスの画面）。notes は演技のメモにする行（既定は台詞のすぐ上の //! の行だけ。
    * "comments" なら前のとおり、すぐ上のすべての // の行）。
    */
   voiceScript?: { notes?: "marked" | "comments" };
@@ -167,8 +168,8 @@ export interface ProjectConfig {
    */
   autoLayout?: { positions?: Record<string, string[]>; enter?: "end" | "start" | "middle"; exit?: "reflow" | "keep"; byCount?: Record<string, Record<string, string>> };
   /**
-   * 整形（lim fmt と制作画面の「整える」）の設定（書式の版の format とは別）。indent は行頭の字下げ（ブロックの深さ一つにつき空白の数か "tab"。省くと字下げは変えない）。
-   * expressions が false なら式の演算子の前後の空白を整えない（前の lim fmt の動き）。
+   * 整形（lim fmt と Studio の「整える」）の設定（フォーマットバージョンの format とは別）。indent は行頭の字下げ（ブロックの深さ一つにつき空白の数か "tab"。省くと字下げは変えない）。
+   * expressions が false なら式の演算子の前後の空白を整えない（以前の lim fmt の動作）。
    */
   fmt?: { indent?: number | "tab"; expressions?: boolean };
   build?: {
@@ -597,6 +598,8 @@ export function loadProject(dir: string, o: { skipBrokenPlugins?: boolean; restr
   for (const key of ["id", "title", "entry"] as const) {
     if (typeof config[key] !== "string" || config[key] === "") throw new ConfigError(CONFIG_FILE, lines.get(`/${key}`) ?? 1, undefined, `${CONFIG_FILE} に ${key} がありません`);
   }
+  // id は書き出したフォルダの名前になる（書き出しはそのフォルダを消して置き直す）ので、パスとして危ない id は開かない
+  if (unsafeProjectId(config.id)) throw new ConfigError(CONFIG_FILE, lines.get("/id") ?? 1, undefined, `${CONFIG_FILE} の id ${JSON.stringify(config.id)} は書き出したフォルダの名前に使えません（英数字、_、- で書きます）`);
   // 一つの項目の誤りで全体を止めない（その項目を使わず、検査が知らせる。知らせる文は検査と同じ configValueProblems）
   const problems = configValueProblems(config, text, CONFIG_FILE);
   if (config.variables !== undefined) {
@@ -821,11 +824,11 @@ export function themeManifestDiagnostics(root: string): Diagnostic[] {
         (need): Diagnostic => ({
           severity: "warning",
           code: "theme-engine-version",
-          message: `テーマ ${id} はエンジンの口の版 ${need} 向けで、このエンジン（版 ${PLUGIN_API_VERSION}）では一部の見た目が出ないことがあります`,
+          message: `テーマ ${id} はエンジン API バージョン ${need} 向けのため、このエンジン（バージョン ${PLUGIN_API_VERSION}）では一部の見た目が表示されないことがあります`,
           messageEn: `The theme ${id} needs engine API version ${need}, but this engine provides version ${PLUGIN_API_VERSION}; some of its look may not show`,
           file: `themes/${id}/theme.json`,
           line: 1,
-          hint: "Liminalia を新しい版にするか、このエンジンに合う版のテーマを使います",
+          hint: "Liminalia を新しいバージョンに更新するか、このエンジンに対応するバージョンのテーマを使います",
           hintEn: "Update Liminalia, or use a version of the theme made for this engine",
         }),
       );
@@ -840,11 +843,11 @@ export function projectEngineDiagnostics(config: unknown): Diagnostic[] {
   return engineMismatches(config).map((need) => ({
     severity: "warning",
     code: "engine-version",
-    message: `この作品はエンジンの口の版 ${need} 向けで、このエンジン（版 ${PLUGIN_API_VERSION}）では動かないことがあります`,
+    message: `このプロジェクトはエンジン API バージョン ${need} 向けのため、このエンジン（バージョン ${PLUGIN_API_VERSION}）では動かないことがあります`,
     messageEn: `This project needs engine API version ${need}, but this engine provides version ${PLUGIN_API_VERSION}; it may not work`,
     file: CONFIG_FILE,
     line: 1,
-    hint: "Liminalia を新しい版にします",
+    hint: "Liminalia を新しいバージョンに更新します",
     hintEn: "Update Liminalia",
   }));
 }

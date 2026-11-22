@@ -82,6 +82,7 @@ export function* expressionsIn(body: readonly Statement[]): Generator<{ expr: Ex
         if (s.target.expr) yield { expr: s.target.expr, line: s.line };
         break;
       case "if":
+        if (s.with) yield* args(s.with.args, s.line);
         if (s.each) yield { expr: s.each.list, line: s.line };
         for (const b of s.branches) {
           if (b.condition) yield { expr: b.condition, line: b.line };

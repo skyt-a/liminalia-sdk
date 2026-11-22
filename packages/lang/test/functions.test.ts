@@ -43,6 +43,11 @@ describe("進み具合の関数の検査（checkProject）", () => {
       ["unknown-option", "main", 6, "選択肢「無い選択肢」はどのシナリオにもありません（chosen() はいつも false になります）"],
     ]);
   });
+
+  it("@with の引数の式の中の呼び出しも確かめる", () => {
+    const main = ["@define f(a: string)", "@content", "@end", '@with f a=(visits("#nope"))', "本文", "@end"].join("\n");
+    expect(found({ main })).toEqual([["unknown-label", "main", 4, "ラベル #nope がこのファイルにありません"]]);
+  });
 });
 
 describe("回想に渡す変数（extra.replay の variables）", () => {

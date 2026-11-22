@@ -20,7 +20,7 @@ export interface CastFrame {
   positions?: Record<string, CastPosition>;
   /**
    * 左右反転（@chara の flip）して出すときに裏返す軸。画像の左端からの X（画像の px）。省くと画像の中央で裏返す。
-   * 制作画面の「頭の大きさを揃える」が、反転しても差分ごとに顎が横へずれないように書く。
+   * Studio の「頭の大きさを揃える」が、反転しても差分ごとに顎が横へずれないように書く。
    */
   flipAxis?: number;
 }
@@ -404,7 +404,7 @@ export function castModelProblems(cast: Readonly<Record<string, unknown>>, avail
         out.push({
           who,
           message: `${who} の model の ${label}（type ${type}）を描くプラグインが入っていません（遊ぶ画面では画像の立ち絵で出ます）`,
-          hint: `制作画面の「プラグイン」の「公式のプラグイン」で ${label} をインストールします。使わないなら model を消します`,
+          hint: `Studio の「プラグイン」の「公式のプラグイン」で ${label} をインストールします。使わないなら model を消します`,
         });
         continue;
       }

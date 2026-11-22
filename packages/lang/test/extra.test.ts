@@ -34,6 +34,18 @@ describe("おまけの一覧", () => {
     expect(warnings).toEqual(["warning 3 not-in-extra", "warning 5 not-in-extra", "warning 7 not-in-extra"]);
   });
 
+  it("解放の命令の引数を id=・image= と書いても一覧と照らす（位置引数が先に無くても）", () => {
+    const extra = {
+      cg: [{ id: "a", images: ["a.png"] }],
+      replay: [{ id: "r", target: "s#start" }],
+      glossary: [{ id: "g", term: "語", description: "説明" }],
+      achievements: [{ id: "ok", title: "OK" }],
+    };
+    const src = "# start\n@cg-unlock image=b.png\n@cg-unlock folder=bgimage a.png\n@replay-unlock id=q\n@achieve id=ok\n@achieve id=ng\n@glossary-unlock id=zz";
+    const warnings = checkExtra(extra, scripts({ s: src })).map((d) => `${d.severity} ${d.line} ${d.code}`);
+    expect(warnings).toEqual(["warning 2 not-in-extra", "warning 4 not-in-extra", "warning 6 not-in-extra", "warning 7 not-in-extra"]);
+  });
+
   it("参照する素材（CG と縮小画像は bgimage、音楽は bgm、実績の画像は image）", () => {
     const refs = extraAssetReferences({ cg: [{ id: "a", images: ["a.png", "a2.png"], thumb: "a_t.png" }], replay: [{ id: "r", target: "s", thumb: "r.png" }], music: [{ file: "m.ogg" }], achievements: [{ id: "x", title: "X", icon: "x.png" }] });
     expect(refs.map((r) => `${r.folder}/${r.path}`)).toEqual(["bgimage/a.png", "bgimage/a2.png", "bgimage/a_t.png", "bgimage/r.png", "bgm/m.ogg", "image/x.png"]);

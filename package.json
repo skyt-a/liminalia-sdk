@@ -1,6 +1,6 @@
 {
   "name": "liminalia-sdk",
-  "version": "0.8.1",
+  "version": "0.8.3",
   "private": true,
   "description": "Liminalia のプラグインを書く部品と、VS Code の拡張機能（公開している部品）",
   "license": "SEE LICENSE IN LICENSE",

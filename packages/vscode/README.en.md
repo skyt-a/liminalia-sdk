@@ -38,7 +38,7 @@ If you misspell the variant `smile` as `smlie` in `@chara`, the extension underl
 
 ## Getting started
 
-1. Install the extension from the Marketplace / Open VSX or from a `.vsix` file.
+1. Download `liminalia-<version>.vsix` from the [releases page](https://github.com/skyt-a/liminalia-releases/releases/latest) and install it with "Extensions: Install from VSIX..." in the VS Code Command Palette. The extension is not yet published on the Marketplace.
 2. Open a project folder containing `liminalia.json`, then open any `.lim` file.
 
 Changes to project settings, `cast.json`, or plugins reload automatically. If the extension doesn't pick up a change, run **Liminalia: Restart Language Server** from the Command Palette.

@@ -227,9 +227,14 @@ export function parse(source: string, file: string, options: ParseOptions = {}):
   const lintSpaces = (raw: string, line: number, kind: "command" | "option" | "text", shift = 0) => {
     const from = kind === "option" ? Math.max(0, raw.lastIndexOf(" -> ")) : 0;
     let quoted = false;
+    // "…" の中の \" は書き逃し（"…" の外の \ はそのままの文字）。\\ の直後の " は本物の引用符（args.ts の読み方と同じ）
+    let escaped = false;
     for (let i = 0; i < raw.length; i++) {
       const ch = raw[i]!;
-      if (kind === "command" && ch === '"' && raw[i - 1] !== "\\") quoted = !quoted;
+      const wasEscaped = escaped;
+      escaped = false;
+      if (kind === "command" && quoted && ch === "\\" && !wasEscaped) escaped = true;
+      else if (kind === "command" && ch === '"' && !wasEscaped) quoted = !quoted;
       const zero = ZERO_WIDTH.test(ch);
       const odd = kind !== "text" && i >= from && !quoted && ODD_SPACE.test(ch);
       if (!zero && !odd) continue;

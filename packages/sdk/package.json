@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/sdk",
-  "version": "0.8.1",
+  "version": "0.8.3",
   "private": true,
   "type": "module",
   "description": "プラグインを書くための部品。命令を一つの表で定義し、仕様と実行時の処理を作る",
@@ -9,8 +9,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.8.1",
-    "@liminalia/runtime": "0.8.1"
+    "@liminalia/lang": "0.8.3",
+    "@liminalia/runtime": "0.8.3"
   },
   "repository": {
     "type": "git",

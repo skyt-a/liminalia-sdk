@@ -50,7 +50,7 @@ export const RUNTIME_REPORTED: ReadonlySet<string> = new Set([
   "engine-version", "flash-rate", "flipbook-data", "flipbook-frames", "flipbook-loop-wait", "flipbook-missing", "flipbook-off-unknown",
   "font-no-vertical-metrics", "forbidden-property", "fullwidth-symbol", "hide-name-unknown", "html-attribute-not-allowed", "html-bad-nesting",
   "html-dynamic-attribute", "html-empty", "html-empty-src", "html-event-attribute", "html-external-url", "html-inline", "html-jump-without-wait",
-  "html-tag-not-allowed", "html-unclosed-tag", "html-wait-without-jump", "invisible-space", "label-in-if", "lfs-pointer", "map-spot-hidden",
+  "html-tag-not-allowed", "html-unclosed-tag", "html-wait-without-jump", "invisible-space", "label-in-define", "label-in-if", "lfs-pointer", "map-spot-hidden",
   "missing-asset", "missing-expression", "missing-param", "missing-translation", "missing-value", "missing-voice", "model-plugin-missing",
   "nested-define", "nested-function", "nested-use", "newer-format", "no-choice-shown", "noclick-in-option", "noclick-not-last", "not-in-chapter",
   "not-in-extra", "option-outside-choice", "orphan-branch", "orphan-end", "plugin-api-version", "plugin-check-failed", "plugin-check-invalid",

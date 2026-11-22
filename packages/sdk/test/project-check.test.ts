@@ -77,7 +77,7 @@ describe("cast.json の model を描くもの", () => {
     const d = models({ type: "live2d", src: "" }, { variant: { type: "live2d", expression: "f01" } });
     expect(d.map((x) => [x.severity, x.message, x.cast])).toEqual([["warning", "ユイ の model の Live2D（type live2d）を描くプラグインが入っていません（遊ぶ画面では画像の立ち絵で出ます）", { who: "ユイ" }]]);
     expect(d[0]!.line).toBeGreaterThan(1);
-    expect(d[0]!.hint).toBe("制作画面の「プラグイン」の「公式のプラグイン」で Live2D をインストールします。使わないなら model を消します");
+    expect(d[0]!.hint).toBe("Studio の「プラグイン」の「公式のプラグイン」で Live2D をインストールします。使わないなら model を消します");
     expect(models({ type: "spine", src: "a.skel" }).map((x) => x.message)).toEqual(["ユイ の model の Spine（type spine）を描くプラグインが入っていません（遊ぶ画面では画像の立ち絵で出ます）"]);
   });
 

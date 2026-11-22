@@ -118,7 +118,7 @@ export async function buildPlayFrom(o: { file: string; text: string; speakers: r
     try {
       return await run(o.studio, "studio");
     } catch (e) {
-      o.log?.(`制作画面から現在地を引けないため、言語サーバーの中で作ります（${e instanceof Error ? e.message : String(e)}）`);
+      o.log?.(`Studio から現在地を取得できないため、言語サーバー側で計算します（${e instanceof Error ? e.message : String(e)}）`);
     }
   }
   return run(o.local(), "local");

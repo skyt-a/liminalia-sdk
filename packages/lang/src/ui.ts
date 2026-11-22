@@ -173,7 +173,7 @@ export interface UiConfig {
    */
   /**
    * 音。movie は動画の音に掛ける系統。streamBgm を false にすると、長い BGM（1MB より大きいもの）も展開して鳴らす
-   * （既定は流し読み。ループのつなぎ目は展開したものの方が正確）。
+   * （既定はストリーミング再生。ループのつなぎ目はデコードした方が正確）。
    * ui はシステム画面の効果音（sound からのパス。効果音の音量で鳴らす）。hover はボタンにマウスが乗ったときとキー・パッドで選んだとき、
    * select は押したとき、cancel は閉じるボタン・Esc・右クリック・B で戻ったとき、open と close は画面を開いた・閉じたとき、
    * page はタブを替えたとき、choice は選択肢を選んだとき。既定の画面とプラグインの部品（ui.button など）の両方で鳴る。
@@ -391,7 +391,7 @@ export interface UiChara {
   /** 話し始めたキャラクターを小さく跳ねさせる。 */
   jump?: boolean;
   /**
-   * true なら、まだ出ていないキャラクターが出るのを待つ間（@chara の wait=true）も、前のページの話者の名前と本文を残す（前の版の動き）。
+   * true なら、まだ出ていないキャラクターが出るのを待つ間（@chara の wait=true）も、前のページの話者の名前と本文を残す（旧バージョンの動作）。
    * 既定（false）は、前の話者がそのキャラクターでなければ名前欄と本文を消してから出す。
    */
   keepText?: boolean;
@@ -492,8 +492,8 @@ export interface UiGlyph {
 }
 
 export const CHOICE_ORNAMENTS = ["none", "brackets", "underline"] as const;
-/** 選択肢の置き方（ui.choice.position）。avoid-faces は立ち絵の顔に重なるときだけ、重ならない高さへずらす。 */
-export const CHOICE_POSITIONS = ["center", "top", "bottom", "avoid-faces"] as const;
+/** 選択肢の置き方（ui.choice.position）。avoid-faces は立ち絵の顔に重なるときだけ、重ならない高さへずらす。inline は本文の流れに出す（サウンドノベル式）。 */
+export const CHOICE_POSITIONS = ["center", "top", "bottom", "avoid-faces", "inline"] as const;
 
 export interface UiChoice {
   /** ボタンの幅（px。既定 560）と文字の大きさ。 */
@@ -550,6 +550,8 @@ export interface UiChoice {
    * 選択肢の置き方。center は縦の中央、top は上、bottom はメッセージ枠のすぐ上（枠が無ければ下）。
    * avoid-faces（既定）は縦の中央に置き、立ち絵の顔に重なるときだけ、重ならないいちばん近い高さへずらす（顔の範囲は cast.json の立ち絵セットの face、
    * 無ければ立ち絵の絵から推し量る）。y を書いたときは top と bottom は使わず、avoid-faces は y の位置からずらす（position を書かずに y だけ書けば y のまま）。
+   * inline はボタンの層を重ねず、今出ている本文の続きとして文字の行で書き込む（サウンドノベル式）。選ぶとそのまま本文の一部として残り、
+   * @nvl の間は段落と同じく積まれる。作品の選択肢（screens.choice）とチャットの画面には効かない。
    */
   position?: (typeof CHOICE_POSITIONS)[number];
   /** 選択肢を出している間、画面いっぱいに敷く画像（image からのパス）。 */
@@ -616,7 +618,7 @@ export function chatDialogueOption(ui: UiConfig | undefined): { me?: string; tit
 
 export interface UiSystem {
   /**
-   * 選んだテーマの名前（制作画面の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。
+   * 選んだテーマの名前（Studio の「ゲームの設定」で選んだもの。default・washi・night・pastel・terminal など）。
    * 見た目はここでは決めず、テーマが書き込んだ下の項目が決める（あとで色を直しても、どのテーマから始めたかが分かるように残す）。
    */
   preset?: string;

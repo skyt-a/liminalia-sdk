@@ -76,6 +76,28 @@ describe("ボイスの番号の固定", () => {
     expect(Object.values(updateVoiceLock(null, s, auto, undefined, { entry: "start" }).lock.lines).map((e) => e.source)).toEqual(["「どちらかで鳴る」"]);
   });
 
+  it("収録用の台本は @define の中の台詞も並べる（@with で呼べば鳴る。鍵は voiceLines と同じ）", () => {
+    const text = ["@define scene()", "ユイ「マクロの中」", "@end", head.trim(), "ユイ「外」", "@with scene", "@end"].join("\n");
+    const s = scripts({ start: text });
+    const lock = updateVoiceLock(null, s, auto, undefined, { entry: "start" }).lock;
+    const rows = voiceScriptRows(new Map([["start", { script: s.get("start")!, text }]]), lock, { entry: "start" });
+    expect(rows.map((r) => [r.line, r.text, r.voice])).toEqual([
+      [2, "「マクロの中」", "y1.ogg"],
+      [5, "「外」", "y2.ogg"],
+    ]);
+  });
+
+  it("@define の中の @voice は外の台詞に付かず、外の @voice は中の台詞に付かない（中身は @with で呼んだ所で動く）", () => {
+    const text = ["@voice one.ogg", "@define scene()", "ユイ「マクロの中」", "@voice inner.ogg", "@end", head.trim(), "ユイ「外」", "@with scene", "@end"].join("\n");
+    const s = scripts({ start: text });
+    const lock = updateVoiceLock(null, s, auto, undefined, { entry: "start" }).lock;
+    const rows = voiceScriptRows(new Map([["start", { script: s.get("start")!, text }]]), lock, { entry: "start" });
+    expect(rows.map((r) => [r.line, r.voice, r.voiceLine ?? null])).toEqual([
+      [3, "y1.ogg", null],
+      [7, "one.ogg", 1],
+    ]);
+  });
+
   it("収録用の台本に鳴らない理由と要再収録を付ける", () => {
     const text = [head.trim(), "ユイ「一」", "@voice-auto-off ユイ", "ユイ「止めた後」", "@voice-auto ユイ", "ユイ「新しい」"].join("\n");
     const s = scripts({ start: text });
