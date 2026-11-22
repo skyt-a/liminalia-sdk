@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>
+  <linearGradient id="f-sky" x1="0.15" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#8e7ae6"/><stop offset="0.55" stop-color="#654dc4"/><stop offset="1" stop-color="#2f265f"/></linearGradient>
+  <linearGradient id="f-light" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a3"/><stop offset="1" stop-color="#ffc53d"/></linearGradient>
+  <linearGradient id="f-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc53d" stop-opacity="0.7"/><stop offset="1" stop-color="#ffc53d" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="100" height="100" rx="22.5" fill="url(#f-sky)"/>
+
+<path d="M31 80V43a19 19 0 0 1 38 0v37z" fill="url(#f-light)"/>
+<path d="M31 43.5L46 37.5V86L31 80z" fill="#f4f0fe"/>
+<path d="M31 80V43a19 19 0 0 1 38 0v37" fill="none" stroke="#fff" stroke-width="7" stroke-linejoin="round"/>
+<path d="M80 11Q80 20 89 20Q80 20 80 29Q80 20 71 20Q80 20 80 11Z" fill="#fff"/></svg>

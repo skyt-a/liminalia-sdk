@@ -6,6 +6,7 @@ import { assetNameResolver, LFS_HEAD_BYTES, configValueProblems, VARIABLE_KEY, e
 import { UI_THEMES, type UiThemePreset, type UiThemeValues } from "@liminalia/lang";
 import { checkPluginManifest, combinePlugins, engineMismatches, PLUGIN_API_VERSION, type CommandPlugin } from "@liminalia/sdk";
 import { listPackSources, listScenarioFiles, packScenarioPlace, readScenarioFile } from "./scenario-files.ts";
+import { within } from "./contained-path.ts";
 import { RESTRICTED_PLUGIN_MESSAGE, restrictedFromEnv } from "./trust.ts";
 import { stdWebFeaturesOf } from "./std-features.ts";
 
@@ -886,7 +887,7 @@ export function projectDataReader(project: Project, packDirs: readonly string[] 
       try {
         for (const folder of folders) {
           const path = resolve(folder, ...name.split("/"));
-          if (!path.startsWith(folder) || !existsSync(path)) continue;
+          if (!within(folder, path) || !existsSync(path)) continue;
           value = JSON.parse(readFileSync(path, "utf8"));
           break;
         }

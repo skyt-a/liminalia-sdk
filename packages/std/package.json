@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/std",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": true,
   "type": "module",
   "description": "標準の命令（画像・レイヤー・合成・フィルタ・立ち絵の移動・動画・要素の動き・画面の切り替えと揺れ・レイヤーの文字）。どのプロジェクトにも組み込みで入るプラグイン",
@@ -11,9 +11,9 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@liminalia/lang": "0.8.3",
-    "@liminalia/runtime": "0.8.3",
-    "@liminalia/sdk": "0.8.3"
+    "@liminalia/lang": "0.8.4",
+    "@liminalia/runtime": "0.8.4",
+    "@liminalia/sdk": "0.8.4"
   },
   "repository": {
     "type": "git",

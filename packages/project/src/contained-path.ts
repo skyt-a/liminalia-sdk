@@ -1,9 +1,14 @@
 import { lstatSync, realpathSync } from "node:fs";
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, join, resolve, sep } from "node:path";
 
+/**
+ * path が root の中か。文字の大小まで比べる（Windows の relative は大小を同一視するので、
+ * 大小を分けるフォルダでは data と DATA が別物になり、relative で見ると外に出られない）。
+ */
 export function within(root: string, path: string): boolean {
-  const rel = relative(root, path);
-  return rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+  const r = resolve(root);
+  const p = resolve(path);
+  return p === r || p.startsWith(r.endsWith(sep) ? r : r + sep);
 }
 
 /** 一区切りのフォルダかファイルの名前か（空、. と ..、区切りの / と \、制御文字を含むものは違う）。 */

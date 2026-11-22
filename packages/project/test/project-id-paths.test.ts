@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { PROJECT_ID_SHAPE } from "@liminalia/lang";
-import { childPath, plainName } from "../src/contained-path.ts";
+import { childPath, plainName, within } from "../src/contained-path.ts";
 import { ConfigError, loadProject } from "../src/index.ts";
 import { PROJECT_ID_MAX, PROJECT_ID_PATTERN, unsafeProjectId } from "../src/project-id.ts";
 
@@ -69,5 +69,16 @@ describe("書き出しの名前を一区切りに限る", () => {
     const parent = resolve(tmpdir(), "out", "browser");
     expect(childPath(parent, "g")).toBe(join(parent, "g"));
     for (const name of ["", ".", "..", "../mac", "../../x", "a/b", "/abs"]) expect(childPath(parent, name), name).toBeNull();
+  });
+
+  it("within は文字の大小が違うだけの名前を中と数えない", () => {
+    const root = resolve(tmpdir(), "proj", "data");
+    expect(within(root, join(root, "x.json"))).toBe(true);
+    expect(within(root, root)).toBe(true);
+    // 大小だけ違う隣のフォルダ（大小を分ける Windows のフォルダでは別物になる）
+    expect(within(root, resolve(tmpdir(), "proj", "DATA", "x.json"))).toBe(false);
+    expect(within(root, resolve(tmpdir(), "proj", "dataSibling", "x.json"))).toBe(false);
+    expect(within(root, resolve(tmpdir(), "proj", "data", "..", "x.json"))).toBe(false);
+    expect(within(root, resolve(tmpdir(), "proj", "data", "sub", "..", "x.json"))).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/project",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": true,
   "type": "module",
   "description": "プロジェクト設定（liminalia.json）の読み込みとプラグインの解決（Node 用）",
@@ -21,9 +21,9 @@
     "./asset-uses": "./src/asset-uses.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.8.3",
-    "@liminalia/sdk": "0.8.3",
-    "@liminalia/std": "0.8.3",
+    "@liminalia/lang": "0.8.4",
+    "@liminalia/sdk": "0.8.4",
+    "@liminalia/std": "0.8.4",
     "ag-psd": "31.0.3"
   },
   "repository": {

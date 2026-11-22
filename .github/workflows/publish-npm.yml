@@ -1,0 +1,89 @@
+# npm に公開する（このリポジトリの部品 @liminalia/lang、@liminalia/runtime、@liminalia/sdk）。
+# このファイルは正本リポジトリの scripts/public/publish-npm.yml を scripts/public-mirror.mjs が写したもの（ここでは直さない）。
+# - いつ: v1.2.3 の tag を push したとき（正本の版を写したコミットに打つ）と、手で動かしたとき（版を入れる。dry_run なら tag を打つ前に、
+#   動かした枝から組み立てて中身を比べるだけ）
+# - このリポジトリのソースから組み立て（node scripts/npm-pack-public.mjs）、正本のリリースが組み立てて確かめ、
+#   配布用のリポジトリ（skyt-a/liminalia-releases）の Release に置いた tarball と中身が同じかを確かめてから出す（違えば一つも出さない）
+# - npm へは OIDC（trusted publishing）で出す。トークンは使わない。npm の各パッケージの Trusted Publisher にこのリポジトリと
+#   このファイルの名前（publish-npm.yml）を設定しておく
+# - npm stage publish で承認待ちにする。npmjs.com の Staged Packages で中身を見て 2FA で承認すると公開される
+#   （sdk は lang と runtime の同じ版に依るので、まとめて承認する）。出どころの証明（provenance）を付ける
+# - 版に - が入る（1.2.3-beta.1）なら dist-tag を next にする
+name: npm に公開する
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "出す版（1.2.3。tag の v1.2.3 から組み立てる）"
+        required: true
+      dry_run:
+        description: "試すだけ（動かした枝から組み立て、配布用のリポジトリの tarball と中身を比べるだけで、npm には出さない）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TAG: ${{ github.event_name == 'push' && github.ref_name || format('v{0}', inputs.version) }}
+      RELEASES_REPO: skyt-a/liminalia-releases
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 試すときは tag を打つ前なので、動かした枝から組み立てる
+          ref: ${{ inputs.dry_run && github.sha || env.TAG }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.23.4
+          registry-url: https://registry.npmjs.org
+      - name: npm を stage publish と OIDC が使える版にする
+        run: |
+          set -euo pipefail
+          npm install -g npm@11.21.3
+          npm --version
+      - name: 版を確かめる
+        id: version
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error title=npm::tag ${TAG} は v1.2.3 の形ではありません"
+            exit 1
+          fi
+          have="$(node -p 'require("./package.json").version')"
+          if [ "$have" != "$version" ]; then
+            echo "::error title=npm::package.json の版（${have}）が ${version} と違います"
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: このリポジトリのソースから組み立てる
+        run: node scripts/npm-pack-public.mjs --version "${{ steps.version.outputs.version }}" --out out/npm
+      - name: 正本のリリースが確かめた tarball を落とす
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          mkdir -p out/tested
+          for name in lang runtime sdk; do
+            curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o "out/tested/liminalia-${name}-${version}.tgz" \
+              "https://github.com/${RELEASES_REPO}/releases/download/v${version}/liminalia-${name}-${version}.tgz"
+          done
+          shasum -a 256 out/npm/tarballs/*.tgz out/tested/*.tgz >> "$GITHUB_STEP_SUMMARY"
+      - name: 中身が同じかを確かめ、承認待ちにする
+        if: ${{ !inputs.dry_run }}
+        run: node scripts/npm-publish.mjs out/npm/tarballs --version "${{ steps.version.outputs.version }}" --same-as out/tested --stage --provenance | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: 中身が同じかを確かめる（試すだけ。npm publish --dry-run）
+        if: ${{ inputs.dry_run }}
+        run: node scripts/npm-publish.mjs out/npm/tarballs --version "${{ steps.version.outputs.version }}" --same-as out/tested --dry-run | tee -a "$GITHUB_STEP_SUMMARY"

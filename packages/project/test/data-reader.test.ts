@@ -11,6 +11,9 @@ describe("作品のデータを読む", () => {
   mkdirSync(join(dir, "data", "codes"), { recursive: true });
   writeFileSync(join(dir, "data", "code.en.json"), JSON.stringify({ lang: "en" }));
   writeFileSync(join(dir, "data", "codes", "v1.2.json"), JSON.stringify({ v: 1 }));
+  // data と頭が同じ名前の隣のフォルダ（中に読まれたくないデータ）
+  mkdirSync(join(dir, "dataSibling"), { recursive: true });
+  writeFileSync(join(dir, "dataSibling", "secret.json"), JSON.stringify({ secret: true }));
 
   it(".json を省ける。名前に点があっても拡張子とみなさない", () => {
     const read = projectDataReader(loadProject(dir));
@@ -19,5 +22,10 @@ describe("作品のデータを読む", () => {
     expect(read("codes/v1.2")).toEqual({ v: 1 });
     expect(read("code")).toBeUndefined();
     expect(read("../liminalia")).toBeUndefined();
+  });
+
+  it("名前の頭が data と同じ隣のフォルダの中は読まない", () => {
+    const read = projectDataReader(loadProject(dir));
+    expect(read("../dataSibling/secret")).toBeUndefined();
   });
 });

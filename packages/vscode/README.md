@@ -38,7 +38,8 @@
 
 ## 使い方
 
-1. [リリースページ](https://github.com/skyt-a/liminalia-releases/releases/latest)から `liminalia-<バージョン>.vsix` をダウンロードし、VS Code のコマンドパレットで「拡張機能: VSIX からのインストール…」を選んでインストールします。マーケットプレイスにはまだ公開していません。
+1. VS Code の拡張機能ビューで「Liminalia」を検索してインストールします（[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=liminalia.liminalia)）。
+   [リリースページ](https://github.com/skyt-a/liminalia-releases/releases/latest)の `liminalia-<バージョン>.vsix` を、コマンドパレットの「拡張機能: VSIX からのインストール…」で入れることもできます。
 2. `liminalia.json` を含むプロジェクトフォルダを開き、`.lim` ファイルを開きます。
 
 設定・`cast.json`・プラグインを更新すると自動で再読み込みされます。反映されない場合は、コマンドパレットから **「Liminalia: 言語サーバーを再起動」** を実行してください。

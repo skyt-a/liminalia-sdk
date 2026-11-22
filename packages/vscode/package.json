@@ -1,7 +1,7 @@
 {
   "name": "@liminalia/vscode",
   "displayName": "Liminalia",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": true,
   "type": "module",
   "publisher": "liminalia",
@@ -41,7 +41,11 @@
         "extensions": [
           ".lim"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./resources/file-icon.svg",
+          "dark": "./resources/file-icon.svg"
+        }
       },
       {
         "id": "liminalia-test",
@@ -52,7 +56,11 @@
         "extensions": [
           ".limtest"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./resources/file-icon.svg",
+          "dark": "./resources/file-icon.svg"
+        }
       }
     ],
     "jsonValidation": [
@@ -154,13 +162,13 @@
     "package": "tsx scripts/build.ts && tsx scripts/package.ts"
   },
   "dependencies": {
-    "@liminalia/editor": "0.8.3",
-    "@liminalia/lang": "0.8.3",
-    "@liminalia/project": "0.8.3",
-    "@liminalia/runtime": "0.8.3",
-    "@liminalia/screens": "0.8.3",
-    "@liminalia/sdk": "0.8.3",
-    "@liminalia/std": "0.8.3",
+    "@liminalia/editor": "0.8.4",
+    "@liminalia/lang": "0.8.4",
+    "@liminalia/project": "0.8.4",
+    "@liminalia/runtime": "0.8.4",
+    "@liminalia/screens": "0.8.4",
+    "@liminalia/sdk": "0.8.4",
+    "@liminalia/std": "0.8.4",
     "vscode-languageclient": "10.1.2",
     "vscode-languageserver": "10.1.2",
     "vscode-languageserver-textdocument": "1.0.15",

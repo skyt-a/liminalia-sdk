@@ -16,7 +16,7 @@ export interface PluginState<T> {
   readonly key: string;
   /** 今の値（無ければ undefined）。 */
   get(extra: Readonly<Record<string, Value>>): T | undefined;
-  /** 今の値（無ければ初めの値。初めの値を渡していなければ undefined）。返したものを書き換えても状態は変わらない（update で書く）。 */
+  /** 今の値（無ければ初めの値。初めの値を渡していなければ undefined で、そのとき T は undefined を含む）。返したものを書き換えても状態は変わらない（update で書く）。 */
   read(extra: Readonly<Record<string, Value>>): T;
   /** 値を入れる（写しを入れる）。 */
   set(extra: Record<string, Value>, value: T): void;
@@ -26,7 +26,12 @@ export interface PluginState<T> {
   clear(extra: Record<string, Value>): void;
 }
 
-/** 型の付いたプラグインの状態を作る。initial は値が無いときの初めの値（呼ぶたびに新しく作る）。 */
+/**
+ * 型の付いたプラグインの状態を作る。initial は値が無いときの初めの値（呼ぶたびに新しく作る）。
+ * initial を渡さなければ、値が無いとき read と update は undefined を渡すので、型も T | undefined になる。
+ */
+export function defineState<T>(key: string, initial: () => T): PluginState<T>;
+export function defineState<T>(key: string): PluginState<T | undefined>;
 export function defineState<T>(key: string, initial?: () => T): PluginState<T> {
   const copy = (v: T): T => (v === undefined || v === null || typeof v !== "object" ? v : (structuredClone(v) as T));
   const fresh = (): T => (initial ? initial() : (undefined as T));

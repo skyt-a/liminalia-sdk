@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it } from "vitest";
 import { check, CORE_COMMANDS, createRegistry, parse, PLUGIN_API_VERSION } from "@liminalia/lang";
 import { HeadlessHost, Runtime, type Value } from "@liminalia/runtime";
 import { apiSatisfies, checkPluginManifest, engineMismatches, combinePlugins, dataKeys, defineCommandPlugin, defineState, runPluginChecks, t, type CommandPlugin } from "../src/index.ts";
@@ -164,6 +164,16 @@ describe("型付きの状態", () => {
     expect(stamps.get(extra)).toEqual({ list: [{ image: "a.png", x: 10 }] });
     stamps.clear(extra);
     expect(Object.keys(extra)).toEqual([]);
+  });
+
+  it("初めの値を渡さなければ、read と update の型も undefined を含む（値が無いとき undefined を返す）", () => {
+    const count = defineState<number>("demo.count");
+    const extra: Record<string, Value> = {};
+    expectTypeOf(count.read(extra)).toEqualTypeOf<number | undefined>();
+    expect(count.read(extra)).toBeUndefined();
+    expect(count.update(extra, (n) => (n ?? 0) + 1)).toBe(1);
+    expect(count.read(extra)).toBe(1);
+    expectTypeOf(defineState<Stamps>("demo.stamps", () => ({ list: [] })).read(extra)).toEqualTypeOf<Stamps>();
   });
 });
 

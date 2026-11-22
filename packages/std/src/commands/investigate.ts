@@ -459,7 +459,7 @@ const investigate: CommandDefinition = {
     }
     if (place.done) targets.add(sceneTarget(place, place.done));
     if (place.incomplete) targets.add(sceneTarget(place, place.incomplete));
-    // 完了の飛び先があれば、かならずどこかへ飛ぶ
+    // 完了の飛び先があれば、調べ終えても調べ足りないまま終えても必ずどこかへ飛ぶ（incomplete・視点の end だけでは、調べ終えたあと次の行へ進みうる）
     return { targets: [...targets], leaves: !!place.done };
   },
 };

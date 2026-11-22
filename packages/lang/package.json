@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/lang",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": true,
   "type": "module",
   "description": "新形式シナリオ（.lim）の構文解析・式・命令レジストリ・検査",

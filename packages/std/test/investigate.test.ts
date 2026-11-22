@@ -227,6 +227,11 @@ describe("@investigate の視点・初回と再訪・調べ足りないまま終
   it("地図の矢印に二度目の場面・初めて入る場面・終わりの飛び先も入れ、当たり判定を縮める", () => {
     const def = commands.find((c) => c.name === "investigate")!;
     expect(def.targets!({ id: "room" }, () => DATA2).targets.sort()).toEqual(["b#bed", "b#desk", "b#desk2", "b#giveup", "b#yuika_end", "b#yuika_in"]);
+    // 完了の飛び先が無いと、調べ終えたあとは次の行へ進める（incomplete・視点の end だけでは leaves にならない）
+    expect(def.targets!({ id: "room" }, () => DATA2).leaves).toBe(false);
+    const done = structuredClone(DATA2);
+    (done.places.room as Record<string, unknown>).done = "#clear";
+    expect(def.targets!({ id: "room" }, () => done).leaves).toBe(true);
     expect(I.hitRect({ x: 0, y: 0, width: 100, height: 40 }, 0.5)).toEqual({ x: 25, y: 10, width: 50, height: 20 });
     expect(I.hitRect({ x: 0, y: 0, width: 100, height: 40 }, undefined)).toEqual({ x: 0, y: 0, width: 100, height: 40 });
   });
