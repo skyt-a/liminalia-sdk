@@ -16,9 +16,11 @@
  * --version を省くと、部品の package.json の版（どれも同じ版）を使う。
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, dirname, join, posix, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import * as tar from "tar";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PACKAGES_DIR = join(ROOT, "packages");
@@ -686,6 +688,7 @@ export function vendorEngineTypes(stageRoot, sdkStage) {
 /**
  * lim（cli）に、ほかの部品（展開した tarball）を node_modules/@liminalia/ に同梱する（bundleDependencies）。
  * 中の部品が使う第三者の依存は cli の依存の欄に集める（同じ名前で範囲が違えば止める）。
+ * npm pack は依存の欄にあるものしか同梱しないので、ここでは同梱する部品も依存の欄に書き、pack のあとで unlistBundled で外す。
  */
 export function bundleCli(cliStage, parts, version) {
   const into = join(cliStage, "node_modules", "@liminalia");
@@ -715,6 +718,29 @@ export function bundleCli(cliStage, parts, version) {
 }
 
 /**
+ * pack した tarball の package.json から、同梱した部品（bundleDependencies）を依存の欄から外す。
+ * 書いたままだと npm が「依存されている」と数え、もう使わない npm のパッケージ（lang、runtime）を消せず（2026-11-23）、
+ * npm audit signatures も npm に無い部品を探しに行く。入れるときは、同梱のものがそのまま使われる。
+ */
+export function unlistBundled(file) {
+  const work = mkdtempSync(join(tmpdir(), "liminalia-unlist-"));
+  try {
+    tar.x({ file, cwd: work, sync: true });
+    const path = join(work, "package", "package.json");
+    const m = readJson(path);
+    const bundled = new Set(m.bundleDependencies ?? []);
+    m.dependencies = Object.fromEntries(Object.entries(m.dependencies ?? {}).filter(([name]) => !bundled.has(name)));
+    writeFileSync(path, `${JSON.stringify(m, null, 2)}\n`);
+    rmSync(file);
+    // npm pack と同じく、持ち主を書かず、時刻を一つに決める
+    tar.c({ file, cwd: work, gzip: true, sync: true, portable: true, mtime: new Date("1985-10-26T08:15:00Z") }, ["package"]);
+    return m;
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+}
+
+/**
  * 配るものを組み立てて npm pack する。部品（NPM_PACKAGES）をすべて組み立てて out/parts に置き、
  * sdk には写したエンジンの型の宣言を足し、cli にはほかの部品を同梱して、npm に出す二つ（NPM_PUBLIC）を out/tarballs に置く。
  */
@@ -741,6 +767,8 @@ export function buildNpmPackages(o = {}) {
   const cliStage = join(stageRoot, "cli");
   const cliManifest = bundleCli(cliStage, partsMade.filter((p) => p.dir !== "cli"), built.version);
   const cli = { name: cliManifest.name, stage: cliStage, ...pack(cliStage, tarballs, cliManifest, ["templates/", "node_modules/@liminalia/"]) };
+  const listed = Object.keys(unlistBundled(cli.file).dependencies).filter((n) => n.startsWith(SCOPE));
+  if (listed.length > 0) throw new Error(`cli の依存の欄に同梱した部品が残っています: ${listed.join("、")}`);
   return { ...built, tarballs: [sdk, cli], parts: partsMade };
 }
 

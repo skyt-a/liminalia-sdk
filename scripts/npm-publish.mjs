@@ -109,6 +109,12 @@ export function publishAll(o) {
       continue;
     }
     const r = run([...(stage ? ["stage", "publish"] : ["publish"]), p.file, "--access", "public", "--tag", tag, ...(provenance ? ["--provenance"] : []), ...(dryRun ? ["--dry-run"] : [])]);
+    // 承認待ちの版は npm view に出ないので、出し直すと E409 になる。前の実行で承認待ちにしたものとして飛ばす（2026-11-23 に一度止まった）
+    if (stage && !dryRun && r.status !== 0 && /\bE409\b/.test(r.stderr ?? "")) {
+      log(`飛ばします: ${p.name}@${version} はもう承認待ちです`);
+      skipped.push(p.name);
+      continue;
+    }
     if (r.status !== 0) throw new Error(`${p.name}@${version} を出せません（出したもの: ${published.join("、") || "なし"}。同じ版でもう一度動かすと続きから出します）\n${r.stderr}`);
     log(`${dryRun ? "出せます（--dry-run）" : stage ? "承認待ちにしました" : "出しました"}: ${p.name}@${version}（dist-tag ${tag}）`);
     published.push(p.name);

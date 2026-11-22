@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/story-import",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "type": "module",
   "description": "Ink（.ink）・Yarn Spinner（.yarn）・Ren'Py（.rpy）・Twine（.twee）のシナリオを .lim に変換する（lim import-ink / import-yarn / import-renpy / import-twine と、Studio のテキストのインポート）",
@@ -10,11 +10,11 @@
     "./node": "./src/node.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.9.0",
-    "@liminalia/project": "0.9.0"
+    "@liminalia/lang": "0.9.1",
+    "@liminalia/project": "0.9.1"
   },
   "devDependencies": {
-    "@liminalia/runtime": "0.9.0"
+    "@liminalia/runtime": "0.9.1"
   },
   "repository": {
     "type": "git",
