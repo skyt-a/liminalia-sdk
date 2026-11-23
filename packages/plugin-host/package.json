@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/plugin-host",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -9,9 +9,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.9.1",
-    "@liminalia/runtime": "0.9.1",
-    "@liminalia/sdk": "0.9.1"
+    "@liminalia/lang": "0.9.2",
+    "@liminalia/runtime": "0.9.2",
+    "@liminalia/sdk": "0.9.2"
   },
   "repository": {
     "type": "git",

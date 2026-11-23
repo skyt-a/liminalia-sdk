@@ -11,7 +11,7 @@ on:
 env:
   # 使うエンジンの版（エンジンのリポジトリの版のタグ）。lim new --ci は、そのときの lim の版を書く。
   # エンジンの変更で急に落ちないように固定する。新しくするときは、ここを書き換えて通るかを確かめる
-  LIMINALIA_ENGINE_REF: v0.9.1
+  LIMINALIA_ENGINE_REF: v0.9.2
 
 jobs:
   check:

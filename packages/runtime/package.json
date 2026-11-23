@@ -1,6 +1,6 @@
 {
   "name": "@liminalia/runtime",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "type": "module",
   "description": ".lim を実行する。状態は JSON にできる素のデータだけで持ち、描画・音・入力は外から差し込む",
@@ -9,8 +9,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@liminalia/lang": "0.9.1",
-    "@liminalia/sdk": "0.9.1"
+    "@liminalia/lang": "0.9.2",
+    "@liminalia/sdk": "0.9.2"
   },
   "repository": {
     "type": "git",

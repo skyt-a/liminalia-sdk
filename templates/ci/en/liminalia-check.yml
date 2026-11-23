@@ -11,7 +11,7 @@ on:
 env:
   # The engine version to use (a version tag in the engine's repository). lim new --ci writes the version of the lim that created the project.
   # It's fixed so that changes to the engine don't suddenly break this workflow. To use a newer engine, change it here and check that everything passes
-  LIMINALIA_ENGINE_REF: v0.9.1
+  LIMINALIA_ENGINE_REF: v0.9.2
 
 jobs:
   check:

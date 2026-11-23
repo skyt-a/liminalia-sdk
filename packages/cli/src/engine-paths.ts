@@ -6,8 +6,8 @@ import { dirname, join, resolve } from "node:path";
  * lim と一緒に動かすエンジンのフォルダ。置き方は三つあり、どれでも見つける:
  * - このリポジトリ: packages/cli の隣に packages/web、packages/desktop
  * - 制作アプリ: node_modules/@liminalia/cli の隣に @liminalia/web、@liminalia/desktop（制作アプリを組み立てるときに置く）
- * - npm で入れた lim（scripts/npm-pack.mjs）: 外枠（desktop）は cli の中。web は依存として、隣か cli の node_modules の中
- *   （npm install -g は依存を cli の中に入れるので、隣を決め打ちしない）
+ * - npm で入れた lim（scripts/npm-pack.mjs）: 外枠（desktop）は cli の中。web などの部品は cli の中の src/node_modules/@liminalia/
+ *   （Node の探し方で上へたどって見つかるので、隣を決め打ちしない）
  */
 
 /** cli のフォルダ（packages/cli か、入れた @liminalia/cli）。 */
@@ -19,7 +19,7 @@ export function desktopDir(): string {
   return existsSync(join(inside, "main.cjs")) ? inside : resolve(CLI_ROOT, "../desktop");
 }
 
-/** プレイヤー（@liminalia/web）のフォルダ。依存として探し、見つからなければ cli の隣。 */
+/** プレイヤー（@liminalia/web）のフォルダ。このファイルから Node の探し方で探し、見つからなければ cli の隣。 */
 export function webDir(): string {
   try {
     return dirname(createRequire(import.meta.url).resolve("@liminalia/web/package.json"));

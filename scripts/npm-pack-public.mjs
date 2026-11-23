@@ -16,11 +16,9 @@
  * --version を省くと、部品の package.json の版（どれも同じ版）を使う。
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, posix, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import * as tar from "tar";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PACKAGES_DIR = join(ROOT, "packages");
@@ -412,9 +410,9 @@ export function rewriteDeclarationImports(text) {
 
 /**
  * npm pack して、入ったファイルの一覧を確かめる。tarball の場所を返す。
- * allowTests は、テストのフォルダ（tests/ など）を入れてよい道筋の頭（配る中身として入れるもの）。
+ * allowTests は、テストのフォルダ（tests/ など）を入れてよい道筋の頭（配る中身として入れるもの）。required は、入っていなければならないファイル。
  */
-export function pack(stage, dest, manifest, allowTests = []) {
+export function pack(stage, dest, manifest, allowTests = [], required = []) {
   const r = spawnSync("npm", ["pack", "--json", "--pack-destination", dest], { cwd: stage, encoding: "utf8", shell: process.platform === "win32" });
   if (r.status !== 0) throw new Error(`${manifest.name} を npm pack できません\n${r.stderr}`);
   const [info] = JSON.parse(r.stdout);
@@ -427,6 +425,7 @@ export function pack(stage, dest, manifest, allowTests = []) {
   const targets = (v) => (typeof v === "string" ? [v] : Object.values(v ?? {}).flatMap(targets));
   for (const [key, value] of Object.entries(manifest.exports ?? {})) for (const t of targets(value)) if (!t.includes("*")) want(t, `exports の ${key}`);
   for (const [name, t] of Object.entries(manifest.bin ?? {})) want(t, `bin の ${name}`);
+  for (const t of required) want(t, "中に入れる部品");
   for (const f of files) if (!allowTests.some((p) => f.startsWith(p)) && /(^|\/)(test|tests|dev|node_modules)\/|\.test\.[cm]?[jt]s$|\.DS_Store$/.test(f)) problems.push(`入れてはいけないもの: ${f}`);
   // 入れたファイルが相対で読むもの（import、new URL(…, import.meta.url)、HTML の src など）が、すべて入っていること
   problems.push(...missingReferences(stage, files));
@@ -685,26 +684,30 @@ export function vendorEngineTypes(stageRoot, sdkStage) {
   return [...done].filter((f) => f.startsWith(engine)).length;
 }
 
+/** npm で入れた lim の中で、エンジンの部品を置くところ（cli の中の道筋）。 */
+export const CLI_ENGINE_DIR = "src/node_modules/@liminalia";
+
 /**
- * lim（cli）に、ほかの部品（展開した tarball）を node_modules/@liminalia/ に同梱する（bundleDependencies）。
- * 中の部品が使う第三者の依存は cli の依存の欄に集める（同じ名前で範囲が違えば止める）。
- * npm pack は依存の欄にあるものしか同梱しないので、ここでは同梱する部品も依存の欄に書き、pack のあとで unlistBundled で外す。
+ * lim（cli）に、ほかの部品（展開した tarball）を src/node_modules/@liminalia/ に入れる。
+ * bundleDependencies は使わない。npm は公開のときに bundleDependencies の名前を "*" で依存の欄に足すので、
+ * npm の上では中の部品に依ったままになり、部品を npm から消せなかった（2026-11-23 の 0.9.1 で確かめた）。
+ * 直下の node_modules でなければ npm pack はふつうのファイルとして入れ、Node と Vite は上へたどって見つける
+ * （cli のコードは src の中にあり、lim の読み込みの口 bin/hooks.mjs も src から探し直す）。
+ * 中の部品が使う第三者の依存は cli の依存の欄に集める（同じ名前で範囲が違えば止める）。部品の名前は依存の欄から外す。
  */
-export function bundleCli(cliStage, parts, version) {
-  const into = join(cliStage, "node_modules", "@liminalia");
+export function bundleCli(cliStage, parts) {
+  const into = join(cliStage, CLI_ENGINE_DIR);
   rmSync(join(cliStage, "node_modules"), { recursive: true, force: true });
+  rmSync(join(cliStage, "src", "node_modules"), { recursive: true, force: true });
   mkdirSync(into, { recursive: true });
   const manifest = readJson(join(cliStage, "package.json"));
-  const deps = { ...(manifest.dependencies ?? {}) };
-  const bundled = [];
+  const deps = Object.fromEntries(Object.entries(manifest.dependencies ?? {}).filter(([name]) => !name.startsWith(SCOPE)));
   for (const part of parts) {
     const dest = join(into, part.dir);
     mkdirSync(dest, { recursive: true });
     const r = spawnSync("tar", ["-xzf", part.file, "-C", dest, "--strip-components=1"], { encoding: "utf8" });
     if (r.status !== 0) throw new Error(`${part.name} を cli の中に展開できません\n${r.stderr}`);
     const pm = readJson(join(dest, "package.json"));
-    bundled.push(pm.name);
-    deps[pm.name] = version;
     for (const [name, range] of Object.entries(pm.dependencies ?? {})) {
       if (name.startsWith(SCOPE)) continue;
       if (deps[name] !== undefined && deps[name] !== range) throw new Error(`${pm.name} の依存 ${name}（${range}）が、cli の ${deps[name]} と違います`);
@@ -712,32 +715,9 @@ export function bundleCli(cliStage, parts, version) {
     }
   }
   manifest.dependencies = Object.fromEntries(Object.entries(deps).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
-  manifest.bundleDependencies = bundled.sort();
+  delete manifest.bundleDependencies;
   writeFileSync(join(cliStage, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
-}
-
-/**
- * pack した tarball の package.json から、同梱した部品（bundleDependencies）を依存の欄から外す。
- * 書いたままだと npm が「依存されている」と数え、もう使わない npm のパッケージ（lang、runtime）を消せず（2026-11-23）、
- * npm audit signatures も npm に無い部品を探しに行く。入れるときは、同梱のものがそのまま使われる。
- */
-export function unlistBundled(file) {
-  const work = mkdtempSync(join(tmpdir(), "liminalia-unlist-"));
-  try {
-    tar.x({ file, cwd: work, sync: true });
-    const path = join(work, "package", "package.json");
-    const m = readJson(path);
-    const bundled = new Set(m.bundleDependencies ?? []);
-    m.dependencies = Object.fromEntries(Object.entries(m.dependencies ?? {}).filter(([name]) => !bundled.has(name)));
-    writeFileSync(path, `${JSON.stringify(m, null, 2)}\n`);
-    rmSync(file);
-    // npm pack と同じく、持ち主を書かず、時刻を一つに決める
-    tar.c({ file, cwd: work, gzip: true, sync: true, portable: true, mtime: new Date("1985-10-26T08:15:00Z") }, ["package"]);
-    return m;
-  } finally {
-    rmSync(work, { recursive: true, force: true });
-  }
 }
 
 /**
@@ -765,10 +745,9 @@ export function buildNpmPackages(o = {}) {
   const sdk = { name: sdkManifest.name, stage: sdkStage, ...pack(sdkStage, tarballs, sdkManifest), vendored };
   // cli: ほかの部品を中に同梱する
   const cliStage = join(stageRoot, "cli");
-  const cliManifest = bundleCli(cliStage, partsMade.filter((p) => p.dir !== "cli"), built.version);
-  const cli = { name: cliManifest.name, stage: cliStage, ...pack(cliStage, tarballs, cliManifest, ["templates/", "node_modules/@liminalia/"]) };
-  const listed = Object.keys(unlistBundled(cli.file).dependencies).filter((n) => n.startsWith(SCOPE));
-  if (listed.length > 0) throw new Error(`cli の依存の欄に同梱した部品が残っています: ${listed.join("、")}`);
+  const cliManifest = bundleCli(cliStage, partsMade.filter((p) => p.dir !== "cli"));
+  if (cliManifest.bundleDependencies || Object.keys(cliManifest.dependencies ?? {}).some((n) => n.startsWith(SCOPE))) throw new Error("cli の依存の欄にエンジンの部品が残っています（npm の上で部品に依ることになる）");
+  const cli = { name: cliManifest.name, stage: cliStage, ...pack(cliStage, tarballs, cliManifest, ["templates/", `${CLI_ENGINE_DIR}/`], partsMade.filter((p) => p.dir !== "cli").map((p) => `${CLI_ENGINE_DIR}/${p.dir}/package.json`)) };
   return { ...built, tarballs: [sdk, cli], parts: partsMade };
 }
 
